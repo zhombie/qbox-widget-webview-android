@@ -4,12 +4,14 @@ plugins {
 }
 
 android {
+    namespace 'kz.qbox.widget.webview.sample'
+
     compileSdk 33
 
     defaultConfig {
         applicationId "kz.qbox.widget.webview"
 
-        minSdk 21
+        minSdk 23
         targetSdk 33
 
         versionCode 1
@@ -41,4 +43,6 @@ dependencies {
 
     // Material Design Components
     implementation 'com.google.android.material:material:1.6.1'
+
+    implementation project(':core')
 }
