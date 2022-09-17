@@ -10,6 +10,151 @@ buildscript {
     }
 }
 
+/**
+ * Shared configs across subprojects
+ */
+ext.projectArtifactId = { Project project ->
+    println "Artifact ID -> project: [$project]"
+
+    switch (project.name) {
+        case 'core':
+            return project.name
+    }
+    return null
+}
+
+allprojects {
+    group = 'kz.qbox.widget.webview'
+    project.ext.version_code = 1
+    version = '1.0.0'
+    project.ext.artifactId = rootProject.ext.projectArtifactId(project)
+
+    if (project.group != null) {
+        if (project.ext.artifactId == null) {
+            println "Group [${project.group}] is set to [${project.name}]"
+        } else {
+            println "Group [${project.group}] is set to [${project.name}] with id [${project.ext.artifactId}]"
+        }
+    }
+}
+
+
+/**
+ * Publishing and signing info
+ */
+subprojects { Project project ->
+    println "Subproject: ${project.name}"
+
+    if (getSampleModuleName(project) != null) return
+    if (getParentFolderModuleName(project) != null) return
+
+    apply plugin: 'com.android.library'
+    apply plugin: 'kotlin-android'
+    apply plugin: 'maven-publish'
+
+    android {
+        compileSdkVersion 33
+        buildToolsVersion '30.0.3'
+
+        defaultConfig {
+            minSdkVersion 23
+            targetSdkVersion 33
+
+            versionCode project.ext.version_code
+            versionName project.version
+        }
+
+        buildTypes {
+            release {
+                minifyEnabled false
+
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+
+        buildFeatures {
+            buildConfig false
+        }
+
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_11
+            targetCompatibility JavaVersion.VERSION_11
+        }
+
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_11.toString()
+        }
+
+        configurations.all {
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'org.jetbrains.kotlin') {
+                    details.useVersion kotlin_version
+                }
+            }
+        }
+    }
+
+    afterEvaluate {
+        publishing {
+            publications {
+                aar(MavenPublication) {
+                    groupId project.group
+                    artifactId project.ext.artifactId
+                    version project.version
+
+                    pom {
+                        name = project.name
+                        url = 'https://github.com/zhombie/QBox-WebView-Widget-Android'
+
+                        developers {
+                            developer {
+                                name = 'zhombie'
+                            }
+                        }
+                    }
+
+                    pom.withXml {
+                        def dependenciesNode = asNode().appendNode('dependencies')
+                        project.configurations.api.allDependencies.each { dependency ->
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', dependency.group)
+                            dependencyNode.appendNode('artifactId', dependency.name)
+                            dependencyNode.appendNode('version', dependency.version)
+                        }
+                    }
+
+//                    from components.release
+                    artifact "$buildDir/outputs/aar/$project.name-release.aar"
+                }
+            }
+        }
+    }
+}
+
+
+static def getSampleModuleName(Project project) {
+    return getModuleName(project, "sample")
+}
+
+static def getModuleName(Project project, String comparator) {
+    if (project.name == comparator) {
+        println "Project [${project.name}] is processed"
+        return project.name
+    }
+    return null
+}
+
+static def getParentFolderModuleName(Project project) {
+    def allProjects = project.getAllprojects()
+    if (allProjects.size() > 1) {
+        def name = allProjects.first().name
+        println "Project [${name}] has submodules"
+        return name
+    }
+    return null
+}
+
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
