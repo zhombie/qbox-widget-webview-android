@@ -1,12 +1,15 @@
 buildscript {
+    ext.kotlin_version = '1.7.10'
+
     repositories {
         google()
         mavenCentral()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:7.3.0'
 
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -25,8 +28,8 @@ ext.projectArtifactId = { Project project ->
 
 allprojects {
     group = 'kz.qbox.widget.webview'
-    project.ext.version_code = 1
-    version = '1.0.0'
+    project.ext.version_code = 2
+    version = '1.0.1'
     project.ext.artifactId = rootProject.ext.projectArtifactId(project)
 
     if (project.group != null) {
