@@ -8,7 +8,6 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Message
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.webkit.*
 
@@ -101,7 +100,7 @@ internal class WebView @JvmOverloads constructor(
 
     fun setupCookieManager() {
         with(CookieManager.getInstance()) {
-            Log.d(TAG, "CookieManager#hasCookies(): ${hasCookies()}")
+            Logger.debug(TAG, "CookieManager#hasCookies(): ${hasCookies()}")
 
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(this@WebView, true)
@@ -118,12 +117,12 @@ internal class WebView @JvmOverloads constructor(
     }
 
     fun setPermissionRequestResult(permissions: List<String>) {
-        Log.d(TAG, "setPermissionRequestResult() -> " +
+        Logger.debug(TAG, "setPermissionRequestResult() -> " +
                 "permissions: ${permissions.joinToString(", ")}")
         if (permissions.isEmpty()) {
             permissionRequest?.deny()
         } else {
-            Log.d(TAG, "setPermissionRequestResult() -> " +
+            Logger.debug(TAG, "setPermissionRequestResult() -> " +
                     "$permissionRequest grant permissions: ${permissions.joinToString(", ")}")
             permissionRequest?.grant(permissions.toTypedArray())
         }
@@ -131,7 +130,7 @@ internal class WebView @JvmOverloads constructor(
     }
 
     fun setGeolocationPermissionsShowPromptResult(success: Boolean) {
-        Log.d(TAG, "setGeolocationPermissionsShowPromptResult() -> " +
+        Logger.debug(TAG, "setGeolocationPermissionsShowPromptResult() -> " +
                 "$success, $geolocationPermissionsShowPrompt")
         if (success) {
             geolocationPermissionsShowPrompt?.callback?.invoke(
@@ -158,7 +157,7 @@ internal class WebView @JvmOverloads constructor(
     }
 
     fun setFileSelectionPromptResult(uris: Array<Uri>?) {
-        Log.d(
+        Logger.debug(
             TAG,
             "setFileSelectionPromptResult() -> $uris, $fileSelectionPrompt"
         )
@@ -178,7 +177,7 @@ internal class WebView @JvmOverloads constructor(
 
     private inner class MyWebChromeClient : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest?) {
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onPermissionRequest() -> " +
                         "origin: ${request?.origin}, " +
@@ -195,7 +194,7 @@ internal class WebView @JvmOverloads constructor(
         override fun onPermissionRequestCanceled(request: PermissionRequest?) {
             super.onPermissionRequestCanceled(request)
 
-            Log.d(TAG, "onPermissionRequestCanceled() -> request: $request")
+            Logger.debug(TAG, "onPermissionRequestCanceled() -> request: $request")
 
             permissionRequest = null
 
@@ -210,7 +209,7 @@ internal class WebView @JvmOverloads constructor(
         ) {
             super.onGeolocationPermissionsShowPrompt(origin, callback)
 
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onGeolocationPermissionsShowPrompt() -> origin: $origin, callback: $callback"
             )
@@ -226,7 +225,7 @@ internal class WebView @JvmOverloads constructor(
         override fun onGeolocationPermissionsHidePrompt() {
             super.onGeolocationPermissionsHidePrompt()
 
-            Log.d(TAG, "onGeolocationPermissionsHidePrompt()")
+            Logger.debug(TAG, "onGeolocationPermissionsHidePrompt()")
 
             geolocationPermissionsShowPrompt = null
 
@@ -239,7 +238,7 @@ internal class WebView @JvmOverloads constructor(
             message: String?,
             result: JsResult?
         ): Boolean {
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onJsAlert() -> " +
                         "url: $url, " +
@@ -255,7 +254,7 @@ internal class WebView @JvmOverloads constructor(
             message: String?,
             result: JsResult?
         ): Boolean {
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onJsConfirm() -> " +
                         "url: $url, " +
@@ -272,7 +271,7 @@ internal class WebView @JvmOverloads constructor(
             defaultValue: String?,
             result: JsPromptResult?
         ): Boolean {
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onJsPrompt() -> " +
                         "url: $url, " +
@@ -297,7 +296,7 @@ internal class WebView @JvmOverloads constructor(
             filePathCallback: ValueCallback<Array<Uri>>?,
             fileChooserParams: FileChooserParams?
         ): Boolean {
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onShowFileChooser() -> params: " +
                         "${fileChooserParams?.acceptTypes?.contentToString()}, " +
@@ -318,7 +317,7 @@ internal class WebView @JvmOverloads constructor(
 
         override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
             super.onShowCustomView(view, callback)
-            Log.d(TAG, "onShowCustomView()")
+            Logger.debug(TAG, "onShowCustomView()")
         }
 
         override fun onProgressChanged(view: android.webkit.WebView?, newProgress: Int) {
@@ -327,8 +326,8 @@ internal class WebView @JvmOverloads constructor(
         }
 
         override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-            return if (Widget.getLoggingEnabled()) {
-                Log.d(TAG, consoleMessage?.message() ?: "Client received console message")
+            return if (Widget.isLoggingEnabled) {
+                Logger.debug(TAG, consoleMessage?.message() ?: "Client received console message")
                 super.onConsoleMessage(consoleMessage)
             } else {
                 false
@@ -339,24 +338,24 @@ internal class WebView @JvmOverloads constructor(
     private inner class MyWebViewClient : WebViewClient() {
         override fun onLoadResource(view: android.webkit.WebView?, url: String?) {
             super.onLoadResource(view, url)
-            Log.d(TAG, "onLoadResource() -> url: $url")
+            Logger.debug(TAG, "onLoadResource() -> url: $url")
         }
 
         override fun onPageStarted(view: android.webkit.WebView?, url: String?, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
-            Log.d(TAG, "onPageStarted() -> url: $url")
+            Logger.debug(TAG, "onPageStarted() -> url: $url")
         }
 
         override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
             super.onPageFinished(view, url)
-            Log.d(TAG, "onPageFinished() -> url: $url")
+            Logger.debug(TAG, "onPageFinished() -> url: $url")
         }
 
         override fun shouldOverrideUrlLoading(
             view: android.webkit.WebView?,
             request: WebResourceRequest?
         ): Boolean {
-            Log.d(TAG, "shouldOverrideUrlLoading() -> ${request?.requestHeaders}, ${request?.url}")
+            Logger.debug(TAG, "shouldOverrideUrlLoading() -> ${request?.requestHeaders}, ${request?.url}")
 
             return if (request == null) {
                 false
@@ -373,7 +372,7 @@ internal class WebView @JvmOverloads constructor(
             view: android.webkit.WebView?,
             url: String?
         ): Boolean {
-            Log.d(TAG, "shouldOverrideUrlLoading() -> url: $url")
+            Logger.debug(TAG, "shouldOverrideUrlLoading() -> url: $url")
             return super.shouldOverrideUrlLoading(view, url)
         }
 
@@ -383,7 +382,7 @@ internal class WebView @JvmOverloads constructor(
             error: WebResourceError?
         ) {
             super.onReceivedError(view, request, error)
-            Log.d(TAG, "onReceivedError() -> $request, $error")
+            Logger.debug(TAG, "onReceivedError() -> $request, $error")
         }
 
         override fun onReceivedHttpError(
@@ -392,7 +391,7 @@ internal class WebView @JvmOverloads constructor(
             errorResponse: WebResourceResponse?
         ) {
             super.onReceivedHttpError(view, request, errorResponse)
-            Log.d(TAG, "onReceivedHttpError() -> $request, $errorResponse")
+            Logger.debug(TAG, "onReceivedHttpError() -> $request, $errorResponse")
         }
 
         override fun onReceivedSslError(
@@ -400,7 +399,7 @@ internal class WebView @JvmOverloads constructor(
             handler: SslErrorHandler?,
             error: SslError?
         ) {
-            Log.d(TAG, "onReceivedSslError() -> $handler, $error")
+            Logger.debug(TAG, "onReceivedSslError() -> $handler, $error")
             listener?.onReceivedSSLError(handler, error)
         }
     }

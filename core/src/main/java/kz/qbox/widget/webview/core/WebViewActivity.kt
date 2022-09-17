@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -85,7 +84,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     private val requestedPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Log.d(TAG, "requestedPermissionsLauncher() -> permissions: $permissions")
+            Logger.debug(TAG, "requestedPermissionsLauncher() -> permissions: $permissions")
 
             webView?.setPermissionRequestResult(
                 PermissionRequestMapper.fromAndroidToWebClient(permissions)
@@ -98,7 +97,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     private val locationPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Log.d(TAG, "locationPermissionsLauncher() -> permissions: $permissions")
+            Logger.debug(TAG, "locationPermissionsLauncher() -> permissions: $permissions")
 
             val isAllPermissionsGranted = permissions.all { it.value }
 
@@ -111,14 +110,14 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     private val locationSettingsLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            Log.d(TAG, "locationSettingsLauncher() -> resultCode: ${result.resultCode}")
+            Logger.debug(TAG, "locationSettingsLauncher() -> resultCode: ${result.resultCode}")
 
             onGeolocationPermissionsShowPrompt()
         }
 
     private val storagePermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Log.d(TAG, "storagePermissionsLauncher() -> permissions: $permissions")
+            Logger.debug(TAG, "storagePermissionsLauncher() -> permissions: $permissions")
 
             val isAllPermissionsGranted = permissions.all { it.value }
 
@@ -286,7 +285,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView?.setupCookieManager()
         webView?.setMixedContentAllowed(true)
         webView?.setUrlListener { headers, uri ->
-            Log.d(TAG, "setUrlListener() -> $headers, $uri")
+            Logger.debug(TAG, "setUrlListener() -> $headers, $uri")
 
             if (uri.toString().contains("image")) {
                 ImagePreviewDialogFragment.show(
@@ -307,7 +306,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         }
 
         webView?.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
-            Log.d(
+            Logger.debug(
                 TAG,
                 "onDownloadStart() -> " +
                         "url: $url, " +
@@ -358,7 +357,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             val found = downloadedFiles?.find { it.first == url }
             if (found != null && !found.second.path.isNullOrBlank()) {
                 val file = File(requireNotNull(found.second.path))
-                Log.d(TAG, "file: $file")
+                Logger.debug(TAG, "file: $file")
                 isLocalFileFoundAndOpened = openFile(file, mimetype)
             }
 
@@ -410,7 +409,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 downloadStateReceiver = null
             }
             downloadStateReceiver = DownloadStateReceiver { downloadId, uri, mimeType ->
-                Log.d(
+                Logger.debug(
                     TAG,
                     "onFileUriReady() -> " +
                             "downloadId: $downloadId, " +
@@ -595,17 +594,20 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     override fun onPermissionRequest(resources: Array<String>) {
         val permissions = PermissionRequestMapper.fromWebClientToAndroid(resources).toTypedArray()
-        Log.d(TAG, "onPermissionRequest() -> resources: ${resources.contentToString()}")
-        Log.d(TAG, "onPermissionRequest() -> permissions: ${permissions.contentToString()}")
+        Logger.debug(TAG, "onPermissionRequest() -> resources: ${resources.contentToString()}")
+        Logger.debug(TAG, "onPermissionRequest() -> permissions: ${permissions.contentToString()}")
         requestedPermissionsLauncher.launch(permissions)
     }
 
     override fun onPermissionRequestCanceled(resources: Array<String>) {
-        Log.d(TAG, "onPermissionRequestCanceled() -> resources: ${resources.contentToString()}")
+        Logger.debug(
+            TAG,
+            "onPermissionRequestCanceled() -> resources: ${resources.contentToString()}"
+        )
     }
 
     override fun onGeolocationPermissionsShowPrompt() {
-        Log.d(TAG, "onGeolocationPermissionsShowPrompt()")
+        Logger.debug(TAG, "onGeolocationPermissionsShowPrompt()")
         if (LOCATION_PERMISSIONS.all {
                 ActivityCompat.checkSelfPermission(
                     this,
@@ -629,7 +631,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     }
 
     override fun onGeolocationPermissionsHidePrompt() {
-        Log.d(TAG, "onGeolocationPermissionsHidePrompt()")
+        Logger.debug(TAG, "onGeolocationPermissionsHidePrompt()")
     }
 
 }

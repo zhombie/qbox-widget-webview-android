@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import kz.qbox.widget.webview.core.Logger
 
 internal class DownloadStateReceiver constructor(
     private val listener: Listener
@@ -20,7 +20,7 @@ internal class DownloadStateReceiver constructor(
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d(TAG, "onReceive() -> context: $context, intent: $intent")
+        Logger.debug(TAG, "onReceive() -> context: $context, intent: $intent")
 
         if (context == null) return
         val action = intent?.action
@@ -36,21 +36,21 @@ internal class DownloadStateReceiver constructor(
                     .setFilterById(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1))
             )
 
-            Log.d(TAG, "onReceive() -> cursor: $cursor")
+            Logger.debug(TAG, "onReceive() -> cursor: $cursor")
 
             if (cursor.moveToFirst()) {
                 if (cursor.count > 0) {
                     val status =
                         cursor.getIntOrNull(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
 
-                    Log.d(TAG, "onReceive() -> status: $status")
+                    Logger.debug(TAG, "onReceive() -> status: $status")
 
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         val localUri: String? =
                             cursor.getStringOrNull(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
                         val mimeType: String? =
                             downloadManager.getMimeTypeForDownloadedFile(downloadId)
-                        Log.d(TAG, "onReceive() -> downloadId: $downloadId, localUri: $localUri")
+                        Logger.debug(TAG, "onReceive() -> downloadId: $downloadId, localUri: $localUri")
                         listener.onFileUriReady(downloadId, Uri.parse(localUri), mimeType)
                     }
                 }

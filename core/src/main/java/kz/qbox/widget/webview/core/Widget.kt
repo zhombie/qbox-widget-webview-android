@@ -1,7 +1,9 @@
 package kz.qbox.widget.webview.core
 
 object Widget {
-    fun getLoggingEnabled(): Boolean {
-        return false
-    }
+
+    var isLoggingEnabled: Boolean = false
+        @Synchronized get
+        @Synchronized set
+
 }

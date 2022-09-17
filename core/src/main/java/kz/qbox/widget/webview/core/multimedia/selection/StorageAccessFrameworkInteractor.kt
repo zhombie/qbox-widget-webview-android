@@ -13,6 +13,7 @@ import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import androidx.core.net.toUri
 import androidx.core.provider.DocumentsContractCompat
+import kz.qbox.widget.webview.core.Logger
 import java.io.*
 import java.lang.ref.WeakReference
 
@@ -85,7 +86,7 @@ internal class StorageAccessFrameworkInteractor private constructor(
 
         val mimeType = contentResolver?.getType(uri)
 
-        Log.d(TAG, "parse() -> mimeType: $mimeType")
+        Logger.debug(TAG, "parse() -> mimeType: $mimeType")
 
         return when {
             mimeType?.startsWith("image") == true -> {

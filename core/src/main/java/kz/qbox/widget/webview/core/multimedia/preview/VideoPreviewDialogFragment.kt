@@ -108,7 +108,7 @@ internal class VideoPreviewDialogFragment : DialogFragment() {
         }
 
         closeButton?.setOnClickListener {
-            dismiss()
+            parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 
