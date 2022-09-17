@@ -29,18 +29,27 @@ internal class VideoPreviewDialogFragment : DialogFragment() {
     companion object {
         private val TAG = VideoPreviewDialogFragment::class.java.simpleName
 
-        fun newInstance(uri: Uri, caption: String?): VideoPreviewDialogFragment {
+        fun newInstance(
+            uri: Uri,
+            caption: String?
+        ): VideoPreviewDialogFragment {
             val fragment = VideoPreviewDialogFragment()
             fragment.arguments = bundleOf("uri" to uri.toString(), "caption" to caption)
             return fragment
         }
 
-        fun show(fragmentManager: FragmentManager, uri: Uri, caption: String?) {
+        fun show(
+            fragmentManager: FragmentManager,
+            uri: Uri,
+            caption: String?
+        ): VideoPreviewDialogFragment {
+            val instance = newInstance(uri, caption)
             fragmentManager.beginTransaction()
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(android.R.id.content, newInstance(uri, caption))
+                .add(android.R.id.content, instance)
                 .addToBackStack(null)
                 .commit()
+            return instance
         }
     }
 

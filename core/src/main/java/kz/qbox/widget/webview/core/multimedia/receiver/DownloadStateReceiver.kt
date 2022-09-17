@@ -4,7 +4,6 @@ import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.core.database.getIntOrNull
@@ -31,7 +30,7 @@ internal class DownloadStateReceiver constructor(
             val downloadManager =
                 ContextCompat.getSystemService(context, DownloadManager::class.java) ?: return
 
-            val cursor: Cursor = downloadManager.query(
+            val cursor = downloadManager.query(
                 DownloadManager.Query()
                     .setFilterById(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1))
             )
@@ -46,11 +45,14 @@ internal class DownloadStateReceiver constructor(
                     Logger.debug(TAG, "onReceive() -> status: $status")
 
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                        val localUri: String? =
+                        val localUri =
                             cursor.getStringOrNull(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
-                        val mimeType: String? =
+                        val mimeType =
                             downloadManager.getMimeTypeForDownloadedFile(downloadId)
-                        Logger.debug(TAG, "onReceive() -> downloadId: $downloadId, localUri: $localUri")
+                        Logger.debug(
+                            TAG, "onReceive() -> " +
+                                    "downloadId: $downloadId, localUri: $localUri"
+                        )
                         listener.onFileUriReady(downloadId, Uri.parse(localUri), mimeType)
                     }
                 }

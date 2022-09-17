@@ -7,7 +7,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "QBox WebView-Widget"
+rootProject.name = "QBox WebView Widget"
 
 include ':sample'
 include ':core'

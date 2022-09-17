@@ -307,8 +307,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
         webView?.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
             Logger.debug(
-                TAG,
-                "onDownloadStart() -> " +
+                TAG, "onDownloadStart() -> " +
                         "url: $url, " +
                         "userAgent: $userAgent, " +
                         "contentDisposition: $contentDisposition, " +
@@ -404,7 +403,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             if (downloadStateReceiver != null) {
                 try {
                     unregisterReceiver(downloadStateReceiver)
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                 }
                 downloadStateReceiver = null
             }
