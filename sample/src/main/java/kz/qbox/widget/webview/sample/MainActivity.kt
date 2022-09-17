@@ -1,7 +1,7 @@
-package kz.qbox.widget.webview
+package kz.qbox.widget.webview.sample
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
