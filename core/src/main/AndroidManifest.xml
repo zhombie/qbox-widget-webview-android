@@ -20,7 +20,8 @@
     <application>
         <activity
             android:name="kz.qbox.widget.webview.core.WebViewActivity"
-            android:theme="@style/Theme.WebViewWidget" />
+            android:theme="@style/Theme.WebViewWidget"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
