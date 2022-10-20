@@ -12,9 +12,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Widget.isLoggingEnabled = true
-
         Widget.Builder(this)
+            .setLoggingEnabled(true)
             .setUrl(BuildConfig.WIDGET_URL)
             .setLanguage("ru")
             .setCall(

@@ -14,10 +14,18 @@ object Widget {
 
     class Builder constructor(private val context: Context) {
 
+        private var isLoggingEnabled: Boolean? = null
         private var url: String? = null
         private var language: String? = null
         private var call: Call? = null
         private var user: User? = null
+
+        fun getLoggingEnabled(): Boolean = isLoggingEnabled ?: false
+
+        fun setLoggingEnabled(isLoggingEnabled: Boolean): Builder {
+            this.isLoggingEnabled = isLoggingEnabled
+            return this
+        }
 
         fun getUrl(): String? = url
 
@@ -48,6 +56,10 @@ object Widget {
         }
 
         fun build(): Intent {
+            isLoggingEnabled?.let {
+                Widget.isLoggingEnabled = it
+            }
+
             return WebViewActivity.newIntent(
                 context = context,
                 url = requireNotNull(url) { "Declare url, without it widget won't work!" },
