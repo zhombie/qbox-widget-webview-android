@@ -2,10 +2,7 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.app.DownloadManager
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
@@ -19,6 +16,7 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
+import android.webkit.ValueCallback
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -217,6 +215,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
                     Toast.makeText(this, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
                     Toast.makeText(
@@ -224,9 +223,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         "Извините, но вы превысили лимит (${result.maxSize}) при выборе файла",
                         Toast.LENGTH_SHORT
                     ).show()
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
                     Toast.makeText(this, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
             }
         }
@@ -655,6 +656,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         3 ->
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
                     }
+                }
+                .setOnDismissListener {
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 .show()
         } else {
