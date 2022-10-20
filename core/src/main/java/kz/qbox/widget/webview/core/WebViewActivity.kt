@@ -1,6 +1,7 @@
 package kz.qbox.widget.webview.core
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -32,6 +33,7 @@ import androidx.webkit.WebViewFeature
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import kz.garage.image.preview.ImagePreviewDialogFragment
+import kz.qbox.widget.webview.core.device.Device
 import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
@@ -67,6 +69,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     private var toolbar: MaterialToolbar? = null
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
+
+    private var device: Device? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
@@ -128,9 +132,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             }
         }
 
+    @SuppressLint("JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
+
+        device = Device(this)
 
         appBarLayout = findViewById(R.id.appBarLayout)
         toolbar = findViewById(R.id.toolbar)
