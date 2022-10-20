@@ -2,10 +2,7 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.app.DownloadManager
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
@@ -19,6 +16,7 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
+import android.webkit.ValueCallback
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -34,6 +32,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
+import kz.qbox.widget.webview.core.device.Device
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
@@ -144,6 +143,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             }
         }
 
+    private val device: Device by lazy { Device(applicationContext) }
+
     private val call by lazy(LazyThreadSafetyMode.NONE) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("call", Call::class.java)
@@ -153,11 +154,25 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     }
 
     private val user by lazy(LazyThreadSafetyMode.NONE) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val user = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("user", User::class.java)
         } else {
             intent.getSerializableExtra("user") as? User
         }
+        user?.copy(
+            device = User.Device(
+                os = device.os,
+                osVersion = device.osVersion,
+                appVersion =  device.versionName,
+                name = device.name,
+                mobileOperator = device.operator,
+                battery = User.Device.Battery(
+                    percentage = device.batteryPercent,
+                    isCharging = device.isPhoneCharging,
+                    temperature = device.batteryTemperature
+                )
+            )
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -169,7 +184,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
 
-        val uri = try {
+        var uri = try {
             Uri.parse(intent.getStringExtra("url"))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -178,13 +193,17 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
         val language = intent.getStringExtra("language")
 
-        if (!language.isNullOrBlank()) {
-            uri.buildUpon().appendQueryParameter("lang", language)
-        }
+        uri = uri.buildUpon()
+            .apply {
+                if (!language.isNullOrBlank()) {
+                    appendQueryParameter("lang", language)
+                }
 
-        call?.let {
-            uri.buildUpon().appendQueryParameter("topic", it.topic)
-        }
+                call?.let {
+                    appendQueryParameter("topic", it.topic)
+                }
+            }
+            .build()
 
         setupActionBar()
         setupWebView()
@@ -196,6 +215,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
                     Toast.makeText(this, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
                     Toast.makeText(
@@ -203,9 +223,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         "Извините, но вы превысили лимит (${result.maxSize}) при выборе файла",
                         Toast.LENGTH_SHORT
                     ).show()
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
                     Toast.makeText(this, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
             }
         }
@@ -634,6 +656,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         3 ->
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
                     }
+                }
+                .setOnDismissListener {
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 .show()
         } else {
