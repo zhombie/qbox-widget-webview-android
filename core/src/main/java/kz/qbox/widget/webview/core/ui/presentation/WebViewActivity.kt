@@ -145,7 +145,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             }
         }
 
-    private val device: Device by lazy { Device(this) }
+    private val device: Device by lazy { Device(applicationContext) }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -186,7 +186,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
 
-        val uri = try {
+        var uri = try {
             Uri.parse(intent.getStringExtra("url"))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -195,13 +195,17 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
         val language = intent.getStringExtra("language")
 
-        if (!language.isNullOrBlank()) {
-            uri.buildUpon().appendQueryParameter("lang", language)
-        }
+        uri = uri.buildUpon()
+            .apply {
+                if (!language.isNullOrBlank()) {
+                    appendQueryParameter("lang", language)
+                }
 
-        call?.let {
-            uri.buildUpon().appendQueryParameter("topic", it.topic)
-        }
+                call?.let {
+                    appendQueryParameter("topic", it.topic)
+                }
+            }
+            .build()
 
         setupActionBar()
         setupWebView()

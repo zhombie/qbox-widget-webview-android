@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
                 Call(
                     domain = "dev.test.kz",
                     type = Call.Type.VIDEO,
-                    topic = "test"
+                    topic = "general"
                 )
             )
             .setUser(
