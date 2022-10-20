@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
             .setLanguage("ru")
             .setCall(
                 Call(
+                    domain = "dev.test.kz",
+                    type = Call.Type.VIDEO,
                     topic = "test"
                 )
             )

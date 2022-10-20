@@ -357,6 +357,7 @@ internal class WebView @JvmOverloads constructor(
         override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
             super.onPageFinished(view, url)
             Logger.debug(TAG, "onPageFinished() -> url: $url")
+            listener?.onPageFinished(view, url)
         }
 
         override fun shouldOverrideUrlLoading(
@@ -379,6 +380,7 @@ internal class WebView @JvmOverloads constructor(
             }
         }
 
+        @Deprecated("Deprecated in Java")
         override fun shouldOverrideUrlLoading(
             view: android.webkit.WebView?,
             url: String?
@@ -420,13 +422,14 @@ internal class WebView @JvmOverloads constructor(
     }
 
     interface Listener {
-        fun onReceivedSSLError(handler: SslErrorHandler?, error: SslError?)
-        fun onPageLoadProgress(progress: Int)
-        fun onSelectFileRequest(): Boolean
-        fun onPermissionRequest(resources: Array<String>)
-        fun onPermissionRequestCanceled(resources: Array<String>)
-        fun onGeolocationPermissionsShowPrompt()
-        fun onGeolocationPermissionsHidePrompt()
+        fun onReceivedSSLError(handler: SslErrorHandler?, error: SslError?) {}
+        fun onPageLoadProgress(progress: Int) {}
+        fun onSelectFileRequest(): Boolean { return false }
+        fun onPermissionRequest(resources: Array<String>) {}
+        fun onPermissionRequestCanceled(resources: Array<String>) {}
+        fun onGeolocationPermissionsShowPrompt() {}
+        fun onGeolocationPermissionsHidePrompt() {}
+        fun onPageFinished(view: android.webkit.WebView?, url: String?) {}
     }
 
 }
