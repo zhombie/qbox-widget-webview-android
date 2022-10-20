@@ -1,4 +1,4 @@
-package kz.qbox.widget.webview.core
+package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -34,6 +34,10 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.qbox.widget.webview.core.device.Device
+import kz.qbox.widget.webview.core.Logger
+import kz.qbox.widget.webview.core.R
+import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
@@ -41,6 +45,8 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
 import kz.qbox.widget.webview.core.ui.components.ProgressView
+import kz.qbox.widget.webview.core.ui.components.WebView
+import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
 import java.io.File
 
@@ -59,9 +65,18 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
-        fun newIntent(context: Context, url: String): Intent {
+        fun newIntent(
+            context: Context,
+            url: String,
+            language: String?,
+            call: Call?,
+            user: User?
+        ): Intent {
             return Intent(context, WebViewActivity::class.java)
                 .putExtra("url", url)
+                .putExtra("language", language)
+                .putExtra("call", call)
+                .putExtra("user", user)
         }
     }
 
@@ -144,6 +159,29 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
 
+        val uri = try {
+            Uri.parse(intent.getStringExtra("url"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        } ?: return finish()
+
+        val language = intent.getStringExtra("language")
+
+        val call = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("call", Call::class.java)
+        } else {
+            intent.getSerializableExtra("call") as? Call
+        }
+
+        if (!language.isNullOrBlank()) {
+            uri.buildUpon().appendQueryParameter("lang", language)
+        }
+
+        if (call != null) {
+            uri.buildUpon().appendQueryParameter("topic", call.topic)
+        }
+
         setupActionBar()
         setupWebView()
 
@@ -168,9 +206,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             }
         }
 
-        webView?.loadUrl(requireNotNull(intent.getStringExtra("url")))
+        webView?.loadUrl(uri.toString())
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val fragments = supportFragmentManager.fragments
 

@@ -1,4 +1,4 @@
-package kz.qbox.widget.webview.core
+package kz.qbox.widget.webview.core.utils
 
 import android.Manifest.permission.*
 import android.webkit.PermissionRequest

@@ -6,7 +6,6 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.OpenableColumns
-import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.database.getLongOrNull
@@ -14,7 +13,9 @@ import androidx.core.database.getStringOrNull
 import androidx.core.net.toUri
 import androidx.core.provider.DocumentsContractCompat
 import kz.qbox.widget.webview.core.Logger
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.ref.WeakReference
 
 internal class StorageAccessFrameworkInteractor private constructor(
