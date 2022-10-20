@@ -22,13 +22,6 @@ internal class GetContentResultContract :
             putExtra(Intent.EXTRA_MIME_TYPES, input.mimeTypes)
         }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
-        return if (resultCode == Activity.RESULT_OK) {
-            intent?.data
-        }else{
-            println("Something is wrong")
-            null
-        }
-    }
-
+    override fun parseResult(resultCode: Int, intent: Intent?): Uri? =
+        intent.takeIf { resultCode == Activity.RESULT_OK }?.data
 }
