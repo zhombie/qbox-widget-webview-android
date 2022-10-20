@@ -85,8 +85,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
 
-    private var device: Device? = null
-
     private var interactor: StorageAccessFrameworkInteractor? = null
 
     /**
@@ -147,6 +145,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             }
         }
 
+    private val device: Device by lazy { Device(this) }
+
     private val call by lazy(LazyThreadSafetyMode.NONE) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("call", Call::class.java)
@@ -156,18 +156,30 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     }
 
     private val user by lazy(LazyThreadSafetyMode.NONE) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val user = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("user", User::class.java)
         } else {
             intent.getSerializableExtra("user") as? User
         }
+        user?.copy(
+            device = User.Device(
+                os = device.os,
+                osVersion = device.osVersion,
+                appVersion =  device.versionName,
+                name = device.name,
+                mobileOperator = device.operator,
+                battery = User.Device.Battery(
+                    percentage = device.batteryPercent,
+                    isCharging = device.isPhoneCharging,
+                    temperature = device.batteryTemperature
+                )
+            )
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
-
-        device = Device(this)
 
         appBarLayout = findViewById(R.id.appBarLayout)
         toolbar = findViewById(R.id.toolbar)

@@ -16,9 +16,9 @@ data class User constructor(
     data class Device constructor(
         private val os: String,
         private val osVersion: String,
-        private val appVersion: String,
+        private val appVersion: String?,
         private val name: String,
-        private val mobileOperator: String,
+        private val mobileOperator: String?,
         private val battery: Battery
     ) : JSONObjectable {
 
