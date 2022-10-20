@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION", "SetJavaScriptEnabled")
 
-package kz.qbox.widget.webview.core
+package kz.qbox.widget.webview.core.ui.components
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,6 +10,8 @@ import android.os.Message
 import android.util.AttributeSet
 import android.view.View
 import android.webkit.*
+import kz.qbox.widget.webview.core.Logger
+import kz.qbox.widget.webview.core.Widget
 
 internal class WebView @JvmOverloads constructor(
     context: Context,
@@ -117,21 +119,27 @@ internal class WebView @JvmOverloads constructor(
     }
 
     fun setPermissionRequestResult(permissions: List<String>) {
-        Logger.debug(TAG, "setPermissionRequestResult() -> " +
-                "permissions: ${permissions.joinToString(", ")}")
+        Logger.debug(
+            TAG, "setPermissionRequestResult() -> " +
+                    "permissions: ${permissions.joinToString(", ")}"
+        )
         if (permissions.isEmpty()) {
             permissionRequest?.deny()
         } else {
-            Logger.debug(TAG, "setPermissionRequestResult() -> " +
-                    "$permissionRequest grant permissions: ${permissions.joinToString(", ")}")
+            Logger.debug(
+                TAG, "setPermissionRequestResult() -> " +
+                        "$permissionRequest grant permissions: ${permissions.joinToString(", ")}"
+            )
             permissionRequest?.grant(permissions.toTypedArray())
         }
         permissionRequest = null
     }
 
     fun setGeolocationPermissionsShowPromptResult(success: Boolean) {
-        Logger.debug(TAG, "setGeolocationPermissionsShowPromptResult() -> " +
-                "$success, $geolocationPermissionsShowPrompt")
+        Logger.debug(
+            TAG, "setGeolocationPermissionsShowPromptResult() -> " +
+                    "$success, $geolocationPermissionsShowPrompt"
+        )
         if (success) {
             geolocationPermissionsShowPrompt?.callback?.invoke(
                 geolocationPermissionsShowPrompt?.origin,
@@ -355,7 +363,10 @@ internal class WebView @JvmOverloads constructor(
             view: android.webkit.WebView?,
             request: WebResourceRequest?
         ): Boolean {
-            Logger.debug(TAG, "shouldOverrideUrlLoading() -> ${request?.requestHeaders}, ${request?.url}")
+            Logger.debug(
+                TAG,
+                "shouldOverrideUrlLoading() -> ${request?.requestHeaders}, ${request?.url}"
+            )
 
             return if (request == null) {
                 false

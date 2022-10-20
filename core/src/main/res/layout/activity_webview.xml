@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".WebViewActivity">
+    tools:context=".ui.presentation.WebViewActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -25,7 +25,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <kz.qbox.widget.webview.core.WebView
+    <kz.qbox.widget.webview.core.ui.components.WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
