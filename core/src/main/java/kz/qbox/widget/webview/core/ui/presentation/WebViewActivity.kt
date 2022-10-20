@@ -1,7 +1,6 @@
 package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -33,9 +32,9 @@ import androidx.webkit.WebViewFeature
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import kz.garage.image.preview.ImagePreviewDialogFragment
-import kz.qbox.widget.webview.core.device.Device
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
+import kz.qbox.widget.webview.core.device.Device
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
@@ -44,6 +43,7 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
+import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
@@ -147,7 +147,22 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             }
         }
 
-    @SuppressLint("JavascriptInterface")
+    private val call by lazy(LazyThreadSafetyMode.NONE) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("call", Call::class.java)
+        } else {
+            intent.getSerializableExtra("call") as? Call
+        }
+    }
+
+    private val user by lazy(LazyThreadSafetyMode.NONE) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("user", User::class.java)
+        } else {
+            intent.getSerializableExtra("user") as? User
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
@@ -168,18 +183,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
         val language = intent.getStringExtra("language")
 
-        val call = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("call", Call::class.java)
-        } else {
-            intent.getSerializableExtra("call") as? Call
-        }
-
         if (!language.isNullOrBlank()) {
             uri.buildUpon().appendQueryParameter("lang", language)
         }
 
-        if (call != null) {
-            uri.buildUpon().appendQueryParameter("topic", call.topic)
+        call?.let {
+            uri.buildUpon().appendQueryParameter("topic", it.topic)
         }
 
         setupActionBar()
@@ -489,6 +498,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
             )
         }
+
+        webView?.addJavascriptInterface(JSBridge(call, user), "JSBridge")
 
         webView?.setListener(this)
     }
