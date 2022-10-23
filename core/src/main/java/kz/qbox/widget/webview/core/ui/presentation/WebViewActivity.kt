@@ -16,7 +16,6 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
-import android.webkit.ValueCallback
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -84,6 +83,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     private var progressView: ProgressView? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
+    private var isDismissed = false
 
     /**
      * [DownloadManager] download ids list (which has downloading status)
@@ -644,21 +644,32 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         "Документ"
                     )
                 ) { dialog, which ->
-                    dialog.dismiss()
+//                    dialog.dismiss()
 
                     when (which) {
-                        0 ->
+                        0 -> {
+                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.IMAGE))
-                        1 ->
+                        }
+                        1 -> {
+                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.VIDEO))
-                        2 ->
+                        }
+                        2 -> {
+                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.AUDIO))
-                        3 ->
+                        }
+                        3 -> {
+                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
+                        }
                     }
                 }
                 .setOnDismissListener {
-                    webView?.setFileSelectionPromptResult(uri = null)
+                    if (!isDismissed) {
+                        webView?.setFileSelectionPromptResult(uri = null)
+                    }
+                    isDismissed = false
                 }
                 .show()
         } else {
