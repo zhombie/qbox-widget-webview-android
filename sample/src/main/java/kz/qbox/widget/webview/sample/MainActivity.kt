@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.Language
 import kz.qbox.widget.webview.core.models.User
 
 class MainActivity : AppCompatActivity() {
@@ -15,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         Widget.Builder(this)
             .setLoggingEnabled(true)
             .setUrl(BuildConfig.WIDGET_URL)
-            .setLanguage("ru")
+            .setLanguage(Language.RUSSIAN)
             .setCall(
                 Call(
                     domain = "dev.test.kz",

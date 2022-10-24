@@ -146,10 +146,14 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     private val device: Device by lazy { Device(applicationContext) }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("call", Call::class.java)
-        } else {
-            intent.getSerializableExtra("call") as? Call
+        requireNotNull(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getSerializableExtra("call", Call::class.java)
+            } else {
+                intent.getSerializableExtra("call") as? Call
+            }
+        ) {
+            "Call information is not provided!"
         }
     }
 
@@ -159,20 +163,21 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         } else {
             intent.getSerializableExtra("user") as? User
         }
-        user?.copy(
-            device = User.Device(
-                os = device.os,
-                osVersion = device.osVersion,
-                appVersion =  device.versionName,
-                name = device.name,
-                mobileOperator = device.operator,
-                battery = User.Device.Battery(
-                    percentage = device.batteryPercent,
-                    isCharging = device.isPhoneCharging,
-                    temperature = device.batteryTemperature
-                )
+
+        val device = User.Device(
+            os = device.os,
+            osVersion = device.osVersion,
+            appVersion = device.versionName,
+            name = device.name,
+            mobileOperator = device.operator,
+            battery = User.Device.Battery(
+                percentage = device.batteryPercent,
+                isCharging = device.isPhoneCharging,
+                temperature = device.batteryTemperature
             )
         )
+
+        user?.copy(device = device) ?: User(device = device)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

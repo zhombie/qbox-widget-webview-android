@@ -24,4 +24,5 @@ internal class GetContentResultContract :
 
     override fun parseResult(resultCode: Int, intent: Intent?): Uri? =
         intent.takeIf { resultCode == Activity.RESULT_OK }?.data
+
 }

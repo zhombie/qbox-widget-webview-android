@@ -3,6 +3,7 @@ package kz.qbox.widget.webview.core
 import android.content.Context
 import android.content.Intent
 import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.Language
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
@@ -16,7 +17,7 @@ object Widget {
 
         private var isLoggingEnabled: Boolean? = null
         private var url: String? = null
-        private var language: String? = null
+        private var language: Language? = null
         private var call: Call? = null
         private var user: User? = null
 
@@ -34,9 +35,9 @@ object Widget {
             return this
         }
 
-        fun getLanguage(): String? = language
+        fun getLanguage(): Language? = language
 
-        fun setLanguage(language: String): Builder {
+        fun setLanguage(language: Language): Builder {
             this.language = language
             return this
         }
@@ -63,7 +64,7 @@ object Widget {
             return WebViewActivity.newIntent(
                 context = context,
                 url = requireNotNull(url) { "Declare url, without it widget won't work!" },
-                language = language,
+                language = (language ?: Language.KAZAKH).code,
                 call = call,
                 user = user
             )

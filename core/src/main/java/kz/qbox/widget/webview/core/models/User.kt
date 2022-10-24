@@ -2,7 +2,6 @@ package kz.qbox.widget.webview.core.models
 
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.Serializable
 
 data class User constructor(
     val firstName: String? = null,
@@ -10,8 +9,9 @@ data class User constructor(
     val patronymic: String? = null,
     val iin: String? = null,
     val phoneNumber: String? = null,
-    val device: Device? = null
-) : JSONObjectable, Serializable {
+    val device: Device? = null,
+    val location: Location? = null
+) : Base() {
 
     data class Device constructor(
         private val os: String,
@@ -20,13 +20,13 @@ data class User constructor(
         private val name: String,
         private val mobileOperator: String?,
         private val battery: Battery
-    ) : JSONObjectable {
+    ) : Base() {
 
         data class Battery constructor(
             private val percentage: Double,
             private val isCharging: Boolean,
             private val temperature: Float
-        ) : JSONObjectable {
+        ) : Base() {
 
             override fun toJSONObject(): JSONObject {
                 val jsonObject = JSONObject()
@@ -59,6 +59,24 @@ data class User constructor(
 
     }
 
+    data class Location constructor(
+        val latitude: Double,
+        val longitude: Double
+    ) : Base() {
+
+        override fun toJSONObject(): JSONObject {
+            val jsonObject = JSONObject()
+            try {
+                jsonObject.put("latitude", latitude)
+                jsonObject.put("longitude", longitude)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+            return jsonObject
+        }
+
+    }
+
     override fun toJSONObject(): JSONObject {
         val jsonObject = JSONObject()
         try {
@@ -68,6 +86,7 @@ data class User constructor(
             jsonObject.put("iin", iin)
             jsonObject.put("phone_number", phoneNumber)
             jsonObject.put("device", device?.toJSONObject())
+            jsonObject.put("location", location?.toJSONObject())
         } catch (e: JSONException) {
             e.printStackTrace()
         }

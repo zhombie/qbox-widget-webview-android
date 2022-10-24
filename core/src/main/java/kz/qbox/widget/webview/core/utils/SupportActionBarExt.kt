@@ -7,7 +7,7 @@ import androidx.appcompat.app.WindowDecorActionBar
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.MaterialToolbar
 
-inline fun Fragment.setupActionBar(
+internal inline fun Fragment.setupActionBar(
     toolbar: MaterialToolbar?,
     isBackButtonEnabled: Boolean = true,
     title: String? = null,
@@ -32,7 +32,7 @@ inline fun Fragment.setupActionBar(
     return false
 }
 
-inline fun AppCompatActivity.setupActionBar(
+internal inline fun AppCompatActivity.setupActionBar(
     toolbar: MaterialToolbar?,
     isBackButtonEnabled: Boolean = true,
     title: String? = null,

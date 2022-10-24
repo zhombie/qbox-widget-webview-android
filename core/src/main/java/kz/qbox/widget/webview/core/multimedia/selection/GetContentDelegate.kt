@@ -2,7 +2,7 @@ package kz.qbox.widget.webview.core.multimedia.selection
 
 import android.net.Uri
 
-fun interface GetContentDelegate {
+internal fun interface GetContentDelegate {
     sealed interface Result {
         data class Success constructor(
             val uri: Uri

@@ -1,6 +1,6 @@
 package kz.qbox.widget.webview.core.multimedia.selection
 
-object MimeType {
+internal object MimeType {
     const val IMAGE = "image/*"
 
     const val VIDEO = "video/*"
