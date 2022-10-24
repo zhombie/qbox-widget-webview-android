@@ -158,9 +158,9 @@ internal class WebView @JvmOverloads constructor(
 
     fun setFileSelectionPromptResult(uri: Uri?) {
         if (uri == null) {
-            setFileSelectionPromptResult(arrayOf())
+            setFileSelectionPromptResult(uris = null)
         } else {
-            setFileSelectionPromptResult(arrayOf(uri))
+            setFileSelectionPromptResult(uris = arrayOf(uri))
         }
     }
 

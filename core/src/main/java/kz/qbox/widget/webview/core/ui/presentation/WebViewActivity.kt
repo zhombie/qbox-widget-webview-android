@@ -83,7 +83,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     private var progressView: ProgressView? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
-    private var isDismissed = false
 
     /**
      * [DownloadManager] download ids list (which has downloading status)
@@ -643,33 +642,24 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         "Аудио",
                         "Документ"
                     )
-                ) { dialog, which ->
-//                    dialog.dismiss()
-
+                ) { _, which ->
                     when (which) {
                         0 -> {
-                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.IMAGE))
                         }
                         1 -> {
-                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.VIDEO))
                         }
                         2 -> {
-                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.AUDIO))
                         }
                         3 -> {
-                            isDismissed = true
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
                         }
                     }
                 }
-                .setOnDismissListener {
-                    if (!isDismissed) {
-                        webView?.setFileSelectionPromptResult(uri = null)
-                    }
-                    isDismissed = false
+                .setOnCancelListener {
+                    webView?.setFileSelectionPromptResult(uri = null)
                 }
                 .show()
         } else {
