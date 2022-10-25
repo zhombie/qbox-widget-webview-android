@@ -57,6 +57,18 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             SCHEME_MAILTO, SCHEME_GEO, "sms:", "smsto:", "mms:", "mmsto:"
         )
 
+        private val SHORTEN_LINKS = arrayOf(
+            "t.me",
+            "telegram.me",
+            "telegram.dog",
+            "vk.com",
+            "vk.cc",
+            "fb.me",
+            "facebook.com",
+            "fb.com"
+        )
+
+
         private val TAG = WebViewActivity::class.java.simpleName
 
         private val LOCATION_PERMISSIONS = arrayOf(
@@ -369,6 +381,16 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 return true
             }
         }
+        SHORTEN_LINKS.forEach {
+            if (uri.authority?.equals(it) == true) {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    return true
+                } catch (e: ActivityNotFoundException) {
+                    Logger.debug(TAG, "setUrlListener() -> $e")
+                }
+            }
+        }
 
         return false
     }
@@ -387,7 +409,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView?.setupCookieManager()
         webView?.setMixedContentAllowed(true)
         webView?.setUrlListener { headers, uri ->
-            Logger.debug(TAG, "setUrlListener() -> $headers, $uri, ${uri.scheme}, ${uri.path}")
+            Logger.debug(
+                TAG,
+                "setUrlListener() -> $headers, $uri, ${uri.scheme}, ${uri.path}, ${uri.encodedPath}, ${uri.authority}"
+            )
 
             if (uri.toString().contains("image")) {
                 ImagePreviewDialogFragment.show(
@@ -404,12 +429,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 )
             }
             if (resolveUri(uri)) return@setUrlListener true
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, uri))
-                return@setUrlListener true
-            } catch (e: Exception) {
-                Logger.debug(TAG, "setUrlListener() -> $e")
-            }
             return@setUrlListener false
         }
 
