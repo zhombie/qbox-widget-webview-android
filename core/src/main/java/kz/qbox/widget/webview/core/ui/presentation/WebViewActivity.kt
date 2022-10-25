@@ -16,6 +16,7 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
+import android.webkit.WebView.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -50,6 +51,12 @@ import java.io.File
 class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     companion object {
+
+        private val URL_SCHEMES = arrayOf(
+            SCHEME_TEL,
+            SCHEME_MAILTO, SCHEME_GEO, "sms:", "smsto:", "mms:", "mmsto:"
+        )
+
         private val TAG = WebViewActivity::class.java.simpleName
 
         private val LOCATION_PERMISSIONS = arrayOf(
@@ -347,6 +354,25 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         }
     }
 
+    private fun resolveUri(uri: Uri): Boolean {
+        URL_SCHEMES.forEach {
+            if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = uri
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Logger.debug(TAG, "resolveUri() -> Activity not found")
+                }
+                return true
+            }
+        }
+
+        return false
+    }
+
     private fun setupWebView() {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
             webView?.settings?.let {
@@ -361,7 +387,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView?.setupCookieManager()
         webView?.setMixedContentAllowed(true)
         webView?.setUrlListener { headers, uri ->
-            Logger.debug(TAG, "setUrlListener() -> $headers, $uri")
+            Logger.debug(TAG, "setUrlListener() -> $headers, $uri, ${uri.scheme}, ${uri.path}")
 
             if (uri.toString().contains("image")) {
                 ImagePreviewDialogFragment.show(
@@ -377,7 +403,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                     caption = uri.toString()
                 )
             }
-
+            if (resolveUri(uri)) return@setUrlListener true
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, uri))
+                return@setUrlListener true
+            } catch (e: Exception) {
+                Logger.debug(TAG, "setUrlListener() -> $e")
+            }
             return@setUrlListener false
         }
 
