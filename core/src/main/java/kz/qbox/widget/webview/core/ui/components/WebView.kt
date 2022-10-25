@@ -217,17 +217,17 @@ internal class WebView @JvmOverloads constructor(
         ) {
             super.onGeolocationPermissionsShowPrompt(origin, callback)
 
-            Logger.debug(
-                TAG,
-                "onGeolocationPermissionsShowPrompt() -> origin: $origin, callback: $callback"
-            )
-
-            geolocationPermissionsShowPrompt = GeolocationPermissionsShowPrompt(
-                origin = origin,
-                callback = callback
-            )
-
-            listener?.onGeolocationPermissionsShowPrompt()
+//            Logger.debug(
+//                TAG,
+//                "onGeolocationPermissionsShowPrompt() -> origin: $origin, callback: $callback"
+//            )
+//
+//            geolocationPermissionsShowPrompt = GeolocationPermissionsShowPrompt(
+//                origin = origin,
+//                callback = callback
+//            )
+//
+//            listener?.onGeolocationPermissionsShowPrompt()
         }
 
         override fun onGeolocationPermissionsHidePrompt() {
