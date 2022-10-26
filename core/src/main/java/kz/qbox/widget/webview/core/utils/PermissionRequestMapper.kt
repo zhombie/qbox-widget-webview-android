@@ -3,7 +3,7 @@ package kz.qbox.widget.webview.core.utils
 import android.Manifest.permission.*
 import android.webkit.PermissionRequest
 
-object PermissionRequestMapper {
+internal object PermissionRequestMapper {
 
     fun fromAndroidToWebClient(permissions: Map<String, Boolean>): List<String> {
         val resources = mutableListOf<String>()

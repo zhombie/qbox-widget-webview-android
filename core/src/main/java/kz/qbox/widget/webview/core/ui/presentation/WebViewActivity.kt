@@ -2,7 +2,10 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.app.DownloadManager
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
@@ -16,7 +19,7 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
-import android.webkit.ValueCallback
+import android.webkit.WebView.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -52,6 +55,27 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     companion object {
         private val TAG = WebViewActivity::class.java.simpleName
+
+        private val URL_SCHEMES = arrayOf(
+            SCHEME_TEL,
+            SCHEME_MAILTO,
+            SCHEME_GEO,
+            "sms:",
+            "smsto:",
+            "mms:",
+            "mmsto:"
+        )
+
+        private val SHORTEN_LINKS = arrayOf(
+            "t.me",
+            "telegram.me",
+            "telegram.dog",
+            "vk.com",
+            "vk.cc",
+            "fb.me",
+            "facebook.com",
+            "fb.com"
+        )
 
         private val LOCATION_PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -146,10 +170,14 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     private val device: Device by lazy { Device(applicationContext) }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("call", Call::class.java)
-        } else {
-            intent.getSerializableExtra("call") as? Call
+        requireNotNull(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getSerializableExtra("call", Call::class.java)
+            } else {
+                intent.getSerializableExtra("call") as? Call
+            }
+        ) {
+            "Call information is not provided!"
         }
     }
 
@@ -159,20 +187,21 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         } else {
             intent.getSerializableExtra("user") as? User
         }
-        user?.copy(
-            device = User.Device(
-                os = device.os,
-                osVersion = device.osVersion,
-                appVersion =  device.versionName,
-                name = device.name,
-                mobileOperator = device.operator,
-                battery = User.Device.Battery(
-                    percentage = device.batteryPercent,
-                    isCharging = device.isPhoneCharging,
-                    temperature = device.batteryTemperature
-                )
+
+        val device = User.Device(
+            os = device.os,
+            osVersion = device.osVersion,
+            appVersion = device.versionName,
+            name = device.name,
+            mobileOperator = device.operator,
+            battery = User.Device.Battery(
+                percentage = device.batteryPercent,
+                isCharging = device.isPhoneCharging,
+                temperature = device.batteryTemperature
             )
         )
+
+        user?.copy(device = device) ?: User(device = device)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -357,24 +386,26 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView?.setupCookieManager()
         webView?.setMixedContentAllowed(true)
         webView?.setUrlListener { headers, uri ->
-            Logger.debug(TAG, "setUrlListener() -> $headers, $uri")
+            Logger.debug(
+                TAG,
+                "setUrlListener() -> $headers, $uri, ${uri.scheme}, ${uri.path}, ${uri.encodedPath}, ${uri.authority}"
+            )
 
-            if (uri.toString().contains("image")) {
+            return@setUrlListener if (uri.toString().contains("image")) {
                 ImagePreviewDialogFragment.show(
                     fragmentManager = supportFragmentManager,
                     uri = uri,
                     caption = uri.toString()
                 )
-                return@setUrlListener true
+                true
             } else if (uri.toString().contains("video")) {
                 VideoPreviewDialogFragment.show(
                     fragmentManager = supportFragmentManager,
                     uri = uri,
                     caption = uri.toString()
                 )
-            }
-
-            return@setUrlListener false
+                true
+            } else resolveUri(uri)
         }
 
         webView?.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
@@ -521,6 +552,40 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView?.setListener(this)
     }
 
+    private fun resolveUri(uri: Uri): Boolean {
+        URL_SCHEMES.forEach {
+            if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = uri
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    startActivity(intent)
+                    return true
+                } catch (e: ActivityNotFoundException) {
+                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+                }
+            }
+        }
+
+        SHORTEN_LINKS.forEach {
+            if (uri.authority?.equals(it) == true) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = uri
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    startActivity(intent)
+                    return true
+                } catch (e: ActivityNotFoundException) {
+                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+                }
+            }
+        }
+
+        return false
+    }
+
     private fun showRequestPermissionsAlertDialog() {
         AlertDialog.Builder(this)
             .setCancelable(false)
@@ -643,21 +708,23 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                         "Аудио",
                         "Документ"
                     )
-                ) { dialog, which ->
-                    dialog.dismiss()
-
+                ) { _, which ->
                     when (which) {
-                        0 ->
+                        0 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.IMAGE))
-                        1 ->
+                        }
+                        1 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.VIDEO))
-                        2 ->
+                        }
+                        2 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.AUDIO))
-                        3 ->
+                        }
+                        3 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
+                        }
                     }
                 }
-                .setOnDismissListener {
+                .setOnCancelListener {
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 .show()
