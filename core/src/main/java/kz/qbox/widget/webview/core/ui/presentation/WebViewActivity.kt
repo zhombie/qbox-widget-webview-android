@@ -2,7 +2,10 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.app.DownloadManager
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
@@ -51,10 +54,16 @@ import java.io.File
 class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     companion object {
+        private val TAG = WebViewActivity::class.java.simpleName
 
         private val URL_SCHEMES = arrayOf(
             SCHEME_TEL,
-            SCHEME_MAILTO, SCHEME_GEO, "sms:", "smsto:", "mms:", "mmsto:"
+            SCHEME_MAILTO,
+            SCHEME_GEO,
+            "sms:",
+            "smsto:",
+            "mms:",
+            "mmsto:"
         )
 
         private val SHORTEN_LINKS = arrayOf(
@@ -67,9 +76,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             "facebook.com",
             "fb.com"
         )
-
-
-        private val TAG = WebViewActivity::class.java.simpleName
 
         private val LOCATION_PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -366,35 +372,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         }
     }
 
-    private fun resolveUri(uri: Uri): Boolean {
-        URL_SCHEMES.forEach {
-            if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = uri
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                try {
-                    startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    Logger.debug(TAG, "resolveUri() -> Activity not found")
-                }
-                return true
-            }
-        }
-        SHORTEN_LINKS.forEach {
-            if (uri.authority?.equals(it) == true) {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, uri))
-                    return true
-                } catch (e: ActivityNotFoundException) {
-                    Logger.debug(TAG, "setUrlListener() -> $e")
-                }
-            }
-        }
-
-        return false
-    }
-
     private fun setupWebView() {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
             webView?.settings?.let {
@@ -414,22 +391,21 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 "setUrlListener() -> $headers, $uri, ${uri.scheme}, ${uri.path}, ${uri.encodedPath}, ${uri.authority}"
             )
 
-            if (uri.toString().contains("image")) {
+            return@setUrlListener if (uri.toString().contains("image")) {
                 ImagePreviewDialogFragment.show(
                     fragmentManager = supportFragmentManager,
                     uri = uri,
                     caption = uri.toString()
                 )
-                return@setUrlListener true
+                true
             } else if (uri.toString().contains("video")) {
                 VideoPreviewDialogFragment.show(
                     fragmentManager = supportFragmentManager,
                     uri = uri,
                     caption = uri.toString()
                 )
-            }
-            if (resolveUri(uri)) return@setUrlListener true
-            return@setUrlListener false
+                true
+            } else resolveUri(uri)
         }
 
         webView?.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
@@ -574,6 +550,40 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         webView?.addJavascriptInterface(JSBridge(call, user), "JSBridge")
 
         webView?.setListener(this)
+    }
+
+    private fun resolveUri(uri: Uri): Boolean {
+        URL_SCHEMES.forEach {
+            if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = uri
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    startActivity(intent)
+                    return true
+                } catch (e: ActivityNotFoundException) {
+                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+                }
+            }
+        }
+
+        SHORTEN_LINKS.forEach {
+            if (uri.authority?.equals(it) == true) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = uri
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    startActivity(intent)
+                    return true
+                } catch (e: ActivityNotFoundException) {
+                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+                }
+            }
+        }
+
+        return false
     }
 
     private fun showRequestPermissionsAlertDialog() {
