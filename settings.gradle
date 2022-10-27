@@ -11,3 +11,4 @@ rootProject.name = "QBox WebView Widget"
 
 include ':sample'
 include ':core'
+include ':lib'

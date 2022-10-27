@@ -80,6 +80,24 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             "fb.com"
         )
 
+        private val FILE_EXTENSIONS = arrayOf(
+            ".dot",
+            ".pptx",
+            ".rtf",
+            ".xlsx",
+            ".xls",
+            ".bmp",
+            ".csv",
+            ".html",
+            ".xml",
+            ".txt",
+            ".pdf",
+            ".doc",
+            ".zip",
+            ".rar",
+            ".docx",
+        )
+
         private val LOCATION_PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
@@ -539,7 +557,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                         AlertDialog.Builder(this@WebViewActivity)
                             .setCancelable(true)
                             .setTitle(R.string.alert_title_files_download_completed)
-                            .setMessage(getString(R.string.alert_message_files_download_completed, file.name))
+                            .setMessage(
+                                getString(
+                                    R.string.alert_message_files_download_completed,
+                                    file.name
+                                )
+                            )
                             .setNegativeButton(R.string.no) { dialog, _ ->
                                 dialog.dismiss()
                             }
@@ -578,19 +601,35 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         }
 
-        SHORTEN_LINKS.forEach {
-            if (uri.authority?.equals(it) == true) {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = uri
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                try {
-                    startActivity(intent)
-                    return true
-                } catch (e: ActivityNotFoundException) {
-                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
-                }
+//        SHORTEN_LINKS.forEach {
+//            if (uri.authority?.equals(it) == true) {
+//                val intent = Intent(Intent.ACTION_VIEW).apply {
+//                    data = uri
+//                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                }
+//                try {
+//                    startActivity(intent)
+//                    return true
+//                } catch (e: ActivityNotFoundException) {
+//                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+//                }
+//            }
+//        }
+
+        for (i in FILE_EXTENSIONS.indices){
+            if(uri.path?.endsWith(FILE_EXTENSIONS[i]) == true){
+                return false
             }
+        }
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = uri
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            startActivity(intent)
+            return true
+        } catch (e: ActivityNotFoundException) {
+            Logger.debug(TAG, "resolveUri() -> $uri, $e")
         }
 
         return false
@@ -666,7 +705,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         val contentUri = try {
             FileProvider.getUriForFile(
-                this,
+                applicationContext,
                 "${packageName}.provider",
                 file
             )
@@ -675,6 +714,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             Toast.makeText(this, R.string.error_files_open_unable, Toast.LENGTH_SHORT).show()
             return false
         }
+
+        grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
         intent.setDataAndType(contentUri, mimeType)
 
