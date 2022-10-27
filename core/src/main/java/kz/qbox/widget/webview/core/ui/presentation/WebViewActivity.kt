@@ -52,6 +52,7 @@ import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
 import java.io.File
+import java.util.Locale
 
 class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener {
 
@@ -220,10 +221,16 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             null
         } ?: return finish()
 
-        val language = intent.getStringExtra("language")
+        val language = intent.getStringExtra("language") ?: Locale.getDefault().language
 
         if (flavor == Flavor.FULL_SUITE) {
-            // Ignored
+            uri = uri.buildUpon()
+                .apply {
+                    if (!language.isNullOrBlank()) {
+                        appendQueryParameter("lang", language)
+                    }
+                }
+                .build()
         } else if (flavor == Flavor.VIDEO_CALL) {
             uri = uri.buildUpon()
                 .apply {
@@ -245,19 +252,19 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     webView?.setFileSelectionPromptResult(result.uri)
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
-                    Toast.makeText(this, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.error_basic, Toast.LENGTH_SHORT).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
                     Toast.makeText(
                         this,
-                        "Извините, но вы превысили лимит (${result.maxSize}) при выборе файла",
+                        getString(R.string.error_files_exceeds_limit, result.maxSize),
                         Toast.LENGTH_SHORT
                     ).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
-                    Toast.makeText(this, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.error_basic, Toast.LENGTH_SHORT).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
             }
@@ -290,12 +297,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
             else -> {
                 AlertDialog.Builder(this)
-                    .setTitle("Выход из виджета")
-                    .setMessage("Вы действительно хотите выйти из виджета?")
-                    .setNegativeButton("Отмена") { dialog, _ ->
+                    .setTitle(R.string.alert_title_exit)
+                    .setMessage(R.string.alert_message_exit)
+                    .setNegativeButton(R.string.cancel) { dialog, _ ->
                         dialog.dismiss()
                     }
-                    .setPositiveButton("Выйти") { dialog, _ ->
+                    .setPositiveButton(R.string.exit) { dialog, _ ->
                         dialog.dismiss()
                         super.onBackPressed()
                     }
@@ -313,12 +320,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         return when (item.itemId) {
             R.id.reload -> {
                 AlertDialog.Builder(this)
-                    .setTitle("Обновление виджета")
-                    .setMessage("Вы действительно хотите обновить виджет?")
-                    .setNegativeButton("Отмена") { dialog, _ ->
+                    .setTitle(R.string.alert_title_reload)
+                    .setMessage(R.string.alert_message_reload)
+                    .setNegativeButton(R.string.cancel) { dialog, _ ->
                         dialog.dismiss()
                     }
-                    .setPositiveButton("Обновить") { dialog, _ ->
+                    .setPositiveButton(R.string.reload) { dialog, _ ->
                         dialog.dismiss()
                         webView?.loadUrl("javascript:window.location.reload(true)")
                     }
@@ -453,7 +460,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             if (url in (pendingDownloads ?: mutableListOf()).map { it.second }) {
                 Toast.makeText(
                     this,
-                    "Извините, но загрузка файла еще не завершена",
+                    R.string.error_files_download_in_progress,
                     Toast.LENGTH_SHORT
                 ).show()
                 return@setDownloadListener
@@ -482,7 +489,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
 
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
-            val downloadMessage = "\"$filename\" загружается"
 
             val publicDirectory = Environment.DIRECTORY_DOWNLOADS
 
@@ -490,7 +496,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             request.allowScanningByMediaScanner()
             request.setAllowedOverMetered(true)
             request.setAllowedOverRoaming(true)
-            request.setDescription(downloadMessage)
+            request.setDescription(getString(R.string.label_files_download_in_progress, filename))
             request.setDestinationInExternalPublicDir(publicDirectory, filename)
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -532,12 +538,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
                         AlertDialog.Builder(this@WebViewActivity)
                             .setCancelable(true)
-                            .setTitle("Загрузка файла завершена")
-                            .setMessage("Хотите ли вы открыть файл \"${file.name}\"?")
-                            .setNegativeButton("Нет") { dialog, _ ->
+                            .setTitle(R.string.alert_title_files_download_completed)
+                            .setMessage(getString(R.string.alert_message_files_download_completed, file.name))
+                            .setNegativeButton(R.string.no) { dialog, _ ->
                                 dialog.dismiss()
                             }
-                            .setPositiveButton("Открыть") { dialog, _ ->
+                            .setPositiveButton(R.string.open) { dialog, _ ->
                                 dialog.dismiss()
                                 openFile(file, mimeType)
                             }
@@ -593,9 +599,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private fun showRequestPermissionsAlertDialog() {
         AlertDialog.Builder(this)
             .setCancelable(false)
-            .setTitle("Доступ к разрешениям")
-            .setMessage("Пожалуйста, предоставьте виджету разрешения для полноценной работы виджета")
-            .setPositiveButton("К настройкам") { dialog, _ ->
+            .setTitle(R.string.alert_title_permissions_require)
+            .setMessage(R.string.alert_message_permissions_require)
+            .setPositiveButton(R.string.go_to_settings) { dialog, _ ->
                 dialog.dismiss()
 
                 startActivity(
@@ -611,8 +617,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private fun showGPSDisabledErrorAlertDialog() {
         AlertDialog.Builder(this)
             .setCancelable(false)
-            .setTitle("Доступ к местоположению")
-            .setMessage("Пожалуйста, включите функцию \"Местоположение\" для совершения звонка")
+            .setTitle(R.string.alert_title_permissions_require_geolocation)
+            .setMessage(R.string.alert_message_permissions_require_geolocation)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                 dialog.dismiss()
 
@@ -638,7 +644,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 pendingDownloads?.set(found, id to url)
             }
         }
-        Toast.makeText(this, "Загрузка файла началась", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, R.string.info_files_download_started, Toast.LENGTH_LONG).show()
     }
 
     private fun saveFile(url: String, folder: File, filename: String) {
@@ -666,7 +672,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             )
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
-            Toast.makeText(this, "Не удалось открыть файл", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.error_files_open_unable, Toast.LENGTH_SHORT).show()
             return false
         }
 
@@ -677,7 +683,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             true
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()
-            Toast.makeText(this, "Не удалось открыть файл", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.error_files_open_unable, Toast.LENGTH_SHORT).show()
             false
         }
     }
@@ -686,9 +692,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
      * [JSBridge.Listener] implementation
      */
 
-    override fun close(): Boolean {
+    override fun onClose(): Boolean {
         onBackPressed()
         return true
+    }
+
+    override fun onChangeLanguage(language: String) {
     }
 
     /**
@@ -702,7 +711,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         if (progress < 95) {
             progressView?.show()
             progressView?.showTextView()
-            progressView?.setText("Загрузка виджета: $progress%")
+            progressView?.setText(getString(R.string.label_widget_loading, progress))
         } else {
             progressView?.hide()
         }
@@ -717,13 +726,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         ) {
             AlertDialog.Builder(this)
-                .setTitle("Выбор медиа-вложения")
+                .setTitle(R.string.alert_title_media_selection)
                 .setItems(
                     arrayOf(
-                        "Фото",
-                        "Видео",
-                        "Аудио",
-                        "Документ"
+                        getString(R.string.content_image),
+                        getString(R.string.content_video),
+                        getString(R.string.content_audio),
+                        getString(R.string.content_document)
                     )
                 ) { _, which ->
                     when (which) {

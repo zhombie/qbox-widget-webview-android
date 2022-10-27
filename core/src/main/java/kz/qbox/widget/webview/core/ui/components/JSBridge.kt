@@ -20,14 +20,20 @@ internal class JSBridge constructor(
 
     @JavascriptInterface
     fun onClose(): Boolean =
-        listener?.close() == true
+        listener?.onClose() == true
+
+    @JavascriptInterface
+    fun onChangeLanguage(language: String) {
+        listener?.onChangeLanguage(language)
+    }
 
     fun dispose() {
         listener = null
     }
 
     interface Listener {
-        fun close(): Boolean
+        fun onClose(): Boolean
+        fun onChangeLanguage(language: String)
     }
 
 }
