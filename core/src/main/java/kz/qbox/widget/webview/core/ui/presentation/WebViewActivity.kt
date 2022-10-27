@@ -37,6 +37,7 @@ import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.device.Device
 import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
@@ -47,6 +48,7 @@ import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkIn
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
+import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
 import java.io.File
@@ -89,12 +91,14 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
         fun newIntent(
             context: Context,
+            flavor: Flavor,
             url: String,
             language: String?,
             call: Call?,
             user: User?
         ): Intent {
             return Intent(context, WebViewActivity::class.java)
+                .putExtra("flavor", flavor)
                 .putExtra("url", url)
                 .putExtra("language", language)
                 .putExtra("call", call)
@@ -169,39 +173,31 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
     private val device: Device by lazy { Device(applicationContext) }
 
+    private val flavor by lazy(LazyThreadSafetyMode.NONE) {
+        IntentCompat.getEnum<Flavor>(intent, "flavor")
+    }
+
     private val call by lazy(LazyThreadSafetyMode.NONE) {
-        requireNotNull(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getSerializableExtra("call", Call::class.java)
-            } else {
-                intent.getSerializableExtra("call") as? Call
-            }
-        ) {
+        requireNotNull(IntentCompat.getSerializable<Call>(intent, "call")) {
             "Call information is not provided!"
         }
     }
 
     private val user by lazy(LazyThreadSafetyMode.NONE) {
-        val user = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("user", User::class.java)
-        } else {
-            intent.getSerializableExtra("user") as? User
-        }
-
-        val device = User.Device(
-            os = device.os,
-            osVersion = device.osVersion,
-            appVersion = device.versionName,
-            name = device.name,
-            mobileOperator = device.operator,
-            battery = User.Device.Battery(
-                percentage = device.batteryPercent,
-                isCharging = device.isPhoneCharging,
-                temperature = device.batteryTemperature
+        (IntentCompat.getSerializable(intent, "user") ?: User()).copy(
+            device = User.Device(
+                os = device.os,
+                osVersion = device.osVersion,
+                appVersion = device.versionName,
+                name = device.name,
+                mobileOperator = device.operator,
+                battery = User.Device.Battery(
+                    percentage = device.batteryPercent,
+                    isCharging = device.isPhoneCharging,
+                    temperature = device.batteryTemperature
+                )
             )
         )
-
-        user?.copy(device = device) ?: User(device = device)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -222,17 +218,19 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
 
         val language = intent.getStringExtra("language")
 
-        uri = uri.buildUpon()
-            .apply {
-                if (!language.isNullOrBlank()) {
-                    appendQueryParameter("lang", language)
-                }
+        if (flavor == Flavor.FULL_SUITE) {
+            // Ignored
+        } else if (flavor == Flavor.VIDEO_CALL) {
+            uri = uri.buildUpon()
+                .apply {
+                    if (!language.isNullOrBlank()) {
+                        appendQueryParameter("lang", language)
+                    }
 
-                call?.let {
-                    appendQueryParameter("topic", it.topic)
+                    appendQueryParameter("topic", call.topic)
                 }
-            }
-            .build()
+                .build()
+        }
 
         setupActionBar()
         setupWebView()

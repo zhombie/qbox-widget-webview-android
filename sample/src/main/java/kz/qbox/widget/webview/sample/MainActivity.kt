@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Widget.Builder(this)
+        Widget.Builder.FullSuite(this)
             .setLoggingEnabled(true)
             .setUrl(BuildConfig.WIDGET_URL)
             .setLanguage(Language.RUSSIAN)
