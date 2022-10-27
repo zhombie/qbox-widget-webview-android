@@ -2,6 +2,7 @@ package kz.qbox.widget.webview.sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.Language
@@ -13,6 +14,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        launchWidget()
+
+        findViewById<MaterialButton>(R.id.button).setOnClickListener {
+            launchWidget()
+        }
+    }
+
+    private fun launchWidget() {
         Widget.Builder.FullSuite(this)
             .setLoggingEnabled(true)
             .setUrl(BuildConfig.WIDGET_URL)

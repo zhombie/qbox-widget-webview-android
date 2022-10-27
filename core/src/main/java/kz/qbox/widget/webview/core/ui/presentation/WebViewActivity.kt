@@ -53,7 +53,7 @@ import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
 import java.io.File
 
-class WebViewActivity : AppCompatActivity(), WebView.Listener {
+class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener {
 
     companion object {
         private val TAG = WebViewActivity::class.java.simpleName
@@ -200,6 +200,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         )
     }
 
+    private val jsBridge by lazy {
+        JSBridge(call, user, this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
@@ -285,7 +289,17 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
                 }
             }
             else -> {
-                super.onBackPressed()
+                AlertDialog.Builder(this)
+                    .setTitle("Выход из виджета")
+                    .setMessage("Вы действительно хотите выйти из виджета?")
+                    .setNegativeButton("Отмена") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton("Выйти") { dialog, _ ->
+                        dialog.dismiss()
+                        super.onBackPressed()
+                    }
+                    .show()
             }
         }
     }
@@ -329,6 +343,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
     }
 
     override fun onDestroy() {
+        jsBridge.dispose()
+
         interactor?.dispose()
         interactor = null
 
@@ -356,17 +372,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
 
         setupActionBar(toolbar, isBackButtonEnabled = true) {
-            AlertDialog.Builder(this)
-                .setTitle("Выход из виджета")
-                .setMessage("Вы действительно хотите выйти из виджета?")
-                .setNegativeButton("Отмена") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Выйти") { dialog, _ ->
-                    dialog.dismiss()
-                    onBackPressed()
-                }
-                .show()
+            onBackPressed()
         }
     }
 
@@ -545,7 +551,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             )
         }
 
-        webView?.addJavascriptInterface(JSBridge(call, user), "JSBridge")
+        webView?.addJavascriptInterface(jsBridge, "JSBridge")
 
         webView?.setListener(this)
     }
@@ -675,6 +681,19 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener {
             false
         }
     }
+
+    /**
+     * [JSBridge.Listener] implementation
+     */
+
+    override fun close(): Boolean {
+        onBackPressed()
+        return true
+    }
+
+    /**
+     * [WebView.Listener] implementation
+     */
 
     override fun onReceivedSSLError(handler: SslErrorHandler?, error: SslError?) {
     }
