@@ -616,11 +616,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 //            }
 //        }
 
-        for (i in FILE_EXTENSIONS.indices){
-            if(uri.path?.endsWith(FILE_EXTENSIONS[i]) == true){
-                return false
-            }
+        if (FILE_EXTENSIONS.any { uri.path?.endsWith(it) == true }) {
+            return false
         }
+
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = uri
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
