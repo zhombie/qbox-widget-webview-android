@@ -69,16 +69,16 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             "mmsto:"
         )
 
-        private val SHORTEN_LINKS = arrayOf(
-            "t.me",
-            "telegram.me",
-            "telegram.dog",
-            "vk.com",
-            "vk.cc",
-            "fb.me",
-            "facebook.com",
-            "fb.com"
-        )
+//        private val SHORTEN_LINKS = arrayOf(
+//            "t.me",
+//            "telegram.me",
+//            "telegram.dog",
+//            "vk.com",
+//            "vk.cc",
+//            "fb.me",
+//            "facebook.com",
+//            "fb.com"
+//        )
 
         private val FILE_EXTENSIONS = arrayOf(
             ".dot",
@@ -616,22 +616,20 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 //            }
 //        }
 
-        if (FILE_EXTENSIONS.any { uri.path?.endsWith(it) == true }) {
-            return false
-        }
+        if (FILE_EXTENSIONS.any { uri.path?.endsWith(it) == true }) return false
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = uri
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        try {
+
+        return try {
             startActivity(intent)
-            return true
+            true
         } catch (e: ActivityNotFoundException) {
             Logger.debug(TAG, "resolveUri() -> $uri, $e")
+            false
         }
-
-        return false
     }
 
     private fun showRequestPermissionsAlertDialog() {
