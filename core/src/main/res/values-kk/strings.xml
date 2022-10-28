@@ -27,7 +27,7 @@
     <string name="alert.title.media.selection">Медиа таңдау</string>
     <string name="alert.message.exit">Виджеттен расымен де шыққыңыз келе ме?</string>
     <string name="alert.message.reload">Виджетті қайта жүктеңіз келе ме?</string>
-    <string name="alert.message.files.download.completed">"{%s}" файлын ашқыңыз келе ме?</string>
+    <string name="alert.message.files.download.completed">"%s" файлын ашқыңыз келе ме?</string>
     <string name="alert.message.permissions.require">Виджеттің қатесіз жұмыс істеуі үшін сұралған мүмкіндіктерге рұқсат беріңіз</string>
     <string name="alert.message.permissions.require.geolocation">Қоңырау шалу үшін «Геолокация» мүмкіндігіне рұқсат беріңіз</string>
 

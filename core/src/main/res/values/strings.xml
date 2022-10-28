@@ -27,7 +27,7 @@
     <string name="alert.title.media.selection">Select media</string>
     <string name="alert.message.exit">Are you sure you want to exit the widget?</string>
     <string name="alert.message.reload">Are you sure you want to reload the widget?</string>
-    <string name="alert.message.files.download.completed">Do you want to open file "{%s}"?</string>
+    <string name="alert.message.files.download.completed">Do you want to open file "%s"?</string>
     <string name="alert.message.permissions.require">Please, grant the widget with permissions to work properly</string>
     <string name="alert.message.permissions.require.geolocation">Please, turn on the "Location" feature to make a call</string>
 
