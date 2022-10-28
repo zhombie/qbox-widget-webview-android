@@ -69,15 +69,33 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             "mmsto:"
         )
 
-        private val SHORTEN_LINKS = arrayOf(
-            "t.me",
-            "telegram.me",
-            "telegram.dog",
-            "vk.com",
-            "vk.cc",
-            "fb.me",
-            "facebook.com",
-            "fb.com"
+//        private val SHORTEN_LINKS = arrayOf(
+//            "t.me",
+//            "telegram.me",
+//            "telegram.dog",
+//            "vk.com",
+//            "vk.cc",
+//            "fb.me",
+//            "facebook.com",
+//            "fb.com"
+//        )
+
+        private val FILE_EXTENSIONS = arrayOf(
+            ".dot",
+            ".pptx",
+            ".rtf",
+            ".xlsx",
+            ".xls",
+            ".bmp",
+            ".csv",
+            ".html",
+            ".xml",
+            ".txt",
+            ".pdf",
+            ".doc",
+            ".zip",
+            ".rar",
+            ".docx",
         )
 
         private val LOCATION_PERMISSIONS = arrayOf(
@@ -539,7 +557,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                         AlertDialog.Builder(this@WebViewActivity)
                             .setCancelable(true)
                             .setTitle(R.string.alert_title_files_download_completed)
-                            .setMessage(getString(R.string.alert_message_files_download_completed, file.name))
+                            .setMessage(
+                                getString(
+                                    R.string.alert_message_files_download_completed,
+                                    file.name
+                                )
+                            )
                             .setNegativeButton(R.string.no) { dialog, _ ->
                                 dialog.dismiss()
                             }
@@ -578,22 +601,35 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         }
 
-        SHORTEN_LINKS.forEach {
-            if (uri.authority?.equals(it) == true) {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = uri
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                try {
-                    startActivity(intent)
-                    return true
-                } catch (e: ActivityNotFoundException) {
-                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
-                }
-            }
+//        SHORTEN_LINKS.forEach {
+//            if (uri.authority?.equals(it) == true) {
+//                val intent = Intent(Intent.ACTION_VIEW).apply {
+//                    data = uri
+//                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                }
+//                try {
+//                    startActivity(intent)
+//                    return true
+//                } catch (e: ActivityNotFoundException) {
+//                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+//                }
+//            }
+//        }
+
+        if (FILE_EXTENSIONS.any { uri.path?.endsWith(it) == true }) return false
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = uri
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
-        return false
+        return try {
+            startActivity(intent)
+            true
+        } catch (e: ActivityNotFoundException) {
+            Logger.debug(TAG, "resolveUri() -> $uri, $e")
+            false
+        }
     }
 
     private fun showRequestPermissionsAlertDialog() {
@@ -666,7 +702,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         val contentUri = try {
             FileProvider.getUriForFile(
-                this,
+                applicationContext,
                 "${packageName}.provider",
                 file
             )
@@ -675,6 +711,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             Toast.makeText(this, R.string.error_files_open_unable, Toast.LENGTH_SHORT).show()
             return false
         }
+
+        grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
         intent.setDataAndType(contentUri, mimeType)
 

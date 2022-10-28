@@ -27,7 +27,7 @@
     <string name="alert.title.media.selection">Выбор медиа-вложения</string>
     <string name="alert.message.exit">Вы действительно хотите выйти из виджета?</string>
     <string name="alert.message.reload">Вы действительно хотите обновить виджет?</string>
-    <string name="alert.message.files.download.completed">Хотите ли вы открыть файл "{%s}"?</string>
+    <string name="alert.message.files.download.completed">Хотите ли вы открыть файл "%s"?</string>
     <string name="alert.message.permissions.require">Пожалуйста, предоставьте виджету разрешения для полноценной работы виджета</string>
     <string name="alert.message.permissions.require.geolocation">Пожалуйста, включите функцию "Местоположение" для совершения звонка</string>
 
