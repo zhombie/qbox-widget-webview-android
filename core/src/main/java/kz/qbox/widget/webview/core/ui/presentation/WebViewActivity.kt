@@ -197,9 +197,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
-        requireNotNull(IntentCompat.getSerializable<Call>(intent, "call")) {
-            "Call information is not provided!"
-        }
+        IntentCompat.getSerializable<Call>(intent, "call")
     }
 
     private val user by lazy(LazyThreadSafetyMode.NONE) {
@@ -241,24 +239,32 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         val language = intent.getStringExtra("language") ?: Locale.getDefault().language
 
-        if (flavor == Flavor.FULL_SUITE) {
-            uri = uri.buildUpon()
-                .apply {
-                    if (!language.isNullOrBlank()) {
-                        appendQueryParameter("lang", language)
+        when (flavor) {
+            Flavor.FULL_SUITE -> {
+                uri = uri.buildUpon()
+                    .apply {
+                        if (!language.isNullOrBlank()) {
+                            appendQueryParameter("lang", language)
+                        }
                     }
-                }
-                .build()
-        } else if (flavor == Flavor.VIDEO_CALL) {
-            uri = uri.buildUpon()
-                .apply {
-                    if (!language.isNullOrBlank()) {
-                        appendQueryParameter("lang", language)
-                    }
+                    .build()
+            }
+            Flavor.VIDEO_CALL -> {
+                val call = call ?: throw NullPointerException("Call information is not provided!")
 
-                    appendQueryParameter("topic", call.topic)
-                }
-                .build()
+                uri = uri.buildUpon()
+                    .apply {
+                        if (!language.isNullOrBlank()) {
+                            appendQueryParameter("lang", language)
+                        }
+
+                        appendQueryParameter("topic", call.topic)
+                    }
+                    .build()
+            }
+            else -> {
+                throw IllegalStateException()
+            }
         }
 
         setupActionBar()

@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchWidget() {
-        Widget.Builder.FullSuite(this)
+        Widget.Builder.VideoCall(this)
             .setLoggingEnabled(true)
             .setUrl(BuildConfig.WIDGET_URL)
             .setLanguage(Language.RUSSIAN)
