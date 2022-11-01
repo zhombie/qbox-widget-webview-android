@@ -69,16 +69,16 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             "mmsto:"
         )
 
-        private val SHORTEN_LINKS = arrayOf(
-            "t.me",
-            "telegram.me",
-            "telegram.dog",
-            "vk.com",
-            "vk.cc",
-            "fb.me",
-            "facebook.com",
-            "fb.com"
-        )
+//        private val SHORTEN_LINKS = arrayOf(
+//            "t.me",
+//            "telegram.me",
+//            "telegram.dog",
+//            "vk.com",
+//            "vk.cc",
+//            "fb.me",
+//            "facebook.com",
+//            "fb.com"
+//        )
 
         private val FILE_EXTENSIONS = arrayOf(
             ".dot",
@@ -197,9 +197,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
-        requireNotNull(IntentCompat.getSerializable<Call>(intent, "call")) {
-            "Call information is not provided!"
-        }
+        IntentCompat.getSerializable<Call>(intent, "call")
     }
 
     private val user by lazy(LazyThreadSafetyMode.NONE) {
@@ -241,24 +239,32 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         val language = intent.getStringExtra("language") ?: Locale.getDefault().language
 
-        if (flavor == Flavor.FULL_SUITE) {
-            uri = uri.buildUpon()
-                .apply {
-                    if (!language.isNullOrBlank()) {
-                        appendQueryParameter("lang", language)
+        when (flavor) {
+            Flavor.FULL_SUITE -> {
+                uri = uri.buildUpon()
+                    .apply {
+                        if (!language.isNullOrBlank()) {
+                            appendQueryParameter("lang", language)
+                        }
                     }
-                }
-                .build()
-        } else if (flavor == Flavor.VIDEO_CALL) {
-            uri = uri.buildUpon()
-                .apply {
-                    if (!language.isNullOrBlank()) {
-                        appendQueryParameter("lang", language)
-                    }
+                    .build()
+            }
+            Flavor.VIDEO_CALL -> {
+                val call = call ?: throw NullPointerException("Call information is not provided!")
 
-                    appendQueryParameter("topic", call.topic)
-                }
-                .build()
+                uri = uri.buildUpon()
+                    .apply {
+                        if (!language.isNullOrBlank()) {
+                            appendQueryParameter("lang", language)
+                        }
+
+                        appendQueryParameter("topic", call.topic)
+                    }
+                    .build()
+            }
+            else -> {
+                throw IllegalStateException()
+            }
         }
 
         setupActionBar()
@@ -616,23 +622,20 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 //            }
 //        }
 
-        for (i in FILE_EXTENSIONS.indices){
-            if(uri.path?.endsWith(FILE_EXTENSIONS[i]) == true){
-                return false
-            }
-        }
+        if (FILE_EXTENSIONS.any { uri.path?.endsWith(it) == true }) return false
+
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = uri
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        try {
+
+        return try {
             startActivity(intent)
-            return true
+            true
         } catch (e: ActivityNotFoundException) {
             Logger.debug(TAG, "resolveUri() -> $uri, $e")
+            false
         }
-
-        return false
     }
 
     private fun showRequestPermissionsAlertDialog() {
