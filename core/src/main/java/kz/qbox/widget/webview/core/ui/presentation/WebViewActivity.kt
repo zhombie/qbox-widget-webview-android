@@ -45,6 +45,7 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
+import kz.qbox.widget.webview.core.ui.components.DownloadingProgressView
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
@@ -129,6 +130,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var toolbar: MaterialToolbar? = null
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
+    private var downloadingProgressBar: DownloadingProgressView? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
@@ -229,6 +231,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         toolbar = findViewById(R.id.toolbar)
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
+
+        downloadingProgressBar = DownloadingProgressView(this)
 
         var uri = try {
             Uri.parse(intent.getStringExtra("url"))
@@ -530,6 +534,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             request.setTitle(filename)
 
             downloadFile(request, url)
+            downloadingProgressBar?.showProgress(filename)
 
             saveFile(
                 url,
@@ -554,6 +559,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 )
 
                 pendingDownloads?.removeAll { it.first == downloadId }
+
+                downloadingProgressBar?.dismissProgressBar()
 
                 val path = uri?.path
                 if (!path.isNullOrBlank() && !mimeType.isNullOrBlank()) {
