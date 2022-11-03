@@ -48,6 +48,7 @@ import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkIn
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
+import kz.qbox.widget.webview.core.ui.dialogs.showProgress
 import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
@@ -129,6 +130,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var toolbar: MaterialToolbar? = null
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
+
+    private var progressDialog: AlertDialog? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
@@ -537,6 +540,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
             downloadFile(request, url)
 
+            progressDialog?.dismiss()
+            progressDialog = null
+            progressDialog = showProgress(filename)
+
             saveFile(
                 url,
                 getExternalFilesDir(publicDirectory) ?: File(Environment.DIRECTORY_DOWNLOADS),
@@ -560,6 +567,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 )
 
                 pendingDownloads?.removeAll { it.first == downloadId }
+
+                progressDialog?.dismiss()
+                progressDialog = null
 
                 val path = uri?.path
                 if (!path.isNullOrBlank() && !mimeType.isNullOrBlank()) {

@@ -31,7 +31,7 @@
     <string name="alert.message.permissions.require">Please, grant the widget with permissions to work properly</string>
     <string name="alert.message.permissions.require.geolocation">Please, turn on the "Location" feature to make a call</string>
 
-    <string name="label.files.download.in_progress">"%s" downloading</string>
+    <string name="label.files.download.in_progress">"%s" downloading…</string>
     <string name="label.widget.loading">Widget loading: %d%%</string>
 
     <string name="info.files.download.started">File download started</string>
