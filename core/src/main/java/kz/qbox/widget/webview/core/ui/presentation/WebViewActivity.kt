@@ -45,10 +45,10 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
-import kz.qbox.widget.webview.core.ui.components.DownloadingProgressView
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
+import kz.qbox.widget.webview.core.ui.dialogs.showProgress
 import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
@@ -130,7 +130,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var toolbar: MaterialToolbar? = null
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
-    private var downloadingProgressBar: DownloadingProgressView? = null
+
+    private var progressDialog: AlertDialog? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
@@ -194,6 +195,19 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private val device: Device by lazy { Device(applicationContext) }
 
+    private val uri by lazy(LazyThreadSafetyMode.NONE) {
+        try {
+            Uri.parse(intent.getStringExtra("url"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw IllegalStateException()
+        }
+    }
+
+    private val language by lazy(LazyThreadSafetyMode.NONE) {
+        intent.getStringExtra("language") ?: Locale.getDefault().language
+    }
+
     private val flavor by lazy(LazyThreadSafetyMode.NONE) {
         IntentCompat.getEnum<Flavor>(intent, "flavor")
     }
@@ -232,16 +246,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
 
-        downloadingProgressBar = DownloadingProgressView(this)
-
-        var uri = try {
-            Uri.parse(intent.getStringExtra("url"))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } ?: return finish()
-
-        val language = intent.getStringExtra("language") ?: Locale.getDefault().language
+        var uri = uri
 
         when (flavor) {
             Flavor.FULL_SUITE -> {
@@ -534,7 +539,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             request.setTitle(filename)
 
             downloadFile(request, url)
-            downloadingProgressBar?.showProgress(filename)
+
+            progressDialog?.dismiss()
+            progressDialog = null
+            progressDialog = showProgress(filename)
 
             saveFile(
                 url,
@@ -560,7 +568,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
                 pendingDownloads?.removeAll { it.first == downloadId }
 
-                downloadingProgressBar?.dismissProgressBar()
+                progressDialog?.dismiss()
+                progressDialog = null
 
                 val path = uri?.path
                 if (!path.isNullOrBlank() && !mimeType.isNullOrBlank()) {
@@ -599,6 +608,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private fun resolveUri(uri: Uri): Boolean {
+        Logger.debug(TAG, "resolveUri() -> ${this.uri}, $uri")
+        if (this.uri == uri) return false
+        if (this.uri.toString() in uri.toString()) return false
+
         URL_SCHEMES.forEach {
             if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {
                 val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -609,7 +622,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     startActivity(intent)
                     return true
                 } catch (e: ActivityNotFoundException) {
-                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+                    Logger.error(TAG, "resolveUri() -> $uri, $e")
                 }
             }
         }
@@ -640,7 +653,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             startActivity(intent)
             true
         } catch (e: ActivityNotFoundException) {
-            Logger.debug(TAG, "resolveUri() -> $uri, $e")
+            Logger.error(TAG, "resolveUri() -> $uri, $e")
             false
         }
     }

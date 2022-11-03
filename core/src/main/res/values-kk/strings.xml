@@ -31,7 +31,7 @@
     <string name="alert.message.permissions.require">Виджеттің қатесіз жұмыс істеуі үшін сұралған мүмкіндіктерге рұқсат беріңіз</string>
     <string name="alert.message.permissions.require.geolocation">Қоңырау шалу үшін «Геолокация» мүмкіндігіне рұқсат беріңіз</string>
 
-    <string name="label.files.download.in_progress">"%s" жүктелуде</string>
+    <string name="label.files.download.in_progress">"%s" жүктелуде…</string>
     <string name="label.widget.loading">Виджет жүктелуде: %d%%</string>
 
     <string name="info.files.download.started">Файлды жүктеу басталды</string>

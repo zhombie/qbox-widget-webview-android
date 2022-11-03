@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.7.20'
 
     repositories {
         google()
@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:7.3.1'
 
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -56,12 +56,12 @@ subprojects { Project project ->
     apply plugin: 'maven-publish'
 
     android {
-        compileSdkVersion 33
+        compileSdk 33
         buildToolsVersion '30.0.3'
 
         defaultConfig {
-            minSdkVersion 23
-            targetSdkVersion 33
+            minSdk 21
+            targetSdk 33
 
             versionCode project.ext.version_code
             versionName project.version
@@ -107,7 +107,7 @@ subprojects { Project project ->
 
                     pom {
                         name = project.name
-                        url = 'https://github.com/zhombie/QBox-WebView-Widget-Android'
+                        url = 'https://github.com/zhombie/qbox-webview-widget-android'
 
                         developers {
                             developer {
