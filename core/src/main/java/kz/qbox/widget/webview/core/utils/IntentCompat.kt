@@ -12,6 +12,7 @@ internal object IntentCompat {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra(name, T::class.java)
         } else {
+            @Suppress("DEPRECATION")
             intent.getSerializableExtra(name) as? T
         }
     }
@@ -23,6 +24,7 @@ internal object IntentCompat {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra(name, T::class.java)
         } else {
+            @Suppress("DEPRECATION")
             intent.getSerializableExtra(name) as? T
         }
     }

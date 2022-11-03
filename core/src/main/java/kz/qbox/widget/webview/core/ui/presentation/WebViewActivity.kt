@@ -192,6 +192,19 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private val device: Device by lazy { Device(applicationContext) }
 
+    private val uri by lazy(LazyThreadSafetyMode.NONE) {
+        try {
+            Uri.parse(intent.getStringExtra("url"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw IllegalStateException()
+        }
+    }
+
+    private val language by lazy(LazyThreadSafetyMode.NONE) {
+        intent.getStringExtra("language") ?: Locale.getDefault().language
+    }
+
     private val flavor by lazy(LazyThreadSafetyMode.NONE) {
         IntentCompat.getEnum<Flavor>(intent, "flavor")
     }
@@ -230,14 +243,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
 
-        var uri = try {
-            Uri.parse(intent.getStringExtra("url"))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } ?: return finish()
-
-        val language = intent.getStringExtra("language") ?: Locale.getDefault().language
+        var uri = uri
 
         when (flavor) {
             Flavor.FULL_SUITE -> {
@@ -592,6 +598,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private fun resolveUri(uri: Uri): Boolean {
+        Logger.debug(TAG, "resolveUri() -> ${this.uri}, $uri")
+        if (this.uri == uri) return false
+        if (this.uri.toString() in uri.toString()) return false
+
         URL_SCHEMES.forEach {
             if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {
                 val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -602,7 +612,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     startActivity(intent)
                     return true
                 } catch (e: ActivityNotFoundException) {
-                    Logger.debug(TAG, "resolveUri() -> $uri, $e")
+                    Logger.error(TAG, "resolveUri() -> $uri, $e")
                 }
             }
         }
@@ -633,7 +643,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             startActivity(intent)
             true
         } catch (e: ActivityNotFoundException) {
-            Logger.debug(TAG, "resolveUri() -> $uri, $e")
+            Logger.error(TAG, "resolveUri() -> $uri, $e")
             false
         }
     }
