@@ -39,7 +39,7 @@ import kz.qbox.widget.webview.core.device.Device
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.User
-import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
+//import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
@@ -312,8 +312,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         val imagePreviewDialogFragments =
             fragments.filterIsInstance<ImagePreviewDialogFragment>()
-        val videoPreviewDialogFragments =
-            fragments.filterIsInstance<VideoPreviewDialogFragment>()
+//        val videoPreviewDialogFragments =
+//            fragments.filterIsInstance<VideoPreviewDialogFragment>()
 
         when {
             imagePreviewDialogFragments.isNotEmpty() -> {
@@ -322,12 +322,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     supportFragmentManager.fragments.remove(it)
                 }
             }
-            videoPreviewDialogFragments.isNotEmpty() -> {
-                videoPreviewDialogFragments.forEach {
-                    it.dismiss()
-                    supportFragmentManager.fragments.remove(it)
-                }
-            }
+//            videoPreviewDialogFragments.isNotEmpty() -> {
+//                videoPreviewDialogFragments.forEach {
+//                    it.dismiss()
+//                    supportFragmentManager.fragments.remove(it)
+//                }
+//            }
             else -> {
                 AlertDialog.Builder(this)
                     .setTitle(R.string.alert_title_exit)
@@ -442,14 +442,16 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     caption = uri.toString()
                 )
                 true
-            } else if (uri.toString().contains("video")) {
-                VideoPreviewDialogFragment.show(
-                    fragmentManager = supportFragmentManager,
-                    uri = uri,
-                    caption = uri.toString()
-                )
-                true
-            } else resolveUri(uri)
+            }
+//            else if (uri.toString().contains("video")) {
+//                VideoPreviewDialogFragment.show(
+//                    fragmentManager = supportFragmentManager,
+//                    uri = uri,
+//                    caption = uri.toString()
+//                )
+//                true
+//            }
+            else resolveUri(uri)
         }
 
         webView?.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
@@ -473,19 +475,20 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     caption = null
                 )
                 return@setDownloadListener
-            } else if (mimetype?.startsWith("video") == true &&
-                (url.endsWith("mp4") ||
-                        url.endsWith("avi") ||
-                        url.endsWith("mov") ||
-                        url.endsWith("3gp"))
-            ) {
-                VideoPreviewDialogFragment.show(
-                    fragmentManager = supportFragmentManager,
-                    uri = Uri.parse(url),
-                    caption = null
-                )
-                return@setDownloadListener
             }
+//            else if (mimetype?.startsWith("video") == true &&
+//                (url.endsWith("mp4") ||
+//                        url.endsWith("avi") ||
+//                        url.endsWith("mov") ||
+//                        url.endsWith("3gp"))
+//            ) {
+//                VideoPreviewDialogFragment.show(
+//                    fragmentManager = supportFragmentManager,
+//                    uri = Uri.parse(url),
+//                    caption = null
+//                )
+//                return@setDownloadListener
+//            }
 
             if (pendingDownloads == null) {
                 pendingDownloads = mutableListOf()
