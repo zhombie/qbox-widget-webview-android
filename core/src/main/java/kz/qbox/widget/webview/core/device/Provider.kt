@@ -23,7 +23,7 @@ import kz.qbox.widget.webview.core.system.wifiManager
 import java.io.File
 import java.util.*
 
-internal class Device constructor(private val context: Context) {
+internal class Provider constructor(private val context: Context) {
 
     companion object {
         private const val PLATFORM = "android"

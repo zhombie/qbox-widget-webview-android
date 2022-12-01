@@ -2,10 +2,7 @@ package kz.qbox.widget.webview.core
 
 import android.content.Context
 import android.content.Intent
-import kz.qbox.widget.webview.core.models.Call
-import kz.qbox.widget.webview.core.models.Flavor
-import kz.qbox.widget.webview.core.models.Language
-import kz.qbox.widget.webview.core.models.User
+import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
 object Widget {
@@ -25,6 +22,7 @@ object Widget {
         private var language: Language? = null
         private var call: Call? = null
         private var user: User? = null
+        private var dynamicAttrs: DynamicAttrs? = null
 
         fun getLoggingEnabled(): Boolean = isLoggingEnabled ?: false
 
@@ -54,6 +52,13 @@ object Widget {
             return this
         }
 
+        fun getDynamicAttrs(): DynamicAttrs? = dynamicAttrs
+
+        fun setDynamicAttrs(dynamicAttrs: DynamicAttrs): Builder {
+            this.dynamicAttrs = dynamicAttrs
+            return this
+        }
+
         fun getUser(): User? = user
 
         fun setUser(user: User): Builder {
@@ -76,7 +81,8 @@ object Widget {
                 url = requireNotNull(url) { "Declare url, without it widget won't work!" },
                 language = (language ?: Language.KAZAKH).code,
                 call = call,
-                user = user
+                user = user,
+                dynamicAttrs = dynamicAttrs
             )
         }
 

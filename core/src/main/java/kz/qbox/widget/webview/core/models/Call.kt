@@ -7,7 +7,8 @@ data class Call constructor(
     val domain: String? = null,
     val type: Type,
     val topic: String = "general",
-    val extra: Map<String, Any>? = null
+    val location: Location? = null,
+    val dynamicAttrs: DynamicAttrs? = null
 ) : Base() {
 
     enum class Type constructor(val value: String) {
@@ -24,10 +25,10 @@ data class Call constructor(
             jsonObject.put("domain", domain)
             jsonObject.put("type", type.value)
             jsonObject.put("topic", topic)
+            jsonObject.put("location", location?.toJSONObject())
 
-            extra?.forEach {
-                val (k, v) = it
-                jsonObject.put(k, v)
+            dynamicAttrs?.value?.forEach {
+                jsonObject.put(it.key, it.value)
             }
         } catch (e: JSONException) {
             e.printStackTrace()

@@ -35,10 +35,8 @@ import com.google.android.material.appbar.MaterialToolbar
 import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
-import kz.qbox.widget.webview.core.device.Device
-import kz.qbox.widget.webview.core.models.Call
-import kz.qbox.widget.webview.core.models.Flavor
-import kz.qbox.widget.webview.core.models.User
+import kz.qbox.widget.webview.core.device.Provider
+import kz.qbox.widget.webview.core.models.*
 //import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
@@ -115,7 +113,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             url: String,
             language: String?,
             call: Call?,
-            user: User?
+            user: User?,
+            dynamicAttrs: DynamicAttrs?
         ): Intent {
             return Intent(context, WebViewActivity::class.java)
                 .putExtra("flavor", flavor)
@@ -123,6 +122,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 .putExtra("language", language)
                 .putExtra("call", call)
                 .putExtra("user", user)
+                .putExtra("dynamic_attrs", dynamicAttrs)
         }
     }
 
@@ -193,7 +193,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         }
 
-    private val device: Device by lazy { Device(applicationContext) }
+    private val provider: Provider by lazy { Provider(applicationContext) }
 
     private val uri by lazy(LazyThreadSafetyMode.NONE) {
         try {
@@ -217,24 +217,32 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private val user by lazy(LazyThreadSafetyMode.NONE) {
-        (IntentCompat.getSerializable(intent, "user") ?: User()).copy(
-            device = User.Device(
-                os = device.os,
-                osVersion = device.osVersion,
-                appVersion = device.versionName,
-                name = device.name,
-                mobileOperator = device.operator,
-                battery = User.Device.Battery(
-                    percentage = device.batteryPercent,
-                    isCharging = device.isPhoneCharging,
-                    temperature = device.batteryTemperature
-                )
-            )
-        )
+        IntentCompat.getSerializable<User>(intent, "user")
+    }
+
+    private val dynamicAttrs by lazy(LazyThreadSafetyMode.NONE) {
+        IntentCompat.getSerializable<DynamicAttrs>(intent, "dynamic_attrs")
     }
 
     private val jsBridge by lazy {
-        JSBridge(call, user, this)
+        JSBridge(
+            device = Device(
+                os = provider.os,
+                osVersion = provider.osVersion,
+                appVersion = provider.versionName,
+                name = provider.name,
+                mobileOperator = provider.operator,
+                battery = Device.Battery(
+                    percentage = provider.batteryPercent,
+                    isCharging = provider.isPhoneCharging,
+                    temperature = provider.batteryTemperature
+                )
+            ),
+            call = call,
+            user = user,
+            dynamicAttrs = dynamicAttrs,
+            listener = this
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -764,7 +772,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         return true
     }
 
-    override fun onChangeLanguage(language: String) {
+    override fun onChangeLanguage(language: String): Boolean {
+        return false
     }
 
     /**
