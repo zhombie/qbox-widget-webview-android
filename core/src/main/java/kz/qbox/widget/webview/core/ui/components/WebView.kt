@@ -13,7 +13,7 @@ import android.webkit.*
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.Widget
 
-internal class WebView @JvmOverloads constructor(
+class WebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,

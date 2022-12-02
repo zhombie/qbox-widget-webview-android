@@ -7,7 +7,7 @@ import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.utils.encode
 
-internal class JSBridge constructor(
+class JSBridge constructor(
     private val device: Device,
     private val call: Call?,
     private val user: User?,
