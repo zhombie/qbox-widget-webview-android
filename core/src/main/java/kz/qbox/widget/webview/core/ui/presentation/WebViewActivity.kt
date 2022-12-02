@@ -24,20 +24,18 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.device.Provider
 import kz.qbox.widget.webview.core.models.*
-//import kz.qbox.widget.webview.core.multimedia.preview.VideoPreviewDialogFragment
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
@@ -51,7 +49,7 @@ import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
 import java.io.File
-import java.util.Locale
+import java.util.*
 
 class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener {
 
@@ -126,8 +124,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
-    private var appBarLayout: AppBarLayout? = null
-    private var toolbar: MaterialToolbar? = null
+    private var toolbar: Toolbar? = null
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
 
@@ -249,7 +246,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
 
-        appBarLayout = findViewById(R.id.appBarLayout)
         toolbar = findViewById(R.id.toolbar)
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)

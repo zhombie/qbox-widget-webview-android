@@ -4,11 +4,11 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.WindowDecorActionBar
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import com.google.android.material.appbar.MaterialToolbar
 
 internal inline fun Fragment.setupActionBar(
-    toolbar: MaterialToolbar?,
+    toolbar: Toolbar?,
     isBackButtonEnabled: Boolean = true,
     title: String? = null,
     subtitle: String? = null,
@@ -33,7 +33,7 @@ internal inline fun Fragment.setupActionBar(
 }
 
 internal inline fun AppCompatActivity.setupActionBar(
-    toolbar: MaterialToolbar?,
+    toolbar: Toolbar?,
     isBackButtonEnabled: Boolean = true,
     title: String? = null,
     subtitle: String? = null,

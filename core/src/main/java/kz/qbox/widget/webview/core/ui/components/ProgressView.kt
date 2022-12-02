@@ -7,7 +7,7 @@ import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.annotation.AttrRes
 import androidx.annotation.StyleRes
-import com.google.android.material.textview.MaterialTextView
+import androidx.appcompat.widget.AppCompatTextView
 import kz.qbox.widget.webview.core.R
 
 class ProgressView @JvmOverloads constructor(
@@ -18,7 +18,7 @@ class ProgressView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     private val progressBar: ProgressBar
-    private val textView: MaterialTextView
+    private val textView: AppCompatTextView
 
     init {
         val view = inflate(context, R.layout.view_progress, this)
