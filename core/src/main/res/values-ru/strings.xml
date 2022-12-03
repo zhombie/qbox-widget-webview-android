@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="yes">Да</string>
-    <string name="no">Нет</string>
-    <string name="cancel">Отмена</string>
-    <string name="exit">Выйти</string>
-    <string name="reload">Обновить</string>
-    <string name="open">Открыть</string>
+    <string name="qbox_widget_yes">Да</string>
+    <string name="qbox_widget_no">Нет</string>
+    <string name="qbox_widget_cancel">Отмена</string>
+    <string name="qbox_widget_exit">Выйти</string>
+    <string name="qbox_widget_reload">Обновить</string>
+    <string name="qbox_widget_open">Открыть</string>
 
-    <string name="content.image">Фото</string>
-    <string name="content.video">Видео</string>
-    <string name="content.audio">Аудио</string>
-    <string name="content.document">Документ</string>
+    <string name="qbox_widget_content_image">Фото</string>
+    <string name="qbox_widget_content_video">Видео</string>
+    <string name="qbox_widget_content_audio">Аудио</string>
+    <string name="qbox_widget_content_document">Документ</string>
 
-    <string name="go_to_settings">К настройкам</string>
+    <string name="qbox_widget_go_to_settings">К настройкам</string>
 
-    <string name="error.basic">Произошла ошибка</string>
-    <string name="error.files.exceeds_limit">Извините, но вы превысили лимит (%d) при выборе файла</string>
-    <string name="error.files.download.in_progress">Извините, но загрузка файла еще не завершена</string>
-    <string name="error.files.open.unable">Не удалось открыть файл</string>
+    <string name="qbox_widget_error_basic">Произошла ошибка</string>
+    <string name="qbox_widget_error_files_exceeds_limit">Извините, но вы превысили лимит (%d) при выборе файла</string>
+    <string name="qbox_widget_error_files_download_in_progress">Извините, но загрузка файла еще не завершена</string>
+    <string name="qbox_widget_error_files_open_unable">Не удалось открыть файл</string>
 
-    <string name="alert.title.exit">Выход из виджета</string>
-    <string name="alert.title.reload">Обновление виджета</string>
-    <string name="alert.title.files.download.completed">Загрузка файла завершена</string>
-    <string name="alert.title.permissions.require">Доступ к разрешениям</string>
-    <string name="alert.title.permissions.require.geolocation">Доступ к местоположению</string>
-    <string name="alert.title.media.selection">Выбор медиа-вложения</string>
-    <string name="alert.message.exit">Вы действительно хотите выйти из виджета?</string>
-    <string name="alert.message.reload">Вы действительно хотите обновить виджет?</string>
-    <string name="alert.message.files.download.completed">Хотите ли вы открыть файл "%s"?</string>
-    <string name="alert.message.permissions.require">Пожалуйста, предоставьте виджету разрешения для полноценной работы виджета</string>
-    <string name="alert.message.permissions.require.geolocation">Пожалуйста, включите функцию "Местоположение" для совершения звонка</string>
+    <string name="qbox_widget_alert_title_exit">Выход из виджета</string>
+    <string name="qbox_widget_alert_title_reload">Обновление виджета</string>
+    <string name="qbox_widget_alert_title_files_download_completed">Загрузка файла завершена</string>
+    <string name="qbox_widget_alert_title_permissions_require">Доступ к разрешениям</string>
+    <string name="qbox_widget_alert_title_permissions_require_geolocation">Доступ к местоположению</string>
+    <string name="qbox_widget_alert_title_media_selection">Выбор медиа-вложения</string>
+    <string name="qbox_widget_alert_message_exit">Вы действительно хотите выйти из виджета?</string>
+    <string name="qbox_widget_alert_message_reload">Вы действительно хотите обновить виджет?</string>
+    <string name="qbox_widget_alert_message_files_download_completed">Хотите ли вы открыть файл "%s"?</string>
+    <string name="qbox_widget_alert_message_permissions_require">Пожалуйста, предоставьте виджету разрешения для полноценной работы виджета</string>
+    <string name="qbox_widget_alert_message_permissions_require_geolocation">Пожалуйста, включите функцию "Местоположение" для совершения звонка</string>
 
-    <string name="label.files.download.in_progress">"%s" загружается…</string>
-    <string name="label.widget.loading">Загрузка виджета: %d%%</string>
+    <string name="qbox_widget_label_files_download_in_progress">"%s" загружается…</string>
+    <string name="qbox_widget_label_widget_loading">Загрузка виджета: %d%%</string>
 
-    <string name="info.files.download.started">Загрузка файла началась</string>
+    <string name="qbox_widget_info_files_download_started">Загрузка файла началась</string>
 </resources>

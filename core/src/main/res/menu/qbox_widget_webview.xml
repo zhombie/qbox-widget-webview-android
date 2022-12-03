@@ -5,7 +5,7 @@
     <item
         android:id="@+id/reload"
         android:icon="@android:drawable/ic_popup_sync"
-        android:title="@string/reload"
+        android:title="@string/qbox_widget_reload"
         android:visible="true"
         app:showAsAction="collapseActionView" />
 

@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="yes">Иә</string>
-    <string name="no">Жоқ</string>
-    <string name="cancel">Бас тарту</string>
-    <string name="exit">Жабу</string>
-    <string name="reload">Қайта жүктеу</string>
-    <string name="open">Ашу</string>
+    <string name="qbox_widget_yes">Иә</string>
+    <string name="qbox_widget_no">Жоқ</string>
+    <string name="qbox_widget_cancel">Бас тарту</string>
+    <string name="qbox_widget_exit">Жабу</string>
+    <string name="qbox_widget_reload">Қайта жүктеу</string>
+    <string name="qbox_widget_open">Ашу</string>
 
-    <string name="content.image">Сурет</string>
-    <string name="content.video">Бейне</string>
-    <string name="content.audio">Аудио</string>
-    <string name="content.document">Құжат</string>
+    <string name="qbox_widget_content_image">Сурет</string>
+    <string name="qbox_widget_content_video">Бейне</string>
+    <string name="qbox_widget_content_audio">Аудио</string>
+    <string name="qbox_widget_content_document">Құжат</string>
 
-    <string name="go_to_settings">Баптауларға өту</string>
+    <string name="qbox_widget_go_to_settings">Баптауларға өту</string>
 
-    <string name="error.basic">Қателік орын алды</string>
-    <string name="error.files.exceeds_limit">Кешіріңіз, бірақ файлды таңдау кезінде шектен (%d) асып кеттіңіз</string>
-    <string name="error.files.download.in_progress">Кешіріңіз, бірақ файлды жүктеп алу әлі аяқталған жоқ</string>
-    <string name="error.files.open.unable">Файлды ашу мүмкін емес</string>
+    <string name="qbox_widget_error_basic">Қателік орын алды</string>
+    <string name="qbox_widget_error_files_exceeds_limit">Кешіріңіз, бірақ файлды таңдау кезінде шектен (%d) асып кеттіңіз</string>
+    <string name="qbox_widget_error_files_download_in_progress">Кешіріңіз, бірақ файлды жүктеп алу әлі аяқталған жоқ</string>
+    <string name="qbox_widget_error_files_open_unable">Файлды ашу мүмкін емес</string>
 
-    <string name="alert.title.exit">Виджеттен шығу</string>
-    <string name="alert.title.reload">Виджетті қайта жүктеу</string>
-    <string name="alert.title.files.download.completed">Файлды жүктеп алу аяқталды</string>
-    <string name="alert.title.permissions.require">Рұқсат сұрау</string>
-    <string name="alert.title.permissions.require.geolocation">Геолокация рұқсатын сұрау</string>
-    <string name="alert.title.media.selection">Медиа таңдау</string>
-    <string name="alert.message.exit">Виджеттен расымен де шыққыңыз келе ме?</string>
-    <string name="alert.message.reload">Виджетті қайта жүктеңіз келе ме?</string>
-    <string name="alert.message.files.download.completed">"%s" файлын ашқыңыз келе ме?</string>
-    <string name="alert.message.permissions.require">Виджеттің қатесіз жұмыс істеуі үшін сұралған мүмкіндіктерге рұқсат беріңіз</string>
-    <string name="alert.message.permissions.require.geolocation">Қоңырау шалу үшін «Геолокация» мүмкіндігіне рұқсат беріңіз</string>
+    <string name="qbox_widget_alert_title_exit">Виджеттен шығу</string>
+    <string name="qbox_widget_alert_title_reload">Виджетті қайта жүктеу</string>
+    <string name="qbox_widget_alert_title_files_download_completed">Файлды жүктеп алу аяқталды</string>
+    <string name="qbox_widget_alert_title_permissions_require">Рұқсат сұрау</string>
+    <string name="qbox_widget_alert_title_permissions_require_geolocation">Геолокация рұқсатын сұрау</string>
+    <string name="qbox_widget_alert_title_media_selection">Медиа таңдау</string>
+    <string name="qbox_widget_alert_message_exit">Виджеттен расымен де шыққыңыз келе ме?</string>
+    <string name="qbox_widget_alert_message_reload">Виджетті қайта жүктеңіз келе ме?</string>
+    <string name="qbox_widget_alert_message_files_download_completed">"%s" файлын ашқыңыз келе ме?</string>
+    <string name="qbox_widget_alert_message_permissions_require">Виджеттің қатесіз жұмыс істеуі үшін сұралған мүмкіндіктерге рұқсат беріңіз</string>
+    <string name="qbox_widget_alert_message_permissions_require_geolocation">Қоңырау шалу үшін «Геолокация» мүмкіндігіне рұқсат беріңіз</string>
 
-    <string name="label.files.download.in_progress">"%s" жүктелуде…</string>
-    <string name="label.widget.loading">Виджет жүктелуде: %d%%</string>
+    <string name="qbox_widget_label_files_download_in_progress">"%s" жүктелуде…</string>
+    <string name="qbox_widget_label_widget_loading">Виджет жүктелуде: %d%%</string>
 
-    <string name="info.files.download.started">Файлды жүктеу басталды</string>
+    <string name="qbox_widget_info_files_download_started">Файлды жүктеу басталды</string>
 </resources>

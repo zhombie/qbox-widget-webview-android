@@ -21,7 +21,7 @@ class ProgressView @JvmOverloads constructor(
     private val textView: AppCompatTextView
 
     init {
-        val view = inflate(context, R.layout.view_progress, this)
+        val view = inflate(context, R.layout.qbox_widget_view_progress, this)
 
         progressBar = view.findViewById(R.id.progressBar)
         textView = view.findViewById(R.id.textView)

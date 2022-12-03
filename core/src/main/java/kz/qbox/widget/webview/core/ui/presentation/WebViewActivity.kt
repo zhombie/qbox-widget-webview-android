@@ -244,7 +244,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_webview)
+        setContentView(R.layout.qbox_widget_activity_webview)
 
         toolbar = findViewById(R.id.toolbar)
         webView = findViewById(R.id.webView)
@@ -289,19 +289,19 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     webView?.setFileSelectionPromptResult(result.uri)
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
-                    Toast.makeText(this, R.string.error_basic, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
                     Toast.makeText(
                         this,
-                        getString(R.string.error_files_exceeds_limit, result.maxSize),
+                        getString(R.string.qbox_widget_error_files_exceeds_limit, result.maxSize),
                         Toast.LENGTH_SHORT
                     ).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
-                    Toast.makeText(this, R.string.error_basic, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
             }
@@ -334,12 +334,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 //            }
             else -> {
                 AlertDialog.Builder(this)
-                    .setTitle(R.string.alert_title_exit)
-                    .setMessage(R.string.alert_message_exit)
-                    .setNegativeButton(R.string.cancel) { dialog, _ ->
+                    .setTitle(R.string.qbox_widget_alert_title_exit)
+                    .setMessage(R.string.qbox_widget_alert_message_exit)
+                    .setNegativeButton(R.string.qbox_widget_cancel) { dialog, _ ->
                         dialog.dismiss()
                     }
-                    .setPositiveButton(R.string.exit) { dialog, _ ->
+                    .setPositiveButton(R.string.qbox_widget_exit) { dialog, _ ->
                         dialog.dismiss()
                         super.onBackPressed()
                     }
@@ -349,7 +349,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.webview, menu)
+        menuInflater.inflate(R.menu.qbox_widget_webview, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -357,12 +357,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         return when (item.itemId) {
             R.id.reload -> {
                 AlertDialog.Builder(this)
-                    .setTitle(R.string.alert_title_reload)
-                    .setMessage(R.string.alert_message_reload)
-                    .setNegativeButton(R.string.cancel) { dialog, _ ->
+                    .setTitle(R.string.qbox_widget_alert_title_reload)
+                    .setMessage(R.string.qbox_widget_alert_message_reload)
+                    .setNegativeButton(R.string.qbox_widget_cancel) { dialog, _ ->
                         dialog.dismiss()
                     }
-                    .setPositiveButton(R.string.reload) { dialog, _ ->
+                    .setPositiveButton(R.string.qbox_widget_reload) { dialog, _ ->
                         dialog.dismiss()
                         webView?.loadUrl("javascript:window.location.reload(true)")
                     }
@@ -500,7 +500,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             if (url in (pendingDownloads ?: mutableListOf()).map { it.second }) {
                 Toast.makeText(
                     this,
-                    R.string.error_files_download_in_progress,
+                    R.string.qbox_widget_error_files_download_in_progress,
                     Toast.LENGTH_SHORT
                 ).show()
                 return@setDownloadListener
@@ -536,7 +536,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             request.allowScanningByMediaScanner()
             request.setAllowedOverMetered(true)
             request.setAllowedOverRoaming(true)
-            request.setDescription(getString(R.string.label_files_download_in_progress, filename))
+            request.setDescription(getString(R.string.qbox_widget_label_files_download_in_progress, filename))
             request.setDestinationInExternalPublicDir(publicDirectory, filename)
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -585,17 +585,17 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
                         AlertDialog.Builder(this@WebViewActivity)
                             .setCancelable(true)
-                            .setTitle(R.string.alert_title_files_download_completed)
+                            .setTitle(R.string.qbox_widget_alert_title_files_download_completed)
                             .setMessage(
                                 getString(
-                                    R.string.alert_message_files_download_completed,
+                                    R.string.qbox_widget_alert_message_files_download_completed,
                                     file.name
                                 )
                             )
-                            .setNegativeButton(R.string.no) { dialog, _ ->
+                            .setNegativeButton(R.string.qbox_widget_no) { dialog, _ ->
                                 dialog.dismiss()
                             }
-                            .setPositiveButton(R.string.open) { dialog, _ ->
+                            .setPositiveButton(R.string.qbox_widget_open) { dialog, _ ->
                                 dialog.dismiss()
                                 openFile(file, mimeType)
                             }
@@ -668,9 +668,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private fun showRequestPermissionsAlertDialog() {
         AlertDialog.Builder(this)
             .setCancelable(false)
-            .setTitle(R.string.alert_title_permissions_require)
-            .setMessage(R.string.alert_message_permissions_require)
-            .setPositiveButton(R.string.go_to_settings) { dialog, _ ->
+            .setTitle(R.string.qbox_widget_alert_title_permissions_require)
+            .setMessage(R.string.qbox_widget_alert_message_permissions_require)
+            .setPositiveButton(R.string.qbox_widget_go_to_settings) { dialog, _ ->
                 dialog.dismiss()
 
                 startActivity(
@@ -686,8 +686,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private fun showGPSDisabledErrorAlertDialog() {
         AlertDialog.Builder(this)
             .setCancelable(false)
-            .setTitle(R.string.alert_title_permissions_require_geolocation)
-            .setMessage(R.string.alert_message_permissions_require_geolocation)
+            .setTitle(R.string.qbox_widget_alert_title_permissions_require_geolocation)
+            .setMessage(R.string.qbox_widget_alert_message_permissions_require_geolocation)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                 dialog.dismiss()
 
@@ -713,7 +713,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 pendingDownloads?.set(found, id to url)
             }
         }
-        Toast.makeText(this, R.string.info_files_download_started, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG).show()
     }
 
     private fun saveFile(url: String, folder: File, filename: String) {
@@ -741,7 +741,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             )
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.error_files_open_unable, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT).show()
             return false
         }
 
@@ -754,7 +754,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             true
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.error_files_open_unable, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT).show()
             false
         }
     }
@@ -783,7 +783,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         if (progress < 95) {
             progressView?.show()
             progressView?.showTextView()
-            progressView?.setText(getString(R.string.label_widget_loading, progress))
+            progressView?.setText(getString(R.string.qbox_widget_label_widget_loading, progress))
         } else {
             progressView?.hide()
         }
@@ -798,13 +798,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         ) {
             AlertDialog.Builder(this)
-                .setTitle(R.string.alert_title_media_selection)
+                .setTitle(R.string.qbox_widget_alert_title_media_selection)
                 .setItems(
                     arrayOf(
-                        getString(R.string.content_image),
-                        getString(R.string.content_video),
-                        getString(R.string.content_audio),
-                        getString(R.string.content_document)
+                        getString(R.string.qbox_widget_content_image),
+                        getString(R.string.qbox_widget_content_video),
+                        getString(R.string.qbox_widget_content_audio),
+                        getString(R.string.qbox_widget_content_document)
                     )
                 ) { _, which ->
                     when (which) {

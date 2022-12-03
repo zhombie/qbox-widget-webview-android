@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="cancel">Cancel</string>
-    <string name="exit">Exit</string>
-    <string name="reload">Reload</string>
-    <string name="open">Open</string>
+    <string name="qbox_widget_yes">Yes</string>
+    <string name="qbox_widget_no">No</string>
+    <string name="qbox_widget_cancel">Cancel</string>
+    <string name="qbox_widget_exit">Exit</string>
+    <string name="qbox_widget_reload">Reload</string>
+    <string name="qbox_widget_open">Open</string>
 
-    <string name="content.image">Image</string>
-    <string name="content.video">Video</string>
-    <string name="content.audio">Audio</string>
-    <string name="content.document">Document</string>
+    <string name="qbox_widget_content_image">Image</string>
+    <string name="qbox_widget_content_video">Video</string>
+    <string name="qbox_widget_content_audio">Audio</string>
+    <string name="qbox_widget_content_document">Document</string>
 
-    <string name="go_to_settings">To settings</string>
+    <string name="qbox_widget_go_to_settings">To settings</string>
 
-    <string name="error.basic">Error occurred</string>
-    <string name="error.files.exceeds_limit">Sorry, but you exceeded the limit (%d) when selecting a file</string>
-    <string name="error.files.download.in_progress">Sorry, but the file download has not completed yet</string>
-    <string name="error.files.open.unable">Failed to open file</string>
+    <string name="qbox_widget_error_basic">Error occurred</string>
+    <string name="qbox_widget_error_files_exceeds_limit">Sorry, but you exceeded the limit (%d) when selecting a file</string>
+    <string name="qbox_widget_error_files_download_in_progress">Sorry, but the file download has not completed yet</string>
+    <string name="qbox_widget_error_files_open_unable">Failed to open file</string>
 
-    <string name="alert.title.exit">Exit Widget</string>
-    <string name="alert.title.reload">Reload Widget</string>
-    <string name="alert.title.files.download.completed">File download completed</string>
-    <string name="alert.title.permissions.require">Access to permissions</string>
-    <string name="alert.title.permissions.require.geolocation">Location access</string>
-    <string name="alert.title.media.selection">Select media</string>
-    <string name="alert.message.exit">Are you sure you want to exit the widget?</string>
-    <string name="alert.message.reload">Are you sure you want to reload the widget?</string>
-    <string name="alert.message.files.download.completed">Do you want to open file "%s"?</string>
-    <string name="alert.message.permissions.require">Please, grant the widget with permissions to work properly</string>
-    <string name="alert.message.permissions.require.geolocation">Please, turn on the "Location" feature to make a call</string>
+    <string name="qbox_widget_alert_title_exit">Exit Widget</string>
+    <string name="qbox_widget_alert_title_reload">Reload Widget</string>
+    <string name="qbox_widget_alert_title_files_download_completed">File download completed</string>
+    <string name="qbox_widget_alert_title_permissions_require">Access to permissions</string>
+    <string name="qbox_widget_alert_title_permissions_require_geolocation">Location access</string>
+    <string name="qbox_widget_alert_title_media_selection">Select media</string>
+    <string name="qbox_widget_alert_message_exit">Are you sure you want to exit the widget?</string>
+    <string name="qbox_widget_alert_message_reload">Are you sure you want to reload the widget?</string>
+    <string name="qbox_widget_alert_message_files_download_completed">Do you want to open file "%s"?</string>
+    <string name="qbox_widget_alert_message_permissions_require">Please, grant the widget with permissions to work properly</string>
+    <string name="qbox_widget_alert_message_permissions_require_geolocation">Please, turn on the "Location" feature to make a call</string>
 
-    <string name="label.files.download.in_progress">"%s" downloading…</string>
-    <string name="label.widget.loading">Widget loading: %d%%</string>
+    <string name="qbox_widget_label_files_download_in_progress">"%s" downloading…</string>
+    <string name="qbox_widget_label_widget_loading">Widget loading: %d%%</string>
 
-    <string name="info.files.download.started">File download started</string>
+    <string name="qbox_widget_info_files_download_started">File download started</string>
 </resources>

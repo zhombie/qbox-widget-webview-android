@@ -4,6 +4,8 @@ android {
     defaultConfig {
         consumerProguardFiles "consumer-rules.pro"
     }
+
+    resourcePrefix 'qbox_widget_'
 }
 
 //ext {
@@ -15,7 +17,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
 
     // Core
-    implementation 'androidx.core:core-ktx:1.9.0'
+//    implementation 'androidx.core:core-ktx:1.9.0'
 
     // WebView Kit
     api 'androidx.webkit:webkit:1.5.0'
