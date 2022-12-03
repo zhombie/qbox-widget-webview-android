@@ -56,12 +56,12 @@ subprojects { Project project ->
     apply plugin: 'maven-publish'
 
     android {
-        compileSdk 33
+        compileSdkVersion 33
         buildToolsVersion '30.0.3'
 
         defaultConfig {
-            minSdk 21
-            targetSdk 33
+            minSdkVersion 21
+            targetSdkVersion 33
 
             versionCode project.ext.version_code
             versionName project.version
@@ -95,24 +95,15 @@ subprojects { Project project ->
                 }
             }
         }
-
-        publishing {
-            singleVariant("release") {
-                withSourcesJar()
-                withJavadocJar()
-            }
-        }
     }
 
     afterEvaluate {
         publishing {
             publications {
-                release(MavenPublication) {
-                    from components.release
-
-                    groupId = project.group
-                    artifactId = project.ext.artifactId
-                    version = project.version
+                aar(MavenPublication) {
+                    groupId project.group
+                    artifactId project.ext.artifactId
+                    version project.version
 
                     pom {
                         name = project.name
@@ -135,6 +126,7 @@ subprojects { Project project ->
                         }
                     }
 
+//                    from components.release
                     artifact "$buildDir/outputs/aar/$project.name-release.aar"
                 }
             }
