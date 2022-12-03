@@ -32,6 +32,7 @@ import androidx.core.location.LocationManagerCompat
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import kz.garage.image.preview.ImagePreviewDialogFragment
+import kz.garage.image.preview.showImagePreview
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.device.Provider
@@ -440,11 +441,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             )
 
             return@setUrlListener if (uri.toString().contains("image")) {
-                ImagePreviewDialogFragment.show(
-                    fragmentManager = supportFragmentManager,
-                    uri = uri,
-                    caption = uri.toString()
-                )
+                showImagePreview(uri)
                 true
             }
 //            else if (uri.toString().contains("video")) {
@@ -473,11 +470,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                         url.endsWith("jpg") ||
                         url.endsWith("jpeg"))
             ) {
-                ImagePreviewDialogFragment.show(
-                    fragmentManager = supportFragmentManager,
-                    uri = Uri.parse(url),
-                    caption = null
-                )
+                showImagePreview(Uri.parse(url))
                 return@setDownloadListener
             }
 //            else if (mimetype?.startsWith("video") == true &&
