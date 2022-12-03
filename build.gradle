@@ -95,15 +95,24 @@ subprojects { Project project ->
                 }
             }
         }
+
+        publishing {
+            singleVariant("release") {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        }
     }
 
     afterEvaluate {
         publishing {
             publications {
-                aar(MavenPublication) {
-                    groupId project.group
-                    artifactId project.ext.artifactId
-                    version project.version
+                release(MavenPublication) {
+                    from components.release
+
+                    groupId = project.group
+                    artifactId = project.ext.artifactId
+                    version = project.version
 
                     pom {
                         name = project.name
@@ -126,7 +135,6 @@ subprojects { Project project ->
                         }
                     }
 
-//                    from components.release
                     artifact "$buildDir/outputs/aar/$project.name-release.aar"
                 }
             }
