@@ -36,10 +36,10 @@ data class Device constructor(
         val jsonObject = JSONObject()
         try {
             jsonObject.put("os", os)
-            jsonObject.put("osVersion", osVersion)
-            jsonObject.put("appVersion", appVersion)
+            jsonObject.put("os_ver", osVersion)
+            jsonObject.put("app_ver", appVersion)
             jsonObject.put("name", name)
-            jsonObject.put("mobileOperator", mobileOperator)
+            jsonObject.put("mobile_operator", mobileOperator)
             jsonObject.put("battery", battery.toJSONObject())
         } catch (e: JSONException) {
             e.printStackTrace()
