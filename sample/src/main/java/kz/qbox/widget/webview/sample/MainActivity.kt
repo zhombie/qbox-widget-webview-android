@@ -31,18 +31,18 @@ class MainActivity : AppCompatActivity() {
 
         Widget.Builder.VideoCall(this)
             .setLoggingEnabled(true)
-            .setUrl("https://vid.bankffin.kz/widget/video-call/nonresident-verification/")
+            .setUrl(BuildConfig.WIDGET_URL)
             .setLanguage(Language.RUSSIAN)
             .setCall(
                 Call(
-                    domain = "android.mobile.bankffin.kz",
+                    domain = "test.kz",
                     type = Call.Type.VIDEO,
                     topic = "dev",
                 )
             )
             .setUser(
                 User(
-                    id = 46
+                    id = 1
                 )
             )
             .launch()
