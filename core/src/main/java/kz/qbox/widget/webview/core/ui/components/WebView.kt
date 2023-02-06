@@ -184,6 +184,12 @@ class WebView @JvmOverloads constructor(
     }
 
     private inner class MyWebChromeClient : WebChromeClient() {
+        private val defaultVideoPoster = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+
+        override fun getDefaultVideoPoster(): Bitmap? {
+            return defaultVideoPoster
+        }
+
         override fun onPermissionRequest(request: PermissionRequest?) {
             Logger.debug(
                 TAG,
