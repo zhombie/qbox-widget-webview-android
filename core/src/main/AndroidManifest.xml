@@ -21,7 +21,8 @@
         <activity
             android:name="kz.qbox.widget.webview.core.ui.presentation.WebViewActivity"
             android:theme="@style/Theme.WebViewWidget"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
