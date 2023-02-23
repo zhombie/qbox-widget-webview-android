@@ -5,7 +5,25 @@ plugins {
 
 def properties = new Properties()
 properties.load(new FileInputStream(rootProject.file('local.properties')))
-def widgetUrl = properties.getProperty('widget.url') ?: '"http://localhost"'
+def firstWidgetUrl = properties.getProperty('first.widget.url') ?: '"http://localhost"'
+def secondWidgetUrl = properties.getProperty('second.widget.url') ?: '"http://localhost"'
+def thirdWidgetUrl = properties.getProperty('third.widget.url') ?: '"http://localhost"'
+def fourthWidgetUrl = properties.getProperty('fourth.widget.url') ?: '"http://localhost"'
+def fifthWidgetUrl = properties.getProperty('fifth.widget.url') ?: '"http://localhost"'
+def sixthWidgetUrl = properties.getProperty('sixth.widget.url') ?: '"http://localhost"'
+def seventhWidgetUrl = properties.getProperty('seventh.widget.url') ?: '"http://localhost"'
+def eighthWidgetUrl = properties.getProperty('eighth.widget.url') ?: '"http://localhost"'
+
+def firstWidgetTitle = properties.getProperty('first.widget.title') ?: '"Some name"'
+def secondWidgetTitle = properties.getProperty('second.widget.title') ?: '"Some name"'
+def thirdWidgetTitle = properties.getProperty('third.widget.title') ?: '"Some name"'
+def fourthWidgetTitle = properties.getProperty('fourth.widget.title') ?: '"Some name"'
+def fifthWidgetTitle = properties.getProperty('fifth.widget.title') ?: '"Some name"'
+def sixthWidgetTitle = properties.getProperty('sixth.widget.title') ?: '"Some name"'
+def seventhWidgetTitle = properties.getProperty('seventh.widget.title') ?: '"Some name"'
+def eighthWidgetTitle = properties.getProperty('eighth.widget.title') ?: '"Some name"'
+
+def callTopic = properties.getProperty('call.topic') ?: '"Some topic"'
 
 android {
     namespace 'kz.qbox.widget.webview.sample'
@@ -24,7 +42,25 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField 'String', 'WIDGET_URL', widgetUrl
+            buildConfigField 'String', 'FIRST_WIDGET_URL', firstWidgetUrl
+            buildConfigField 'String', 'SECOND_WIDGET_URL', secondWidgetUrl
+            buildConfigField 'String', 'THIRD_WIDGET_URL', thirdWidgetUrl
+            buildConfigField 'String', 'FOURTH_WIDGET_URL', fourthWidgetUrl
+            buildConfigField 'String', 'FIFTH_WIDGET_URL', fifthWidgetUrl
+            buildConfigField 'String', 'SIXTH_WIDGET_URL', sixthWidgetUrl
+            buildConfigField 'String', 'SEVENTH_WIDGET_URL', seventhWidgetUrl
+            buildConfigField 'String', 'EIGHTH_WIDGET_URL', eighthWidgetUrl
+
+            buildConfigField 'String', 'FIRST_WIDGET_TITLE', firstWidgetTitle
+            buildConfigField 'String', 'SECOND_WIDGET_TITLE', secondWidgetTitle
+            buildConfigField 'String', 'THIRD_WIDGET_TITLE', thirdWidgetTitle
+            buildConfigField 'String', 'FOURTH_WIDGET_TITLE', fourthWidgetTitle
+            buildConfigField 'String', 'FIFTH_WIDGET_TITLE', fifthWidgetTitle
+            buildConfigField 'String', 'SIXTH_WIDGET_TITLE', sixthWidgetTitle
+            buildConfigField 'String', 'SEVENTH_WIDGET_TITLE', seventhWidgetTitle
+            buildConfigField 'String', 'EIGHTH_WIDGET_TITLE', eighthWidgetTitle
+
+            buildConfigField 'String', 'CALL_TOPIC', callTopic
 
             minifyEnabled false
 
@@ -32,7 +68,25 @@ android {
         }
 
         release {
-            buildConfigField 'String', 'WIDGET_URL', widgetUrl
+            buildConfigField 'String', 'FIRST_WIDGET_URL', firstWidgetUrl
+            buildConfigField 'String', 'SECOND_WIDGET_URL', secondWidgetUrl
+            buildConfigField 'String', 'THIRD_WIDGET_URL', thirdWidgetUrl
+            buildConfigField 'String', 'FOURTH_WIDGET_URL', fourthWidgetUrl
+            buildConfigField 'String', 'FIFTH_WIDGET_URL', fifthWidgetUrl
+            buildConfigField 'String', 'SIXTH_WIDGET_URL', sixthWidgetUrl
+            buildConfigField 'String', 'SEVENTH_WIDGET_URL', seventhWidgetUrl
+            buildConfigField 'String', 'EIGHTH_WIDGET_URL', eighthWidgetUrl
+
+            buildConfigField 'String', 'FIRST_WIDGET_TITLE', firstWidgetTitle
+            buildConfigField 'String', 'SECOND_WIDGET_TITLE', secondWidgetTitle
+            buildConfigField 'String', 'THIRD_WIDGET_TITLE', thirdWidgetTitle
+            buildConfigField 'String', 'FOURTH_WIDGET_TITLE', fourthWidgetTitle
+            buildConfigField 'String', 'FIFTH_WIDGET_TITLE', fifthWidgetTitle
+            buildConfigField 'String', 'SIXTH_WIDGET_TITLE', sixthWidgetTitle
+            buildConfigField 'String', 'SEVENTH_WIDGET_TITLE', seventhWidgetTitle
+            buildConfigField 'String', 'EIGHTH_WIDGET_TITLE', eighthWidgetTitle
+
+            buildConfigField 'String', 'CALL_TOPIC', callTopic
 
             minifyEnabled false
 
