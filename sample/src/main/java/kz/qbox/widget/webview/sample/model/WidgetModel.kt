@@ -6,5 +6,4 @@ data class WidgetModel(
     val title: String,
     val url: String,
     val call: Call? = null,
-) {
-}
+)

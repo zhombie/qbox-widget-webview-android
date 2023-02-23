@@ -7,8 +7,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.forEachIndexed
-import androidx.core.view.get
 import com.google.android.material.button.MaterialButton
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.*
@@ -74,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        widgetTitles.forEach{item ->
+        widgetTitles.forEach { item ->
             menu?.add(item)
         }
         return super.onCreateOptionsMenu(menu)
