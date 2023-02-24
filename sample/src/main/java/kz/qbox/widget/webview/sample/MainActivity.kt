@@ -129,8 +129,9 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        button?.text = item.title
+        button?.text = "Launch: " + item.title
 
         val key = item.title
         selected = if (key == null) {
