@@ -435,6 +435,20 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         super.onUserLeaveHint()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        Logger.debug(TAG, "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
+        if (isInPictureInPictureMode) {
+            supportActionBar?.hide()
+        } else {
+            supportActionBar?.show()
+        }
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    }
+
     private fun setupActionBar() {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
