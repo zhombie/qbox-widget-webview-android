@@ -2,11 +2,13 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.app.DownloadManager
+import android.app.PictureInPictureParams
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.location.LocationManager
 import android.net.Uri
 import android.net.http.SslError
@@ -14,6 +16,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Rational
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -22,6 +25,7 @@ import android.webkit.URLUtil
 import android.webkit.WebView.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -105,6 +109,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
+
+        private var callState: Lifecycle.State = Lifecycle.State.FINISHED
 
         fun newIntent(
             context: Context,
@@ -290,7 +296,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     webView?.setFileSelectionPromptResult(result.uri)
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
-                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT)
+                        .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
@@ -302,7 +309,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
-                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT)
+                        .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
             }
@@ -378,13 +386,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     override fun onResume() {
         super.onResume()
 
-        webView?.onResume()
+//        webView?.onResume()
     }
 
     override fun onPause() {
         super.onPause()
 
-        webView?.onPause()
+//        webView?.onPause()
     }
 
     override fun onDestroy() {
@@ -410,6 +418,21 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         super.onDestroy()
 
         webView?.destroy()
+    }
+
+
+    override fun onUserLeaveHint() {
+        Logger.debug(TAG, "onUserLeaveHint()")
+        if (callState == Lifecycle.State.STARTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(2, 3))
+                        .build()
+                )
+            }
+        }
+        super.onUserLeaveHint()
     }
 
     private fun setupActionBar() {
@@ -529,7 +552,12 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             request.allowScanningByMediaScanner()
             request.setAllowedOverMetered(true)
             request.setAllowedOverRoaming(true)
-            request.setDescription(getString(R.string.qbox_widget_label_files_download_in_progress, filename))
+            request.setDescription(
+                getString(
+                    R.string.qbox_widget_label_files_download_in_progress,
+                    filename
+                )
+            )
             request.setDestinationInExternalPublicDir(publicDirectory, filename)
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -706,7 +734,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 pendingDownloads?.set(found, id to url)
             }
         }
-        Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
+            .show()
     }
 
     private fun saveFile(url: String, folder: File, filename: String) {
@@ -734,7 +763,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             )
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT)
+                .show()
             return false
         }
 
@@ -747,7 +777,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             true
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT)
+                .show()
             false
         }
     }
@@ -763,6 +794,29 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onChangeLanguage(language: String): Boolean {
         return false
+    }
+//
+//    override fun onLogMessageReceived(message: String) {
+//        Logger.debug("JavaScriptLogs", message)
+//    }
+
+    override fun onLifecycleState(state: Lifecycle.State) {
+        Logger.debug(TAG, "onLifecycleState() -> $state")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            when (state) {
+                Lifecycle.State.STARTED -> {
+                    callState = state
+                }
+                Lifecycle.State.FINISHED -> {
+                    if (isInPictureInPictureMode) {
+                        Toast.makeText(this, "Call finished", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        callState = state
+                    }
+                }
+            }
+        }
     }
 
     /**

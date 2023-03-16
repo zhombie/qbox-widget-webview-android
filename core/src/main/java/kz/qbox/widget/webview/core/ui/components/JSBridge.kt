@@ -1,10 +1,9 @@
 package kz.qbox.widget.webview.core.ui.components
 
 import android.webkit.JavascriptInterface
-import kz.qbox.widget.webview.core.models.Call
-import kz.qbox.widget.webview.core.models.Device
-import kz.qbox.widget.webview.core.models.DynamicAttrs
-import kz.qbox.widget.webview.core.models.User
+import kz.qbox.widget.webview.core.Logger
+import kz.qbox.widget.webview.core.models.*
+import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 import kz.qbox.widget.webview.core.utils.encode
 
 class JSBridge constructor(
@@ -35,11 +34,27 @@ class JSBridge constructor(
     fun onChangeLanguage(language: String): Boolean =
         listener?.onChangeLanguage(language) == true
 
+//    @JavascriptInterface
+//    fun onJavaScriptLogging(message: String) {
+//        listener?.onLogMessageReceived(message)
+//    }
+
+    @JavascriptInterface
+    fun onLifecycleState(state: String){
+        when (state){
+            "start" -> listener?.onLifecycleState(Lifecycle.State.STARTED)
+            "finish" -> listener?.onLifecycleState(Lifecycle.State.FINISHED)
+        }
+
+    }
+
     fun dispose() {
         listener = null
     }
 
     interface Listener {
+        fun onLifecycleState(state: Lifecycle.State)
+//        fun onLogMessageReceived(message: String)
         fun onChangeLanguage(language: String): Boolean
         fun onClose(): Boolean
     }
