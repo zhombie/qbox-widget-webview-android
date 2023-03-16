@@ -26,7 +26,6 @@ internal class GetContentResultContract :
         return if (resultCode == Activity.RESULT_OK) {
             intent?.data
         }else{
-            println("Something is wrong")
             null
         }
     }

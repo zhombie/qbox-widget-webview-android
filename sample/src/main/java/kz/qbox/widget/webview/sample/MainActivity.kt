@@ -24,76 +24,30 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.button)
     }
 
-    private val paramsMap = mapOf(
-        BuildConfig.FIRST_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.FIRST_WIDGET_TITLE,
-                    url = BuildConfig.FIRST_WIDGET_URL,
-                    call = Call(
-                        domain = DEFAULT_DOMAIN,
-                        type = Call.Type.VIDEO,
-                        topic = BuildConfig.CALL_TOPIC
-                    )
-                ),
-        BuildConfig.SECOND_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.SECOND_WIDGET_TITLE,
-                    url = BuildConfig.SECOND_WIDGET_URL,
-                    call = Call(
-                        domain = DEFAULT_DOMAIN,
-                        type = Call.Type.VIDEO,
-                        topic = BuildConfig.CALL_TOPIC
-                    )
-                ),
-        BuildConfig.THIRD_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.THIRD_WIDGET_TITLE,
-                    url = BuildConfig.THIRD_WIDGET_URL,
-                    call = Call(
-                        domain = DEFAULT_DOMAIN,
-                        type = Call.Type.VIDEO,
-                        topic = BuildConfig.CALL_TOPIC
-                    )
-                ),
-        BuildConfig.FOURTH_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.FOURTH_WIDGET_TITLE,
-                    url = BuildConfig.FOURTH_WIDGET_URL,
-                    call = Call(
-                        domain = DEFAULT_DOMAIN,
-                        type = Call.Type.VIDEO,
-                        topic = BuildConfig.CALL_TOPIC
-                    )
-                ),
-        BuildConfig.FIFTH_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.FIFTH_WIDGET_TITLE,
-                    url = BuildConfig.FIFTH_WIDGET_URL,
-                ),
-        BuildConfig.SIXTH_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.SIXTH_WIDGET_TITLE,
-                    url = BuildConfig.SIXTH_WIDGET_URL,
-                ),
-        BuildConfig.SEVENTH_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.SEVENTH_WIDGET_TITLE,
-                    url = BuildConfig.SEVENTH_WIDGET_URL,
-                ),
-        BuildConfig.EIGHTH_WIDGET_TITLE to
-                Params(
-                    title = BuildConfig.EIGHTH_WIDGET_TITLE,
-                    url = BuildConfig.EIGHTH_WIDGET_URL,
-                )
-    )
+    private val paramsMap = mutableMapOf<String, Params>()
 
-    private var selected: Pair<String, Params> = paramsMap.entries.first().toPair()
+    private lateinit var selected: Pair<String, Params>
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (BuildConfig.WIDGET_TITLES.size == BuildConfig.WIDGET_LINKS.size) {
+            BuildConfig.WIDGET_TITLES.forEachIndexed { index, item ->
+                paramsMap[item] = Params(
+                    title = item,
+                    url = BuildConfig.WIDGET_LINKS[index],
+                    call = if (index <= 3) null else Call(
+                        domain = DEFAULT_DOMAIN,
+                        type = Call.Type.VIDEO,
+                        topic = BuildConfig.CALL_TOPIC
+                    )
+                )
+            }
+            selected = paramsMap.entries.first().toPair()
+        }
 
         with(button) {
             text = "Launch: " + selected.first
@@ -126,6 +80,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         paramsMap.keys.forEach { menu?.add(it) }
+        BuildConfig.WIDGET_TITLES
         return super.onCreateOptionsMenu(menu)
     }
 

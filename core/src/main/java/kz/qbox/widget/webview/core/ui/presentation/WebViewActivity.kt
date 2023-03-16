@@ -250,6 +250,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Logger.debug(TAG, "Lifecycle: onCreate()")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.qbox_widget_activity_webview)
 
@@ -383,18 +384,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-//        webView?.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-//        webView?.onPause()
-    }
-
     override fun onDestroy() {
         jsBridge.dispose()
 
@@ -425,11 +414,16 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         Logger.debug(TAG, "onUserLeaveHint()")
         if (callState == Lifecycle.State.STARTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                enterPictureInPictureMode(
-                    PictureInPictureParams.Builder()
-                        .setAspectRatio(Rational(2, 3))
-                        .build()
-                )
+                if (!isInPictureInPictureMode) {
+                    println("Is in this mode")
+                    enterPictureInPictureMode(
+                        PictureInPictureParams.Builder()
+                            .setAspectRatio(Rational(2, 3))
+                            .build()
+                    )
+                }else{
+                    println("Is not in this mode")
+                }
             }
         }
         super.onUserLeaveHint()
