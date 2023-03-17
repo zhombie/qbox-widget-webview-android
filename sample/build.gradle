@@ -6,10 +6,10 @@ plugins {
 def properties = new Properties()
 properties.load(new FileInputStream(rootProject.file('local.properties')))
 
-def callTopic = properties.getProperty('call.topic') ?: '"Some topic"'
-
 def widgetTitles = properties.getProperty('widget.titles') ?: "Some name"
 def widgetLinks = properties.getProperty('widget.links') ?: "Some name"
+
+def callTopic = properties.getProperty('call.topic') ?: '"general"'
 
 android {
     namespace 'kz.qbox.widget.webview.sample'
