@@ -360,9 +360,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     override fun onPause() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (isInPictureInPictureMode) {
-                println("onPause: In pip mode")
-            }else{
-                println("onPause: not in pip")
+                //TODO Realize javaScript method calling
+            } else {
+                //TODO Realize javaScript method calling
             }
         }
         super.onPause()
@@ -371,9 +371,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     override fun onResume() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (isInPictureInPictureMode) {
-                println("onPause: onResume() -> In pip mode")
-            }else{
-                println("onPause: onResume() -> not in pip")
+                //TODO Realize javaScript method calling
+            } else {
+                //TODO Realize javaScript method calling
             }
         }
         super.onResume()

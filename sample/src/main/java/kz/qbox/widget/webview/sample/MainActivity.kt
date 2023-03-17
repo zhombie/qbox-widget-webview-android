@@ -24,30 +24,15 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.button)
     }
 
-    private val paramsMap = mutableMapOf<String, Params>()
+    private val paramsMap = stringToParams()
 
-    private lateinit var selected: Pair<String, Params>
+    private var selected: Pair<String, Params> = paramsMap.entries.first().toPair()
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        if (BuildConfig.WIDGET_TITLES.size == BuildConfig.WIDGET_LINKS.size) {
-            BuildConfig.WIDGET_TITLES.forEachIndexed { index, item ->
-                paramsMap[item] = Params(
-                    title = item,
-                    url = BuildConfig.WIDGET_LINKS[index],
-                    call = if (index <= 3) null else Call(
-                        domain = DEFAULT_DOMAIN,
-                        type = Call.Type.VIDEO,
-                        topic = BuildConfig.CALL_TOPIC
-                    )
-                )
-            }
-            selected = paramsMap.entries.first().toPair()
-        }
 
         with(button) {
             text = "Launch: " + selected.first
@@ -100,6 +85,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun stringToParams(): Map<String, Params>{
+        val paramsMap = mutableMapOf<String, Params>()
+        BuildConfig.WIDGET_PARAMS.split(",").forEachIndexed{index, pair ->
+            val parts = pair.split("*")
+            paramsMap[parts[0]] = Params(
+                title = parts[0],
+                url = parts[1],
+                call = if (index <= 3) null else Call(
+                    domain = DEFAULT_DOMAIN,
+                    type = Call.Type.VIDEO,
+                    topic = BuildConfig.CALL_TOPIC
+                )
+            )
+        }
+        return paramsMap
     }
 
 }
