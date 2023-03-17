@@ -250,7 +250,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Logger.debug(TAG, "Lifecycle: onCreate()")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.qbox_widget_activity_webview)
 
@@ -358,6 +357,28 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
+    override fun onPause() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInPictureInPictureMode) {
+                println("onPause: In pip mode")
+            }else{
+                println("onPause: not in pip")
+            }
+        }
+        super.onPause()
+    }
+
+    override fun onResume() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInPictureInPictureMode) {
+                println("onPause: onResume() -> In pip mode")
+            }else{
+                println("onPause: onResume() -> not in pip")
+            }
+        }
+        super.onResume()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.qbox_widget_webview, menu)
         return super.onCreateOptionsMenu(menu)
@@ -415,14 +436,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         if (callState == Lifecycle.State.STARTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (!isInPictureInPictureMode) {
-                    println("Is in this mode")
                     enterPictureInPictureMode(
                         PictureInPictureParams.Builder()
                             .setAspectRatio(Rational(2, 3))
                             .build()
                     )
-                }else{
-                    println("Is not in this mode")
                 }
             }
         }

@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         paramsMap.keys.forEach { menu?.add(it) }
-        BuildConfig.WIDGET_TITLES
         return super.onCreateOptionsMenu(menu)
     }
 
