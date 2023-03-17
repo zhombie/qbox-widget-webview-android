@@ -110,8 +110,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
-        private var callState: Lifecycle.State = Lifecycle.State.FINISHED
-
         fun newIntent(
             context: Context,
             flavor: Flavor,
@@ -248,6 +246,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             listener = this
         )
     }
+
+    private var callState: Lifecycle.State? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -433,8 +433,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onUserLeaveHint() {
         Logger.debug(TAG, "onUserLeaveHint()")
-        if (callState == Lifecycle.State.STARTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (callState == Lifecycle.State.STARTED) {
                 if (!isInPictureInPictureMode) {
                     enterPictureInPictureMode(
                         PictureInPictureParams.Builder()

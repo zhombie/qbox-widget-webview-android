@@ -1,9 +1,7 @@
 package kz.qbox.widget.webview.core.ui.components
 
 import android.webkit.JavascriptInterface
-import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.models.*
-import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 import kz.qbox.widget.webview.core.utils.encode
 
 class JSBridge constructor(
@@ -40,12 +38,10 @@ class JSBridge constructor(
 //    }
 
     @JavascriptInterface
-    fun onLifecycleState(state: String){
-        when (state){
-            "start" -> listener?.onLifecycleState(Lifecycle.State.STARTED)
-            "finish" -> listener?.onLifecycleState(Lifecycle.State.FINISHED)
+    fun onLifecycleState(state: String) {
+        Lifecycle.State.of(state)?.let {
+            listener?.onLifecycleState(it)
         }
-
     }
 
     fun dispose() {
@@ -53,8 +49,8 @@ class JSBridge constructor(
     }
 
     interface Listener {
+        //        fun onLogMessageReceived(message: String)
         fun onLifecycleState(state: Lifecycle.State)
-//        fun onLogMessageReceived(message: String)
         fun onChangeLanguage(language: String): Boolean
         fun onClose(): Boolean
     }

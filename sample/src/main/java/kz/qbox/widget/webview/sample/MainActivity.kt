@@ -58,21 +58,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    private fun launchWidget(widget: Params) {
+    private fun launchWidget(params: Params) {
         val calendar = Calendar.getInstance()
         calendar.set(1970, 1, 1)
 
-        if (widget.call == null) {
+        if (params.call == null) {
             Widget.Builder.FullSuite(this)
                 .setLoggingEnabled(true)
-                .setUrl(widget.url)
+                .setUrl(params.url)
                 .setLanguage(Language.RUSSIAN)
                 .launch()
         } else {
             Widget.Builder.VideoCall(this)
                 .setLoggingEnabled(true)
-                .setUrl(widget.url)
-                .setCall(call = widget.call)
+                .setUrl(params.url)
+                .setCall(call = params.call)
                 .setLanguage(Language.RUSSIAN)
                 .launch()
         }
