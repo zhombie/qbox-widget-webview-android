@@ -35,10 +35,6 @@ class JSBridge constructor(
 
     @JavascriptInterface
     fun onLifecycleState(state: String) {
-        Logger.debug(
-            "onLifecycleState()",
-            "${Lifecycle.State.FINISHED}, ${Lifecycle.State.STARTED}"
-        )
         when (state) {
             "start" -> Lifecycle.State.of("STARTED")?.let {
                 listener?.onLifecycleState(it)

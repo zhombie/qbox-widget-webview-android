@@ -249,7 +249,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private var callState: Lifecycle.State? = null
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.qbox_widget_activity_webview)
@@ -432,14 +432,18 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onUserLeaveHint() {
         Logger.debug(TAG, "onUserLeaveHint()")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (callState == Lifecycle.State.STARTED) {
                 if (!isInPictureInPictureMode) {
-                    enterPictureInPictureMode(
-                        PictureInPictureParams.Builder()
-                            .setAspectRatio(Rational(2, 3))
-                            .build()
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        enterPictureInPictureMode(
+                            PictureInPictureParams.Builder()
+                                .setAspectRatio(Rational(2, 3))
+                                .build()
+                        )
+                    }else{
+                        enterPictureInPictureMode()
+                    }
                 }
             }
         }
@@ -820,26 +824,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     override fun onChangeLanguage(language: String): Boolean {
         return false
     }
-//
-//    override fun onLogMessageReceived(message: String) {
-//        Logger.debug("JavaScriptLogs", message)
-//    }
 
     override fun onLifecycleState(state: Lifecycle.State) {
         Logger.debug(TAG, "onLifecycleState() -> $state")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            when (state) {
-                Lifecycle.State.STARTED -> {
-                    callState = state
-                }
-                Lifecycle.State.FINISHED -> {
-                    if (isInPictureInPictureMode) {
-                        Toast.makeText(this, "Call finished", Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        callState = state
-                    }
-                }
+            callState = state
+            if (state == Lifecycle.State.FINISHED && isInPictureInPictureMode) {
+                Toast.makeText(this, R.string.qbox_widget_alert_message_call_finished, Toast.LENGTH_SHORT).show()
             }
         }
     }

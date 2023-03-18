@@ -25,6 +25,7 @@
     <string name="qbox_widget_alert_title_permissions_require">Access to permissions</string>
     <string name="qbox_widget_alert_title_permissions_require_geolocation">Location access</string>
     <string name="qbox_widget_alert_title_media_selection">Select media</string>
+    <string name="qbox_widget_alert_message_call_finished">Call finished</string>
     <string name="qbox_widget_alert_message_exit">Are you sure you want to exit the widget?</string>
     <string name="qbox_widget_alert_message_reload">Are you sure you want to reload the widget?</string>
     <string name="qbox_widget_alert_message_files_download_completed">Do you want to open file "%s"?</string>

@@ -25,6 +25,7 @@
     <string name="qbox_widget_alert_title_permissions_require">Рұқсат сұрау</string>
     <string name="qbox_widget_alert_title_permissions_require_geolocation">Геолокация рұқсатын сұрау</string>
     <string name="qbox_widget_alert_title_media_selection">Медиа таңдау</string>
+    <string name="qbox_widget_alert_message_call_finished">Қоңырау аяқталды</string>
     <string name="qbox_widget_alert_message_exit">Виджеттен расымен де шыққыңыз келе ме?</string>
     <string name="qbox_widget_alert_message_reload">Виджетті қайта жүктеңіз келе ме?</string>
     <string name="qbox_widget_alert_message_files_download_completed">"%s" файлын ашқыңыз келе ме?</string>
