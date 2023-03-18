@@ -23,11 +23,7 @@ internal class GetContentResultContract :
         }
 
     override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
-        return if (resultCode == Activity.RESULT_OK) {
-            intent?.data
-        }else{
-            null
-        }
+        return if (resultCode == Activity.RESULT_OK) intent?.data else null
     }
 
 }

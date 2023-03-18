@@ -3,7 +3,6 @@ package kz.qbox.widget.webview.core.ui.presentation
 import android.Manifest
 import android.app.DownloadManager
 import android.app.PictureInPictureParams
-import android.app.RemoteAction
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -23,7 +22,6 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
-import android.webkit.WebMessage
 import android.webkit.WebView.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -319,13 +317,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         }
         webView?.loadUrl(uri.toString())
-//        webView?.webChromeClient = object: WebChromeClient(){
-//            override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
-//                Logger.debug("ALibek", message ?: "No message")
-//            }
-//        }
-//        println("Web logs: ${webView?.webChromeClient}")
-
 
     }
 
