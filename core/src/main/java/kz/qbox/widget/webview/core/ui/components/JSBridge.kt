@@ -1,6 +1,7 @@
 package kz.qbox.widget.webview.core.ui.components
 
 import android.webkit.JavascriptInterface
+import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.utils.encode
 
@@ -32,15 +33,16 @@ class JSBridge constructor(
     fun onChangeLanguage(language: String): Boolean =
         listener?.onChangeLanguage(language) == true
 
-//    @JavascriptInterface
-//    fun onJavaScriptLogging(message: String) {
-//        listener?.onLogMessageReceived(message)
-//    }
-
     @JavascriptInterface
     fun onLifecycleState(state: String) {
-        Lifecycle.State.of(state)?.let {
-            listener?.onLifecycleState(it)
+        Logger.debug("onLifecycleState()", "${Lifecycle.State.FINISHED}, ${Lifecycle.State.STARTED}")
+        when (state){
+            "start" -> Lifecycle.State.of("STARTED")?.let {
+                listener?.onLifecycleState(it)
+            }
+            "finish" -> Lifecycle.State.of("FINISHED")?.let {
+                listener?.onLifecycleState(it)
+            }
         }
     }
 
@@ -49,7 +51,6 @@ class JSBridge constructor(
     }
 
     interface Listener {
-        //        fun onLogMessageReceived(message: String)
         fun onLifecycleState(state: Lifecycle.State)
         fun onChangeLanguage(language: String): Boolean
         fun onClose(): Boolean

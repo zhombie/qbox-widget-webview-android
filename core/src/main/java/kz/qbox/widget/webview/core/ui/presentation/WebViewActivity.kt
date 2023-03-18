@@ -3,6 +3,7 @@ package kz.qbox.widget.webview.core.ui.presentation
 import android.Manifest
 import android.app.DownloadManager
 import android.app.PictureInPictureParams
+import android.app.RemoteAction
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -22,6 +23,7 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
+import android.webkit.WebMessage
 import android.webkit.WebView.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -249,6 +251,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private var callState: Lifecycle.State? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.qbox_widget_activity_webview)
@@ -315,8 +318,15 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 }
             }
         }
-
         webView?.loadUrl(uri.toString())
+//        webView?.webChromeClient = object: WebChromeClient(){
+//            override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
+//                Logger.debug("ALibek", message ?: "No message")
+//            }
+//        }
+//        println("Web logs: ${webView?.webChromeClient}")
+
+
     }
 
     @Deprecated("Deprecated in Java")
@@ -357,26 +367,24 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
-    override fun onPause() {
+    override fun onStop() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (isInPictureInPictureMode) {
-                //TODO Realize javaScript method calling
-            } else {
-                //TODO Realize javaScript method calling
+            if (callState == Lifecycle.State.STARTED) {
+                Logger.debug(TAG, "onStop() -> application state changed -> minimized")
+                webView?.evaluateJavascript("window.postMessage('minimized', '*');", null)
             }
         }
-        super.onPause()
+        super.onStop()
     }
 
-    override fun onResume() {
+    override fun onStart() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (isInPictureInPictureMode) {
-                //TODO Realize javaScript method calling
-            } else {
-                //TODO Realize javaScript method calling
+            if (callState == Lifecycle.State.STARTED) {
+                Logger.debug(TAG, "onStart() -> application state changed -> maximized")
+                webView?.evaluateJavascript("window.postMessage('maximized', '*');", null)
             }
         }
-        super.onResume()
+        super.onStart()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
