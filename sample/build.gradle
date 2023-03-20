@@ -6,7 +6,7 @@ plugins {
 def properties = new Properties()
 properties.load(new FileInputStream(rootProject.file('local.properties')))
 
-def widgetParams = properties.getProperty('widget.params') ?: "Some name"
+def widgetParams = properties.getProperty('widget.params') ?: "\"Some name\""
 
 def callTopic = properties.getProperty('call.topic') ?: '"general"'
 

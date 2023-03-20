@@ -441,7 +441,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                                 .setAspectRatio(Rational(2, 3))
                                 .build()
                         )
-                    }else{
+                    } else {
                         enterPictureInPictureMode()
                     }
                 }
@@ -830,7 +830,23 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callState = state
             if (state == Lifecycle.State.FINISHED && isInPictureInPictureMode) {
-                Toast.makeText(this, R.string.qbox_widget_alert_message_call_finished, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    R.string.qbox_widget_alert_message_call_finished,
+                    Toast.LENGTH_SHORT
+                ).show()
+                startActivity(
+                    newIntent(
+                        context = this,
+                        flavor = flavor!!,
+                        url = uri!!.toString(),
+                        language = language,
+                        call = call,
+                        user = user,
+                        dynamicAttrs = dynamicAttrs
+                    ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                )
+//                moveTaskToBack(true)
             }
         }
     }

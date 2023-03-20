@@ -1,7 +1,6 @@
 package kz.qbox.widget.webview.core.ui.components
 
 import android.webkit.JavascriptInterface
-import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.utils.encode
 
@@ -35,13 +34,8 @@ class JSBridge constructor(
 
     @JavascriptInterface
     fun onLifecycleState(state: String) {
-        when (state) {
-            "start" -> Lifecycle.State.of("STARTED")?.let {
-                listener?.onLifecycleState(it)
-            }
-            "finish" -> Lifecycle.State.of("FINISHED")?.let {
-                listener?.onLifecycleState(it)
-            }
+        Lifecycle.State.of(state)?.let {
+            listener?.onLifecycleState(it)
         }
     }
 
