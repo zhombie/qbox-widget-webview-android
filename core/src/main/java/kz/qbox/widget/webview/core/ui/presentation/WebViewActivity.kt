@@ -3,12 +3,11 @@ package kz.qbox.widget.webview.core.ui.presentation
 import android.Manifest
 import android.app.DownloadManager
 import android.app.PictureInPictureParams
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.database.Cursor
+import android.graphics.Color
 import android.location.LocationManager
 import android.net.Uri
 import android.net.http.SslError
@@ -16,6 +15,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.text.Html
+import android.text.Html.FROM_HTML_MODE_LEGACY
+import android.text.method.LinkMovementMethod
 import android.util.Rational
 import android.view.Menu
 import android.view.MenuItem
@@ -23,6 +25,7 @@ import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebView.*
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -47,9 +50,11 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
 import kz.qbox.widget.webview.core.ui.components.JSBridge
+import kz.qbox.widget.webview.core.ui.components.LinearProgressIndicator
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
-import kz.qbox.widget.webview.core.ui.dialogs.showProgress
+import kz.qbox.widget.webview.core.ui.dialogs.DownloadProgressDialog
+import kz.qbox.widget.webview.core.ui.dialogs.showError
 import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
@@ -133,7 +138,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
 
-    private var progressDialog: AlertDialog? = null
+    private var progressDialog: DownloadProgressDialog? = null
+    private var progress: Int? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
@@ -458,8 +464,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         Logger.debug(TAG, "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
         if (isInPictureInPictureMode) {
             supportActionBar?.hide()
+            webView?.evaluateJavascript("window.postMessage('inPictureInPictureMode', '*');", null)
         } else {
             supportActionBar?.show()
+            webView?.evaluateJavascript(
+                "window.postMessage('notInPictureInPictureMode', '*');",
+                null
+            )
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
@@ -576,6 +587,44 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
 
             val publicDirectory = Environment.DIRECTORY_DOWNLOADS
+            val deviceDirectory = Environment.getExternalStorageDirectory()
+            if (deviceDirectory.freeSpace / 1000000.0 <= 300.0) {
+                val linkMessage = TextView(this).apply {
+                    setPadding(65, 0, 65, 0)
+                    setTextColor(Color.BLACK)
+                    textSize = 15f
+                    isClickable = true
+                    movementMethod = LinkMovementMethod.getInstance()
+                    text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        Html.fromHtml("<a href='$url'>$url</a>", FROM_HTML_MODE_LEGACY)
+                    } else {
+                        Html.fromHtml("<a href='$url'>$url</a>")
+                    }
+                }
+
+                AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.qbox_widget_attention))
+                    .setMessage(getString(R.string.qbox_widget_alert_message_not_enough_space))
+                    .setView(linkMessage)
+                    .setPositiveButton(getString(R.string.qbox_widget_copy)) { dialog, _ ->
+                        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                            .setPrimaryClip(ClipData.newPlainText("url", url))
+                        Toast.makeText(
+                            this,
+                            getString(R.string.qbox_widget_toast_message_copied_to_clipbaord),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(getString(R.string.qbox_widget_cancel)) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
+
+                return@setDownloadListener
+            }
 
             request.addRequestHeader("User-Agent", userAgent)
             request.allowScanningByMediaScanner()
@@ -595,17 +644,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
             request.setTitle(filename)
 
-            downloadFile(request, url)
-
-            progressDialog?.dismiss()
-            progressDialog = null
-            progressDialog = showProgress(filename)
-
-            saveFile(
-                url,
-                getExternalFilesDir(publicDirectory) ?: File(Environment.DIRECTORY_DOWNLOADS),
-                filename
-            )
+            downloadFile(request, url, filename)
 
             if (downloadStateReceiver != null) {
                 try {
@@ -647,9 +686,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                             }
                             .setPositiveButton(R.string.qbox_widget_open) { dialog, _ ->
                                 dialog.dismiss()
-                                openFile(file, mimeType)
+                                val s = openFile(file, mimeType)
                             }
                             .show()
+
+                        saveFile(url, uri)
                     }
                 }
             }
@@ -746,12 +787,18 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             .show()
     }
 
-    private fun downloadFile(downloadRequest: DownloadManager.Request, url: String) {
+    private fun downloadFile(
+        downloadRequest: DownloadManager.Request,
+        url: String,
+        filename: String
+    ) {
         val downloadManager = ContextCompat.getSystemService(
             applicationContext,
             DownloadManager::class.java
         )
+
         val id = downloadManager?.enqueue(downloadRequest)
+
         if (pendingDownloads == null) {
             pendingDownloads = mutableListOf()
         }
@@ -763,12 +810,83 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 pendingDownloads?.set(found, id to url)
             }
         }
+
+        id?.let {
+            Thread {
+                var downloading = true
+                var errorDialog: AlertDialog? = null
+                while (downloading) {
+                    val q = DownloadManager.Query()
+                    q.setFilterById(it)
+                    val cursor: Cursor = downloadManager.query(q)
+                    if (cursor.moveToFirst()) {
+                        when (cursor.getInt(
+                            cursor.getColumnIndex(DownloadManager.COLUMN_STATUS) ?: 0
+                        )) {
+                            DownloadManager.STATUS_SUCCESSFUL -> downloading = false
+                            DownloadManager.STATUS_PAUSED -> {
+                                val reasonIndex =
+                                    cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
+                                if (cursor.getInt(reasonIndex) != DownloadManager.PAUSED_WAITING_TO_RETRY) {
+                                    downloading = false
+                                    runOnUiThread {
+                                        errorDialog?.dismiss()
+                                        errorDialog = null
+                                        errorDialog = showError(url)
+                                        errorDialog?.show()
+                                    }
+                                }
+                            }
+                            DownloadManager.STATUS_FAILED -> {
+                                downloading = false
+                                runOnUiThread {
+                                    errorDialog?.dismiss()
+                                    errorDialog = null
+                                    errorDialog = showError(url)
+                                    errorDialog?.show()
+                                }
+                            }
+                            else -> {
+                                val bytesDownloaded = cursor.getInt(
+                                    cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                                        ?: 0
+                                )
+                                val bytesTotal = cursor.getInt(
+                                    cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                                        ?: 0
+                                )
+                                val progress =
+                                    if (bytesTotal > 0) (bytesDownloaded * 100.0 / bytesTotal) else 0.0
+
+                                runOnUiThread {
+                                    errorDialog?.dismiss()
+                                    errorDialog = null
+
+                                    if (progressDialog == null) {
+
+                                        progressDialog = DownloadProgressDialog(
+                                            context = this,
+                                            progressView = LinearProgressIndicator(this),
+                                            cancelable = true,
+                                            cancelListener = null,
+                                            params = DownloadProgressDialog.Params(filename)
+                                        )
+                                        progressDialog?.show()
+                                    }
+                                    progressDialog?.progress = progress
+                                }
+                            }
+                        }
+                    }
+                    cursor.close()
+                }
+            }.start()
+        }
         Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
             .show()
     }
 
-    private fun saveFile(url: String, folder: File, filename: String) {
-        val uri = Uri.withAppendedPath(Uri.fromFile(folder), filename)
+    private fun saveFile(url: String, uri: Uri) {
         if (downloadedFiles == null) {
             downloadedFiles = mutableListOf()
         }

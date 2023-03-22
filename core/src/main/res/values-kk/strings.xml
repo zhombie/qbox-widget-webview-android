@@ -6,6 +6,7 @@
     <string name="qbox_widget_exit">Жабу</string>
     <string name="qbox_widget_reload">Қайта жүктеу</string>
     <string name="qbox_widget_open">Ашу</string>
+    <string name="qbox_widget_copy">Көшіру</string>
 
     <string name="qbox_widget_content_image">Сурет</string>
     <string name="qbox_widget_content_video">Бейне</string>
@@ -13,6 +14,8 @@
     <string name="qbox_widget_content_document">Құжат</string>
 
     <string name="qbox_widget_go_to_settings">Баптауларға өту</string>
+
+    <string name="qbox_widget_attention">Назар аударыңыз!</string>
 
     <string name="qbox_widget_error_basic">Қателік орын алды</string>
     <string name="qbox_widget_error_files_exceeds_limit">Кешіріңіз, бірақ файлды таңдау кезінде шектен (%d) асып кеттіңіз</string>
@@ -31,6 +34,10 @@
     <string name="qbox_widget_alert_message_files_download_completed">"%s" файлын ашқыңыз келе ме?</string>
     <string name="qbox_widget_alert_message_permissions_require">Виджеттің қатесіз жұмыс істеуі үшін сұралған мүмкіндіктерге рұқсат беріңіз</string>
     <string name="qbox_widget_alert_message_permissions_require_geolocation">Қоңырау шалу үшін «Геолокация» мүмкіндігіне рұқсат беріңіз</string>
+    <string name="qbox_widget_alert_message_not_enough_space">Файлды жүктеу үшін жад жеткеліксіз, файл сілтемесін көшіргіңіз келе ме?</string>
+    <string name="qbox_widget_alert_message_error_occurred">Файл жүктеу барысында қате пайда болды, файл сілтемесін көшіргіңіз келе ме?</string>
+
+    <string name="qbox_widget_toast_message_copied_to_clipbaord">Аралық сақтышқа көшірілді</string>
 
     <string name="qbox_widget_label_files_download_in_progress">"%s" жүктелуде…</string>
     <string name="qbox_widget_label_widget_loading">Виджет жүктелуде: %d%%</string>

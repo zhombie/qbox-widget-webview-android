@@ -6,6 +6,7 @@
     <string name="qbox_widget_exit">Exit</string>
     <string name="qbox_widget_reload">Reload</string>
     <string name="qbox_widget_open">Open</string>
+    <string name="qbox_widget_copy">Copy</string>
 
     <string name="qbox_widget_content_image">Image</string>
     <string name="qbox_widget_content_video">Video</string>
@@ -13,6 +14,8 @@
     <string name="qbox_widget_content_document">Document</string>
 
     <string name="qbox_widget_go_to_settings">To settings</string>
+
+    <string name="qbox_widget_attention">Attention!</string>
 
     <string name="qbox_widget_error_basic">Error occurred</string>
     <string name="qbox_widget_error_files_exceeds_limit">Sorry, but you exceeded the limit (%d) when selecting a file</string>
@@ -31,6 +34,10 @@
     <string name="qbox_widget_alert_message_files_download_completed">Do you want to open file "%s"?</string>
     <string name="qbox_widget_alert_message_permissions_require">Please, grant the widget with permissions to work properly</string>
     <string name="qbox_widget_alert_message_permissions_require_geolocation">Please, turn on the "Location" feature to make a call</string>
+    <string name="qbox_widget_alert_message_not_enough_space">Not enough space to download the file, do you want to copy the file link?</string>
+    <string name="qbox_widget_alert_message_error_occurred">An error occurred while downloading the file, do you want to copy the link?</string>
+
+    <string name="qbox_widget_toast_message_copied_to_clipbaord">Copied to clipboard</string>
 
     <string name="qbox_widget_label_files_download_in_progress">"%s" downloading…</string>
     <string name="qbox_widget_label_widget_loading">Widget loading: %d%%</string>
