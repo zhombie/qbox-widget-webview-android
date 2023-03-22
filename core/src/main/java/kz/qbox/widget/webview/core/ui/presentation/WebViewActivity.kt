@@ -139,7 +139,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var progressView: ProgressView? = null
 
     private var progressDialog: DownloadProgressDialog? = null
-    private var progress: Int? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
