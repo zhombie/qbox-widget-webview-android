@@ -16,10 +16,10 @@ import android.os.StatFs
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.webkit.WebSettings
-import kz.qbox.widget.webview.core.system.activityManager
-import kz.qbox.widget.webview.core.system.audioManager
-import kz.qbox.widget.webview.core.system.telephonyManager
-import kz.qbox.widget.webview.core.system.wifiManager
+import kz.qbox.widget.webview.core.utils.activityManager
+import kz.qbox.widget.webview.core.utils.audioManager
+import kz.qbox.widget.webview.core.utils.telephonyManager
+import kz.qbox.widget.webview.core.utils.wifiManager
 import java.io.File
 import java.util.*
 

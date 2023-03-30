@@ -13,16 +13,14 @@ import android.webkit.*
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.Widget
 
+private val TAG = WebView::class.java.simpleName
+
 class WebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : android.webkit.WebView(context, attrs, defStyleAttr, defStyleRes) {
-
-    companion object {
-        private val TAG = WebView::class.java.simpleName
-    }
 
     data class GeolocationPermissionsShowPrompt constructor(
         val origin: String?,
@@ -430,7 +428,7 @@ class WebView @JvmOverloads constructor(
     interface Listener {
         fun onReceivedSSLError(handler: SslErrorHandler?, error: SslError?) {}
         fun onPageLoadProgress(progress: Int) {}
-        fun onSelectFileRequest(): Boolean { return false }
+        fun onSelectFileRequest(): Boolean = false
         fun onPermissionRequest(resources: Array<String>) {}
         fun onPermissionRequestCanceled(resources: Array<String>) {}
         fun onGeolocationPermissionsShowPrompt() {}
