@@ -1,5 +1,6 @@
 package kz.qbox.widget.webview.core
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import kz.qbox.widget.webview.core.models.*
