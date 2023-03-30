@@ -1,10 +1,7 @@
 package kz.qbox.widget.webview.core.ui.components
 
 import android.webkit.JavascriptInterface
-import kz.qbox.widget.webview.core.models.Call
-import kz.qbox.widget.webview.core.models.Device
-import kz.qbox.widget.webview.core.models.DynamicAttrs
-import kz.qbox.widget.webview.core.models.User
+import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.utils.encode
 
 class JSBridge constructor(
@@ -28,19 +25,27 @@ class JSBridge constructor(
     fun getExtra(): String? = dynamicAttrs?.encode()
 
     @JavascriptInterface
-    fun onClose(): Boolean =
-        listener?.onClose() == true
+    fun onCallState(state: String) {
+        CallState.of(state)?.let {
+            listener?.onCallState(it)
+        }
+    }
 
     @JavascriptInterface
-    fun onChangeLanguage(language: String): Boolean =
-        listener?.onChangeLanguage(language) == true
+    fun onLanguageSet(language: String): Boolean =
+        listener?.onLanguageSet(language) == true
+
+    @JavascriptInterface
+    fun onClose(): Boolean =
+        listener?.onClose() == true
 
     fun dispose() {
         listener = null
     }
 
     interface Listener {
-        fun onChangeLanguage(language: String): Boolean
+        fun onCallState(state: CallState)
+        fun onLanguageSet(language: String): Boolean
         fun onClose(): Boolean
     }
 

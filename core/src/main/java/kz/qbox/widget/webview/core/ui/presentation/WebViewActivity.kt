@@ -2,11 +2,11 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.Manifest
 import android.app.DownloadManager
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.PictureInPictureParams
+import android.content.*
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.graphics.Color
 import android.location.LocationManager
 import android.net.Uri
 import android.net.http.SslError
@@ -14,14 +14,20 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.text.Html
+import android.text.Html.FROM_HTML_MODE_LEGACY
+import android.text.method.LinkMovementMethod
+import android.util.Rational
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebView.*
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -42,13 +48,18 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
+import kz.qbox.widget.webview.core.system.clipboardManager
+import kz.qbox.widget.webview.core.system.downloadManager
+import kz.qbox.widget.webview.core.system.getIntOrDefault
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
-import kz.qbox.widget.webview.core.ui.dialogs.showProgress
+import kz.qbox.widget.webview.core.ui.dialogs.DownloadProgressDialog
+import kz.qbox.widget.webview.core.ui.dialogs.showError
 import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
+import org.json.JSONObject
 import java.io.File
 import java.util.*
 
@@ -129,7 +140,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
 
-    private var progressDialog: AlertDialog? = null
+    private var progressDialog: DownloadProgressDialog? = null
 
     private var interactor: StorageAccessFrameworkInteractor? = null
 
@@ -207,7 +218,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private val flavor by lazy(LazyThreadSafetyMode.NONE) {
-        IntentCompat.getEnum<Flavor>(intent, "flavor")
+        IntentCompat.getEnum<Flavor>(intent, "flavor") ?: throw IllegalStateException()
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
@@ -242,6 +253,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             listener = this
         )
     }
+
+    private var callState: CallState? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -290,7 +304,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     webView?.setFileSelectionPromptResult(result.uri)
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
-                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT)
+                        .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
@@ -302,13 +317,14 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
-                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT)
+                        .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
             }
         }
-
         webView?.loadUrl(uri.toString())
+
     }
 
     @Deprecated("Deprecated in Java")
@@ -349,6 +365,24 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
+    override fun onStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (callState == CallState.START) {
+                evaluateJS(JSONObject().apply { put("app_state", AppState.START.toString()) })
+            }
+        }
+        super.onStart()
+    }
+
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (callState == CallState.START) {
+                evaluateJS(JSONObject().apply { put("app_state", AppState.STOP.toString()) })
+            }
+        }
+        super.onStop()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.qbox_widget_webview, menu)
         return super.onCreateOptionsMenu(menu)
@@ -375,18 +409,6 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        webView?.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        webView?.onPause()
-    }
-
     override fun onDestroy() {
         jsBridge.dispose()
 
@@ -410,6 +432,44 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         super.onDestroy()
 
         webView?.destroy()
+    }
+
+
+    override fun onUserLeaveHint() {
+        Logger.debug(TAG, "onUserLeaveHint()")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (callState == CallState.START) {
+                if (!isInPictureInPictureMode) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        enterPictureInPictureMode(
+                            PictureInPictureParams.Builder()
+                                .setAspectRatio(Rational(2, 3))
+//                                .setAutoEnterEnabled(true)
+                                .build()
+                        )
+                    } else {
+                        enterPictureInPictureMode()
+                    }
+                }
+            }
+        }
+        super.onUserLeaveHint()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        Logger.debug(TAG, "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
+        if (isInPictureInPictureMode) {
+            supportActionBar?.hide()
+            evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_ENTER.toString()) })
+        } else {
+            supportActionBar?.show()
+            evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_EXIT.toString()) })
+        }
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
 
     private fun setupActionBar() {
@@ -524,12 +584,55 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
 
             val publicDirectory = Environment.DIRECTORY_DOWNLOADS
+            val deviceDirectory = Environment.getExternalStorageDirectory()
+            if (deviceDirectory.freeSpace / 1000000.0 <= 300.0) {
+                val linkMessage = TextView(this).apply {
+                    setPadding(65, 0, 65, 0)
+                    setTextColor(Color.BLACK)
+                    textSize = 15f
+                    isClickable = true
+                    movementMethod = LinkMovementMethod.getInstance()
+                    text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        Html.fromHtml("<a href='$url'>$url</a>", FROM_HTML_MODE_LEGACY)
+                    } else {
+                        Html.fromHtml("<a href='$url'>$url</a>")
+                    }
+                }
+
+                AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.qbox_widget_attention))
+                    .setMessage(getString(R.string.qbox_widget_alert_message_not_enough_space))
+                    .setView(linkMessage)
+                    .setPositiveButton(getString(R.string.qbox_widget_copy)) { dialog, _ ->
+                        clipboardManager?.setPrimaryClip(ClipData.newPlainText("url", url))
+
+                        Toast.makeText(
+                            this,
+                            getString(R.string.qbox_widget_toast_message_copied_to_clipboard),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(getString(R.string.qbox_widget_cancel)) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
+
+                return@setDownloadListener
+            }
 
             request.addRequestHeader("User-Agent", userAgent)
             request.allowScanningByMediaScanner()
             request.setAllowedOverMetered(true)
             request.setAllowedOverRoaming(true)
-            request.setDescription(getString(R.string.qbox_widget_label_files_download_in_progress, filename))
+            request.setDescription(
+                getString(
+                    R.string.qbox_widget_label_files_download_in_progress,
+                    filename
+                )
+            )
             request.setDestinationInExternalPublicDir(publicDirectory, filename)
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -538,17 +641,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
             request.setTitle(filename)
 
-            downloadFile(request, url)
-
-            progressDialog?.dismiss()
-            progressDialog = null
-            progressDialog = showProgress(filename)
-
-            saveFile(
-                url,
-                getExternalFilesDir(publicDirectory) ?: File(Environment.DIRECTORY_DOWNLOADS),
-                filename
-            )
+            downloadFile(request, url, filename)
 
             if (downloadStateReceiver != null) {
                 try {
@@ -590,9 +683,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                             }
                             .setPositiveButton(R.string.qbox_widget_open) { dialog, _ ->
                                 dialog.dismiss()
+
+                                // TODO: Handle file open issue
                                 openFile(file, mimeType)
                             }
                             .show()
+
+                        saveFile(url, uri)
                     }
                 }
             }
@@ -605,6 +702,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         webView?.addJavascriptInterface(jsBridge, "JSBridge")
 
         webView?.setListener(this)
+    }
+
+    private fun evaluateJS(jsonObject: JSONObject) {
+        webView?.evaluateJavascript("window.postMessage('$jsonObject', '*');", null)
     }
 
     private fun resolveUri(uri: Uri): Boolean {
@@ -689,28 +790,109 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             .show()
     }
 
-    private fun downloadFile(downloadRequest: DownloadManager.Request, url: String) {
-        val downloadManager = ContextCompat.getSystemService(
-            applicationContext,
-            DownloadManager::class.java
-        )
-        val id = downloadManager?.enqueue(downloadRequest)
+    private fun downloadFile(
+        downloadRequest: DownloadManager.Request,
+        url: String,
+        filename: String
+    ) {
+        // TODO: Handle DownloadManager absence issue (impossible case, but who knows)
+        val downloadManager = downloadManager ?: return
+
+        val id = downloadManager.enqueue(downloadRequest)
+
         if (pendingDownloads == null) {
             pendingDownloads = mutableListOf()
         }
-        if (id != null) {
-            val found = pendingDownloads?.indexOfFirst { it.first == id }
-            if (found == null || found < 0) {
-                pendingDownloads?.add(id to url)
-            } else {
-                pendingDownloads?.set(found, id to url)
-            }
+
+        val found = pendingDownloads?.indexOfFirst { it.first == id }
+        if (found == null || found < 0) {
+            pendingDownloads?.add(id to url)
+        } else {
+            pendingDownloads?.set(found, id to url)
         }
-        Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG).show()
+
+        Thread {
+            var isDownloading = true
+
+            var errorDialog: AlertDialog? = null
+
+            while (isDownloading) {
+                val q = DownloadManager.Query()
+                q.setFilterById(id)
+                val cursor = downloadManager.query(q)
+                if (cursor.moveToFirst()) {
+                    when (cursor.getIntOrDefault(DownloadManager.COLUMN_STATUS, 0)) {
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            isDownloading = false
+                        }
+                        DownloadManager.STATUS_PAUSED -> {
+                            if (cursor.getIntOrDefault(
+                                    DownloadManager.COLUMN_REASON,
+                                    0
+                                ) != DownloadManager.PAUSED_WAITING_TO_RETRY
+                            ) {
+                                isDownloading = false
+
+                                runOnUiThread {
+                                    errorDialog?.dismiss()
+                                    errorDialog = null
+                                    errorDialog = showError(url)
+                                    errorDialog?.show()
+                                }
+                            }
+                        }
+                        DownloadManager.STATUS_FAILED -> {
+                            isDownloading = false
+
+                            runOnUiThread {
+                                errorDialog?.dismiss()
+                                errorDialog = null
+                                errorDialog = showError(url)
+                                errorDialog?.show()
+                            }
+                        }
+                        else -> {
+                            val bytesDownloaded = cursor.getIntOrDefault(
+                                DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR,
+                                0
+                            )
+                            val bytesTotal = cursor.getIntOrDefault(
+                                DownloadManager.COLUMN_TOTAL_SIZE_BYTES,
+                                0
+                            )
+                            val progress = if (bytesTotal > 0) {
+                                (bytesDownloaded * 100.0 / bytesTotal)
+                            } else {
+                                0.0
+                            }
+
+                            runOnUiThread {
+                                errorDialog?.dismiss()
+                                errorDialog = null
+
+                                if (progressDialog == null) {
+                                    progressDialog = DownloadProgressDialog(
+                                        context = this,
+                                        cancelable = true,
+                                        cancelListener = null,
+                                        params = DownloadProgressDialog.Params(filename)
+                                    )
+                                    progressDialog?.show()
+                                }
+                                progressDialog?.progress = progress
+                            }
+                        }
+                    }
+                }
+                cursor.close()
+            }
+        }.start()
+
+        Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
+            .show()
     }
 
-    private fun saveFile(url: String, folder: File, filename: String) {
-        val uri = Uri.withAppendedPath(Uri.fromFile(folder), filename)
+    private fun saveFile(url: String, uri: Uri) {
         if (downloadedFiles == null) {
             downloadedFiles = mutableListOf()
         }
@@ -734,7 +916,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             )
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT)
+                .show()
             return false
         }
 
@@ -747,7 +930,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             true
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT)
+                .show()
             false
         }
     }
@@ -761,8 +945,36 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         return true
     }
 
-    override fun onChangeLanguage(language: String): Boolean {
+    override fun onLanguageSet(language: String): Boolean {
         return false
+    }
+
+    override fun onCallState(state: CallState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            callState = state
+
+            if (state == CallState.FINISH && isInPictureInPictureMode) {
+                Toast.makeText(
+                    this,
+                    R.string.qbox_widget_alert_message_call_finished,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                startActivity(
+                    newIntent(
+                        context = this,
+                        flavor = flavor,
+                        url = uri.toString(),
+                        language = language,
+                        call = call,
+                        user = user,
+                        dynamicAttrs = dynamicAttrs
+                    ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                )
+
+//                moveTaskToBack(true)
+            }
+        }
     }
 
     /**

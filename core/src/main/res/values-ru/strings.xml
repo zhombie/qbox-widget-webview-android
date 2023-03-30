@@ -6,6 +6,7 @@
     <string name="qbox_widget_exit">Выйти</string>
     <string name="qbox_widget_reload">Обновить</string>
     <string name="qbox_widget_open">Открыть</string>
+    <string name="qbox_widget_copy">Скопировать</string>
 
     <string name="qbox_widget_content_image">Фото</string>
     <string name="qbox_widget_content_video">Видео</string>
@@ -13,6 +14,8 @@
     <string name="qbox_widget_content_document">Документ</string>
 
     <string name="qbox_widget_go_to_settings">К настройкам</string>
+
+    <string name='qbox_widget_attention'>Внимание!</string>
 
     <string name="qbox_widget_error_basic">Произошла ошибка</string>
     <string name="qbox_widget_error_files_exceeds_limit">Извините, но вы превысили лимит (%d) при выборе файла</string>
@@ -25,11 +28,16 @@
     <string name="qbox_widget_alert_title_permissions_require">Доступ к разрешениям</string>
     <string name="qbox_widget_alert_title_permissions_require_geolocation">Доступ к местоположению</string>
     <string name="qbox_widget_alert_title_media_selection">Выбор медиа-вложения</string>
+    <string name="qbox_widget_alert_message_call_finished">Звонок завершен</string>
     <string name="qbox_widget_alert_message_exit">Вы действительно хотите выйти из виджета?</string>
     <string name="qbox_widget_alert_message_reload">Вы действительно хотите обновить виджет?</string>
     <string name="qbox_widget_alert_message_files_download_completed">Хотите ли вы открыть файл "%s"?</string>
     <string name="qbox_widget_alert_message_permissions_require">Пожалуйста, предоставьте виджету разрешения для полноценной работы виджета</string>
     <string name="qbox_widget_alert_message_permissions_require_geolocation">Пожалуйста, включите функцию "Местоположение" для совершения звонка</string>
+    <string name="qbox_widget_alert_message_not_enough_space">Недостаточно памяти для загрузки файла, хотите ли вы скопировать ссылку файла?</string>
+    <string name="qbox_widget_alert_message_error_occurred">Произошла ошибка во время скачивания файла, хотите ли вы скопировать ссылку файла?</string>
+
+    <string name="qbox_widget_toast_message_copied_to_clipboard">Скопировано в буфер обмена</string>
 
     <string name="qbox_widget_label_files_download_in_progress">"%s" загружается…</string>
     <string name="qbox_widget_label_widget_loading">Загрузка виджета: %d%%</string>
