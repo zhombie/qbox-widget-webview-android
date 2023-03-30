@@ -2,8 +2,8 @@ package kz.qbox.widget.webview.core.models
 
 class Lifecycle {
     enum class State() {
-        STARTED,
-        FINISHED;
+        START,
+        FINISH;
 
         companion object {
             fun of(value: String): State? {

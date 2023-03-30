@@ -58,6 +58,7 @@ import kz.qbox.widget.webview.core.ui.dialogs.showError
 import kz.qbox.widget.webview.core.utils.IntentCompat
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
 import kz.qbox.widget.webview.core.utils.setupActionBar
+import org.json.JSONObject
 import java.io.File
 import java.util.*
 
@@ -365,9 +366,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onStop() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == Lifecycle.State.STARTED) {
-                Logger.debug(TAG, "onStop() -> application state changed -> minimized")
-                webView?.evaluateJavascript("window.postMessage('minimized', '*');", null)
+            if (callState == Lifecycle.State.START) {
+                Logger.debug(TAG, "onStop() -> minimized")
+                evaluateJS(JSONObject().apply { put("state", "stop")})
             }
         }
         super.onStop()
@@ -375,9 +376,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onStart() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == Lifecycle.State.STARTED) {
-                Logger.debug(TAG, "onStart() -> application state changed -> maximized")
-                webView?.evaluateJavascript("window.postMessage('maximized', '*');", null)
+            if (callState == Lifecycle.State.START) {
+                Logger.debug(TAG, "onStart() -> maximized")
+                evaluateJS(JSONObject().apply { put("state", "start")})
             }
         }
         super.onStart()
@@ -438,7 +439,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     override fun onUserLeaveHint() {
         Logger.debug(TAG, "onUserLeaveHint()")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == Lifecycle.State.STARTED) {
+            if (callState == Lifecycle.State.START) {
                 if (!isInPictureInPictureMode) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         enterPictureInPictureMode(
@@ -463,13 +464,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         Logger.debug(TAG, "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
         if (isInPictureInPictureMode) {
             supportActionBar?.hide()
-            webView?.evaluateJavascript("window.postMessage('inPictureInPictureMode', '*');", null)
+            evaluateJS(JSONObject().apply { put("event", "pip_enter") })
         } else {
             supportActionBar?.show()
-            webView?.evaluateJavascript(
-                "window.postMessage('notInPictureInPictureMode', '*');",
-                null
-            )
+            evaluateJS(JSONObject().apply { put("event", "pip_exit") })
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
@@ -702,6 +700,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         webView?.addJavascriptInterface(jsBridge, "JSBridge")
 
         webView?.setListener(this)
+    }
+
+    private fun evaluateJS(jsonObject: JSONObject) {
+        webView?.evaluateJavascript("window.postMessage('$jsonObject', '*');", null)
     }
 
     private fun resolveUri(uri: Uri): Boolean {
@@ -946,7 +948,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         Logger.debug(TAG, "onLifecycleState() -> $state")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callState = state
-            if (state == Lifecycle.State.FINISHED && isInPictureInPictureMode) {
+            if (state == Lifecycle.State.FINISH && isInPictureInPictureMode) {
                 Toast.makeText(
                     this,
                     R.string.qbox_widget_alert_message_call_finished,
