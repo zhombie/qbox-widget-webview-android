@@ -37,7 +37,7 @@
     <string name="qbox_widget_alert_message_not_enough_space">Not enough space to download the file, do you want to copy the file link?</string>
     <string name="qbox_widget_alert_message_error_occurred">An error occurred while downloading the file, do you want to copy the link?</string>
 
-    <string name="qbox_widget_toast_message_copied_to_clipbaord">Copied to clipboard</string>
+    <string name="qbox_widget_toast_message_copied_to_clipboard">Copied to clipboard</string>
 
     <string name="qbox_widget_label_files_download_in_progress">"%s" downloading…</string>
     <string name="qbox_widget_label_widget_loading">Widget loading: %d%%</string>

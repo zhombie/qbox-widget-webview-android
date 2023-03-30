@@ -1,12 +1,10 @@
 package kz.qbox.widget.webview.sample
 
 import android.annotation.SuppressLint
-import android.icu.util.Calendar
-import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import kz.qbox.widget.webview.core.Widget
@@ -24,41 +22,49 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.button)
     }
 
-    private val paramsMap = stringToParams()
+    private val paramsMap = parseParams()
 
     private var selected: Pair<String, Params> = paramsMap.entries.first().toPair()
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         with(button) {
             text = "Launch: " + selected.first
+
             setOnClickListener {
                 launchWidget(selected.second)
             }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun launchWidget(params: Params) {
-        val calendar = Calendar.getInstance()
-        calendar.set(1970, 1, 1)
+        val exampleCustomer = User(
+            firstName = "Shaken",
+            lastName = "Aimanov",
+            patronymic = "Kenzhetaiuly",
+            birthdate = Date(SystemClock.currentThreadTimeMillis()),
+            iin = "140215100000",
+            phoneNumber = "77771234567",
+            dynamicAttrs = DynamicAttrs("foo" to "bar")
+        )
 
         if (params.call == null) {
             Widget.Builder.FullSuite(this)
                 .setLoggingEnabled(true)
                 .setUrl(params.url)
-                .setLanguage(Language.RUSSIAN)
+                .setLanguage(Language.KAZAKH)
+                .setUser(exampleCustomer)
                 .launch()
         } else {
             Widget.Builder.VideoCall(this)
                 .setLoggingEnabled(true)
                 .setUrl(params.url)
+                .setLanguage(Language.KAZAKH)
                 .setCall(call = params.call)
-                .setLanguage(Language.RUSSIAN)
+                .setUser(exampleCustomer)
                 .launch()
         }
     }
@@ -87,18 +93,22 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun stringToParams(): Map<String, Params>{
+    private fun parseParams(): Map<String, Params> {
         val paramsMap = mutableMapOf<String, Params>()
-        BuildConfig.WIDGET_PARAMS.split(",").forEachIndexed{index, pair ->
-            val parts = pair.split("*")
-            paramsMap[parts[0]] = Params(
-                title = parts[0],
-                url = parts[1],
-                call = if (index <= 3) null else Call(
-                    domain = DEFAULT_DOMAIN,
-                    type = Call.Type.VIDEO,
-                    topic = BuildConfig.CALL_TOPIC
-                )
+        BuildConfig.CALL_ROUTES.split(",").forEachIndexed { index, pair ->
+            val (title, url) = pair.split("*")
+            paramsMap[title] = Params(
+                title = title,
+                url = url,
+                call = if (index <= 3) {
+                    null
+                } else {
+                    Call(
+                        domain = DEFAULT_DOMAIN,
+                        type = Call.Type.VIDEO,
+                        topic = BuildConfig.CALL_TOPIC
+                    )
+                }
             )
         }
         return paramsMap

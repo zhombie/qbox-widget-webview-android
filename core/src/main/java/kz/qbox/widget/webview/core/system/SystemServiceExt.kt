@@ -1,6 +1,8 @@
 package kz.qbox.widget.webview.core.system
 
 import android.app.ActivityManager
+import android.app.DownloadManager
+import android.content.ClipboardManager
 import android.content.Context
 import android.media.AudioManager
 import android.net.wifi.WifiManager
@@ -12,6 +14,12 @@ internal inline val Context.activityManager: ActivityManager?
 
 internal inline val Context.audioManager: AudioManager?
     get() = getSystemServiceCompat(AudioManager::class.java)
+
+internal inline val Context.clipboardManager: ClipboardManager?
+    get() = getSystemServiceCompat(ClipboardManager::class.java)
+
+internal inline val Context.downloadManager: DownloadManager?
+    get() = getSystemServiceCompat(DownloadManager::class.java)
 
 internal inline val Context.telephonyManager: TelephonyManager?
     get() = getSystemServiceCompat(TelephonyManager::class.java)

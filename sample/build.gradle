@@ -6,9 +6,8 @@ plugins {
 def properties = new Properties()
 properties.load(new FileInputStream(rootProject.file('local.properties')))
 
-def widgetParams = properties.getProperty('widget.params') ?: "\"Some name\""
-
 def callTopic = properties.getProperty('call.topic') ?: '"general"'
+def callRoutes = properties.getProperty('call.routes') ?: '"localhost*http://127.0.0.1"'
 
 android {
     namespace 'kz.qbox.widget.webview.sample'
@@ -27,9 +26,8 @@ android {
 
     buildTypes {
         debug {
-
             buildConfigField 'String', 'CALL_TOPIC', callTopic
-            buildConfigField "String", "WIDGET_PARAMS", widgetParams
+            buildConfigField 'String', 'CALL_ROUTES', callRoutes
 
             minifyEnabled false
 
@@ -49,13 +47,13 @@ android {
 
 dependencies {
     // AppCompat
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 
     // Core
     implementation 'androidx.core:core-ktx:1.9.0'
 
     // Material Design Components
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.material:material:1.8.0'
 
     // Garage SDK
     implementation 'com.github.zhombie.garage:image-coil:1.3.5'

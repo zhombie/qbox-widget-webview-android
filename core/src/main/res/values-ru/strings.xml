@@ -6,7 +6,7 @@
     <string name="qbox_widget_exit">Выйти</string>
     <string name="qbox_widget_reload">Обновить</string>
     <string name="qbox_widget_open">Открыть</string>
-    <string name="qbox_widget_copy">Копировать</string>
+    <string name="qbox_widget_copy">Скопировать</string>
 
     <string name="qbox_widget_content_image">Фото</string>
     <string name="qbox_widget_content_video">Видео</string>
@@ -37,7 +37,7 @@
     <string name="qbox_widget_alert_message_not_enough_space">Недостаточно памяти для загрузки файла, хотите ли вы скопировать ссылку файла?</string>
     <string name="qbox_widget_alert_message_error_occurred">Произошла ошибка во время скачивания файла, хотите ли вы скопировать ссылку файла?</string>
 
-    <string name="qbox_widget_toast_message_copied_to_clipbaord">Скопировано в буфер обмена</string>
+    <string name="qbox_widget_toast_message_copied_to_clipboard">Скопировано в буфер обмена</string>
 
     <string name="qbox_widget_label_files_download_in_progress">"%s" загружается…</string>
     <string name="qbox_widget_label_widget_loading">Загрузка виджета: %d%%</string>

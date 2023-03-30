@@ -6,7 +6,6 @@ import android.app.PictureInPictureParams
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.database.Cursor
 import android.graphics.Color
 import android.location.LocationManager
 import android.net.Uri
@@ -49,8 +48,10 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
+import kz.qbox.widget.webview.core.system.clipboardManager
+import kz.qbox.widget.webview.core.system.downloadManager
+import kz.qbox.widget.webview.core.system.getIntOrDefault
 import kz.qbox.widget.webview.core.ui.components.JSBridge
-import kz.qbox.widget.webview.core.ui.components.LinearProgressIndicator
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
 import kz.qbox.widget.webview.core.ui.dialogs.DownloadProgressDialog
@@ -217,7 +218,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     private val flavor by lazy(LazyThreadSafetyMode.NONE) {
-        IntentCompat.getEnum<Flavor>(intent, "flavor")
+        IntentCompat.getEnum<Flavor>(intent, "flavor") ?: throw IllegalStateException()
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
@@ -253,7 +254,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         )
     }
 
-    private var callState: Lifecycle.State? = null
+    private var callState: CallState? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -364,24 +365,22 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
-    override fun onStop() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == Lifecycle.State.START) {
-                Logger.debug(TAG, "onStop() -> minimized")
-                evaluateJS(JSONObject().apply { put("state", "stop")})
-            }
-        }
-        super.onStop()
-    }
-
     override fun onStart() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == Lifecycle.State.START) {
-                Logger.debug(TAG, "onStart() -> maximized")
-                evaluateJS(JSONObject().apply { put("state", "start")})
+            if (callState == CallState.START) {
+                evaluateJS(JSONObject().apply { put("app_state", AppState.START.toString()) })
             }
         }
         super.onStart()
+    }
+
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (callState == CallState.START) {
+                evaluateJS(JSONObject().apply { put("app_state", AppState.STOP.toString()) })
+            }
+        }
+        super.onStop()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -439,12 +438,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     override fun onUserLeaveHint() {
         Logger.debug(TAG, "onUserLeaveHint()")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == Lifecycle.State.START) {
+            if (callState == CallState.START) {
                 if (!isInPictureInPictureMode) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         enterPictureInPictureMode(
                             PictureInPictureParams.Builder()
                                 .setAspectRatio(Rational(2, 3))
+//                                .setAutoEnterEnabled(true)
                                 .build()
                         )
                     } else {
@@ -464,10 +464,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         Logger.debug(TAG, "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
         if (isInPictureInPictureMode) {
             supportActionBar?.hide()
-            evaluateJS(JSONObject().apply { put("event", "pip_enter") })
+            evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_ENTER.toString()) })
         } else {
             supportActionBar?.show()
-            evaluateJS(JSONObject().apply { put("event", "pip_exit") })
+            evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_EXIT.toString()) })
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
@@ -604,11 +604,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                     .setMessage(getString(R.string.qbox_widget_alert_message_not_enough_space))
                     .setView(linkMessage)
                     .setPositiveButton(getString(R.string.qbox_widget_copy)) { dialog, _ ->
-                        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                            .setPrimaryClip(ClipData.newPlainText("url", url))
+                        clipboardManager?.setPrimaryClip(ClipData.newPlainText("url", url))
+
                         Toast.makeText(
                             this,
-                            getString(R.string.qbox_widget_toast_message_copied_to_clipbaord),
+                            getString(R.string.qbox_widget_toast_message_copied_to_clipboard),
                             Toast.LENGTH_SHORT
                         ).show()
 
@@ -683,7 +683,9 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                             }
                             .setPositiveButton(R.string.qbox_widget_open) { dialog, _ ->
                                 dialog.dismiss()
-                                val s = openFile(file, mimeType)
+
+                                // TODO: Handle file open issue
+                                openFile(file, mimeType)
                             }
                             .show()
 
@@ -793,53 +795,44 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         url: String,
         filename: String
     ) {
-        val downloadManager = ContextCompat.getSystemService(
-            applicationContext,
-            DownloadManager::class.java
-        )
+        // TODO: Handle DownloadManager absence issue (impossible case, but who knows)
+        val downloadManager = downloadManager ?: return
 
-        val id = downloadManager?.enqueue(downloadRequest)
+        val id = downloadManager.enqueue(downloadRequest)
 
         if (pendingDownloads == null) {
             pendingDownloads = mutableListOf()
         }
-        if (id != null) {
-            val found = pendingDownloads?.indexOfFirst { it.first == id }
-            if (found == null || found < 0) {
-                pendingDownloads?.add(id to url)
-            } else {
-                pendingDownloads?.set(found, id to url)
-            }
+
+        val found = pendingDownloads?.indexOfFirst { it.first == id }
+        if (found == null || found < 0) {
+            pendingDownloads?.add(id to url)
+        } else {
+            pendingDownloads?.set(found, id to url)
         }
 
-        id?.let {
-            Thread {
-                var downloading = true
-                var errorDialog: AlertDialog? = null
-                while (downloading) {
-                    val q = DownloadManager.Query()
-                    q.setFilterById(it)
-                    val cursor: Cursor = downloadManager.query(q)
-                    if (cursor.moveToFirst()) {
-                        when (cursor.getInt(
-                            cursor.getColumnIndex(DownloadManager.COLUMN_STATUS) ?: 0
-                        )) {
-                            DownloadManager.STATUS_SUCCESSFUL -> downloading = false
-                            DownloadManager.STATUS_PAUSED -> {
-                                val reasonIndex =
-                                    cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
-                                if (cursor.getInt(reasonIndex) != DownloadManager.PAUSED_WAITING_TO_RETRY) {
-                                    downloading = false
-                                    runOnUiThread {
-                                        errorDialog?.dismiss()
-                                        errorDialog = null
-                                        errorDialog = showError(url)
-                                        errorDialog?.show()
-                                    }
-                                }
-                            }
-                            DownloadManager.STATUS_FAILED -> {
-                                downloading = false
+        Thread {
+            var isDownloading = true
+
+            var errorDialog: AlertDialog? = null
+
+            while (isDownloading) {
+                val q = DownloadManager.Query()
+                q.setFilterById(id)
+                val cursor = downloadManager.query(q)
+                if (cursor.moveToFirst()) {
+                    when (cursor.getIntOrDefault(DownloadManager.COLUMN_STATUS, 0)) {
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            isDownloading = false
+                        }
+                        DownloadManager.STATUS_PAUSED -> {
+                            if (cursor.getIntOrDefault(
+                                    DownloadManager.COLUMN_REASON,
+                                    0
+                                ) != DownloadManager.PAUSED_WAITING_TO_RETRY
+                            ) {
+                                isDownloading = false
+
                                 runOnUiThread {
                                     errorDialog?.dismiss()
                                     errorDialog = null
@@ -847,42 +840,54 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                                     errorDialog?.show()
                                 }
                             }
-                            else -> {
-                                val bytesDownloaded = cursor.getInt(
-                                    cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-                                        ?: 0
-                                )
-                                val bytesTotal = cursor.getInt(
-                                    cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
-                                        ?: 0
-                                )
-                                val progress =
-                                    if (bytesTotal > 0) (bytesDownloaded * 100.0 / bytesTotal) else 0.0
+                        }
+                        DownloadManager.STATUS_FAILED -> {
+                            isDownloading = false
 
-                                runOnUiThread {
-                                    errorDialog?.dismiss()
-                                    errorDialog = null
+                            runOnUiThread {
+                                errorDialog?.dismiss()
+                                errorDialog = null
+                                errorDialog = showError(url)
+                                errorDialog?.show()
+                            }
+                        }
+                        else -> {
+                            val bytesDownloaded = cursor.getIntOrDefault(
+                                DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR,
+                                0
+                            )
+                            val bytesTotal = cursor.getIntOrDefault(
+                                DownloadManager.COLUMN_TOTAL_SIZE_BYTES,
+                                0
+                            )
+                            val progress = if (bytesTotal > 0) {
+                                (bytesDownloaded * 100.0 / bytesTotal)
+                            } else {
+                                0.0
+                            }
 
-                                    if (progressDialog == null) {
+                            runOnUiThread {
+                                errorDialog?.dismiss()
+                                errorDialog = null
 
-                                        progressDialog = DownloadProgressDialog(
-                                            context = this,
-                                            progressView = LinearProgressIndicator(this),
-                                            cancelable = true,
-                                            cancelListener = null,
-                                            params = DownloadProgressDialog.Params(filename)
-                                        )
-                                        progressDialog?.show()
-                                    }
-                                    progressDialog?.progress = progress
+                                if (progressDialog == null) {
+                                    progressDialog = DownloadProgressDialog(
+                                        context = this,
+                                        cancelable = true,
+                                        cancelListener = null,
+                                        params = DownloadProgressDialog.Params(filename)
+                                    )
+                                    progressDialog?.show()
                                 }
+                                progressDialog?.progress = progress
                             }
                         }
                     }
-                    cursor.close()
                 }
-            }.start()
-        }
+                cursor.close()
+            }
+        }.start()
+
         Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
             .show()
     }
@@ -940,31 +945,33 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         return true
     }
 
-    override fun onChangeLanguage(language: String): Boolean {
+    override fun onLanguageSet(language: String): Boolean {
         return false
     }
 
-    override fun onLifecycleState(state: Lifecycle.State) {
-        Logger.debug(TAG, "onLifecycleState() -> $state")
+    override fun onCallState(state: CallState) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callState = state
-            if (state == Lifecycle.State.FINISH && isInPictureInPictureMode) {
+
+            if (state == CallState.FINISH && isInPictureInPictureMode) {
                 Toast.makeText(
                     this,
                     R.string.qbox_widget_alert_message_call_finished,
                     Toast.LENGTH_SHORT
                 ).show()
+
                 startActivity(
                     newIntent(
                         context = this,
-                        flavor = flavor!!,
-                        url = uri!!.toString(),
+                        flavor = flavor,
+                        url = uri.toString(),
                         language = language,
                         call = call,
                         user = user,
                         dynamicAttrs = dynamicAttrs
                     ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 )
+
 //                moveTaskToBack(true)
             }
         }

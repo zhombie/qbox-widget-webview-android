@@ -1,15 +1,16 @@
 package kz.qbox.widget.webview.core.ui.components
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.StyleRes
+import androidx.appcompat.widget.AppCompatTextView
 import kz.qbox.widget.webview.core.R
 
-class LinearProgressIndicator @JvmOverloads constructor(
+internal class LinearProgressIndicator @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAttr: Int = 0,
@@ -17,8 +18,8 @@ class LinearProgressIndicator @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     private val progressBar: ProgressBar
-    private val leftSideProgress: TextView
-    private val rightSideProgress: TextView
+    private val leftSideProgress: AppCompatTextView
+    private val rightSideProgress: AppCompatTextView
 
     init {
         val view = inflate(context, R.layout.qbox_widget_linear_progress_view, this)
@@ -28,11 +29,11 @@ class LinearProgressIndicator @JvmOverloads constructor(
         rightSideProgress = view.findViewById(R.id.rightSideProgress)
     }
 
+    @SuppressLint("SetTextI18n")
     fun setProgress(progress: Int) {
         leftSideProgress.text = "$progress%"
         rightSideProgress.text = "$progress/100"
         progressBar.progress = progress
     }
-
 
 }

@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/leftSideProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/rightSideProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

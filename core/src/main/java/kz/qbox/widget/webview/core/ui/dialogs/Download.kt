@@ -6,17 +6,20 @@ import androidx.appcompat.app.AlertDialog
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.ui.components.LinearProgressIndicator
 
-class DownloadProgressDialog constructor(
+internal class DownloadProgressDialog constructor(
     context: Context,
     cancelable: Boolean = true,
     cancelListener: DialogInterface.OnCancelListener? = null,
-    params: Params,
-    private val progressView: LinearProgressIndicator,
+    params: Params
 ) : AlertDialog(context, cancelable, cancelListener) {
 
-    data class Params(
+    data class Params constructor(
         val fileName: String
     )
+
+    private val progressView by lazy(LazyThreadSafetyMode.NONE) {
+        LinearProgressIndicator(context)
+    }
 
     var progress: Double = 0.0
         set(value) {

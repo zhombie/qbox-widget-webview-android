@@ -37,7 +37,7 @@
     <string name="qbox_widget_alert_message_not_enough_space">Файлды жүктеу үшін жад жеткеліксіз, файл сілтемесін көшіргіңіз келе ме?</string>
     <string name="qbox_widget_alert_message_error_occurred">Файл жүктеу барысында қате пайда болды, файл сілтемесін көшіргіңіз келе ме?</string>
 
-    <string name="qbox_widget_toast_message_copied_to_clipbaord">Аралық сақтышқа көшірілді</string>
+    <string name="qbox_widget_toast_message_copied_to_clipboard">Көшірілді</string>
 
     <string name="qbox_widget_label_files_download_in_progress">"%s" жүктелуде…</string>
     <string name="qbox_widget_label_widget_loading">Виджет жүктелуде: %d%%</string>

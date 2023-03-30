@@ -25,27 +25,27 @@ class JSBridge constructor(
     fun getExtra(): String? = dynamicAttrs?.encode()
 
     @JavascriptInterface
-    fun onClose(): Boolean =
-        listener?.onClose() == true
-
-    @JavascriptInterface
-    fun onChangeLanguage(language: String): Boolean =
-        listener?.onChangeLanguage(language) == true
-
-    @JavascriptInterface
-    fun onLifecycleState(state: String) {
-        Lifecycle.State.of(state)?.let {
-            listener?.onLifecycleState(it)
+    fun onCallState(state: String) {
+        CallState.of(state)?.let {
+            listener?.onCallState(it)
         }
     }
+
+    @JavascriptInterface
+    fun onLanguageSet(language: String): Boolean =
+        listener?.onLanguageSet(language) == true
+
+    @JavascriptInterface
+    fun onClose(): Boolean =
+        listener?.onClose() == true
 
     fun dispose() {
         listener = null
     }
 
     interface Listener {
-        fun onLifecycleState(state: Lifecycle.State)
-        fun onChangeLanguage(language: String): Boolean
+        fun onCallState(state: CallState)
+        fun onLanguageSet(language: String): Boolean
         fun onClose(): Boolean
     }
 
