@@ -20,11 +20,11 @@
     <application>
         <activity
             android:name="kz.qbox.widget.webview.core.ui.presentation.WebViewActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:screenOrientation="portrait"
             android:supportsPictureInPicture="true"
             android:theme="@style/Theme.WebViewWidget"
             android:windowSoftInputMode="adjustResize"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:screenOrientation="portrait"
             tools:targetApi="n" />
     </application>
 
