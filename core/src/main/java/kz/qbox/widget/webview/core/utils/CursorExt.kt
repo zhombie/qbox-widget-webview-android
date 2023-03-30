@@ -1,4 +1,4 @@
-package kz.qbox.widget.webview.core.system
+package kz.qbox.widget.webview.core.utils
 
 import android.database.Cursor
 

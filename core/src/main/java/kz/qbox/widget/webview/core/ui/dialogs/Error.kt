@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.R
-import kz.qbox.widget.webview.core.system.clipboardManager
+import kz.qbox.widget.webview.core.utils.clipboardManager
 
 fun AppCompatActivity.showError(url: String): AlertDialog {
     val linkMessage = TextView(this).apply {

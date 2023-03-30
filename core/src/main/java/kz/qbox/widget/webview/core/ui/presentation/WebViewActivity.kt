@@ -1,13 +1,10 @@
 package kz.qbox.widget.webview.core.ui.presentation
 
-import android.Manifest
 import android.app.DownloadManager
 import android.app.PictureInPictureParams
 import android.content.*
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.location.LocationManager
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
@@ -31,7 +28,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
@@ -49,75 +45,25 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
-import kz.qbox.widget.webview.core.system.clipboardManager
-import kz.qbox.widget.webview.core.system.downloadManager
-import kz.qbox.widget.webview.core.system.getIntOrDefault
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
 import kz.qbox.widget.webview.core.ui.dialogs.DownloadProgressDialog
 import kz.qbox.widget.webview.core.ui.dialogs.showError
-import kz.qbox.widget.webview.core.utils.IntentCompat
-import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
-import kz.qbox.widget.webview.core.utils.setupActionBar
+import kz.qbox.widget.webview.core.utils.*
+import kz.qbox.widget.webview.core.utils.Constants.FILE_EXTENSIONS
+import kz.qbox.widget.webview.core.utils.Constants.LOCATION_PERMISSIONS
+import kz.qbox.widget.webview.core.utils.Constants.STORAGE_PERMISSIONS
+import kz.qbox.widget.webview.core.utils.Constants.URL_SCHEMES
 import org.json.JSONObject
 import java.io.File
 import java.util.*
 
+private val TAG = WebViewActivity::class.java.simpleName
+
 class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener {
 
     companion object {
-        private val TAG = WebViewActivity::class.java.simpleName
-
-        private val URL_SCHEMES = arrayOf(
-            SCHEME_TEL,
-            SCHEME_MAILTO,
-            SCHEME_GEO,
-            "sms:",
-            "smsto:",
-            "mms:",
-            "mmsto:"
-        )
-
-//        private val SHORTEN_LINKS = arrayOf(
-//            "t.me",
-//            "telegram.me",
-//            "telegram.dog",
-//            "vk.com",
-//            "vk.cc",
-//            "fb.me",
-//            "facebook.com",
-//            "fb.com"
-//        )
-
-        private val FILE_EXTENSIONS = arrayOf(
-            ".dot",
-            ".pptx",
-            ".rtf",
-            ".xlsx",
-            ".xls",
-            ".bmp",
-            ".csv",
-            ".html",
-            ".xml",
-            ".txt",
-            ".pdf",
-            ".doc",
-            ".zip",
-            ".rar",
-            ".docx",
-        )
-
-        private val LOCATION_PERMISSIONS = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-
-        private val STORAGE_PERMISSIONS = arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-
         fun newIntent(
             context: Context,
             flavor: Flavor,
@@ -126,15 +72,13 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             call: Call?,
             user: User?,
             dynamicAttrs: DynamicAttrs?
-        ): Intent {
-            return Intent(context, WebViewActivity::class.java)
-                .putExtra("flavor", flavor)
-                .putExtra("url", url)
-                .putExtra("language", language)
-                .putExtra("call", call)
-                .putExtra("user", user)
-                .putExtra("dynamic_attrs", dynamicAttrs)
-        }
+        ): Intent = Intent(context, WebViewActivity::class.java)
+            .putExtra("flavor", flavor)
+            .putExtra("url", url)
+            .putExtra("language", language)
+            .putExtra("call", call)
+            .putExtra("user", user)
+            .putExtra("dynamic_attrs", dynamicAttrs)
     }
 
     private var toolbar: Toolbar? = null
@@ -1000,13 +944,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     }
 
     override fun onSelectFileRequest(): Boolean {
-        if (STORAGE_PERMISSIONS.all {
-                ActivityCompat.checkSelfPermission(
-                    this,
-                    it
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-        ) {
+        if (STORAGE_PERMISSIONS.all { isPermissionGranted(it) }) {
             AlertDialog.Builder(this)
                 .setTitle(R.string.qbox_widget_alert_title_media_selection)
                 .setItems(
@@ -1059,14 +997,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onGeolocationPermissionsShowPrompt() {
         Logger.debug(TAG, "onGeolocationPermissionsShowPrompt()")
-        if (LOCATION_PERMISSIONS.all {
-                ActivityCompat.checkSelfPermission(
-                    this,
-                    it
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-        ) {
-            val locationManager = ContextCompat.getSystemService(this, LocationManager::class.java)
+        if (LOCATION_PERMISSIONS.all { isPermissionGranted(it) }) {
+            val locationManager = locationManager
             if (locationManager == null) {
                 showGPSDisabledErrorAlertDialog()
             } else {

@@ -18,14 +18,12 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.ref.WeakReference
 
+private val TAG = StorageAccessFrameworkInteractor::class.java.simpleName
+
 internal class StorageAccessFrameworkInteractor private constructor(
     private val reference: WeakReference<AppCompatActivity>,
     private val getContentDelegate: GetContentDelegate
 ) {
-
-    companion object {
-        private val TAG = StorageAccessFrameworkInteractor::class.java.simpleName
-    }
 
     constructor(
         activity: AppCompatActivity,

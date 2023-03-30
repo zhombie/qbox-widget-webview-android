@@ -1,6 +1,7 @@
 package kz.qbox.widget.webview.core.ui.components
 
 import android.webkit.JavascriptInterface
+import findEnumByName
 import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.utils.encode
 
@@ -26,7 +27,7 @@ class JSBridge constructor(
 
     @JavascriptInterface
     fun onCallState(state: String) {
-        CallState.of(state)?.let {
+        findEnumByName<CallState>(state)?.let {
             listener?.onCallState(it)
         }
     }
