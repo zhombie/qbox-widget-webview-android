@@ -35,6 +35,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
+import androidx.lifecycle.Lifecycle
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import kz.garage.image.preview.ImagePreviewDialogFragment
@@ -468,6 +469,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         } else {
             supportActionBar?.show()
             evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_EXIT.toString()) })
+        }
+
+        if (lifecycle.currentState == Lifecycle.State.CREATED) {
+            finishAndRemoveTask()
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
