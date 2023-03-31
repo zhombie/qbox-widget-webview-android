@@ -15,9 +15,7 @@ import android.text.Html
 import android.text.Html.FROM_HTML_MODE_LEGACY
 import android.text.method.LinkMovementMethod
 import android.util.Rational
-import android.view.Menu
-import android.view.MenuItem
-import android.view.WindowManager
+import android.view.*
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebView.*
@@ -87,6 +85,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private var progressDialog: DownloadProgressDialog? = null
 
+    private var errorDialog: AlertDialog? = null
+
     private var interactor: StorageAccessFrameworkInteractor? = null
 
     /**
@@ -100,6 +100,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var downloadedFiles: MutableList<Pair<String, Uri>>? = null
 
     private var downloadStateReceiver: DownloadStateReceiver? = null
+
+    private var thread: Thread? = null
 
     private val requestedPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -201,6 +203,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private var callState: CallState? = null
 
+    private var isDownloading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -268,8 +271,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 }
             }
         }
-        webView?.loadUrl(uri.toString())
 
+        webView?.loadUrl(uri.toString())
     }
 
     @Deprecated("Deprecated in Java")
@@ -373,6 +376,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         downloadedFiles?.clear()
         downloadedFiles = null
+
+        isDownloading = false
+
+//        thread?.interrupt()
+        thread = null
 
         super.onDestroy()
 
@@ -513,7 +521,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             if (found != null && !found.second.path.isNullOrBlank()) {
                 val file = File(requireNotNull(found.second.path))
                 Logger.debug(TAG, "file: $file")
-                isLocalFileFoundAndOpened = openFile(file, mimetype)
+                isLocalFileFoundAndOpened = openFile(file, mimetype, url)
             }
 
             if (isLocalFileFoundAndOpened) return@setDownloadListener
@@ -634,7 +642,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                                 dialog.dismiss()
 
                                 // TODO: Handle file open issue
-                                openFile(file, mimeType)
+                                openFile(file, mimeType, url)
                             }
                             .show()
 
@@ -760,82 +768,94 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             pendingDownloads?.set(found, id to url)
         }
 
-        Thread {
-            var isDownloading = true
+        isDownloading = true
 
-            var errorDialog: AlertDialog? = null
+        thread = object : Thread() {
+            override fun run() {
+                while (isDownloading) {
+                    if (lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        break
+                    }
 
-            while (isDownloading) {
-                val q = DownloadManager.Query()
-                q.setFilterById(id)
-                val cursor = downloadManager.query(q)
-                if (cursor.moveToFirst()) {
-                    when (cursor.getIntOrDefault(DownloadManager.COLUMN_STATUS, 0)) {
-                        DownloadManager.STATUS_SUCCESSFUL -> {
-                            isDownloading = false
-                        }
-                        DownloadManager.STATUS_PAUSED -> {
-                            if (cursor.getIntOrDefault(
-                                    DownloadManager.COLUMN_REASON,
-                                    0
-                                ) != DownloadManager.PAUSED_WAITING_TO_RETRY
-                            ) {
+                    val q = DownloadManager.Query()
+                    q.setFilterById(id)
+                    val cursor = downloadManager.query(q)
+                    if (cursor.moveToFirst()) {
+                        when (cursor.getIntOrDefault(DownloadManager.COLUMN_STATUS, 0)) {
+                            DownloadManager.STATUS_SUCCESSFUL -> {
+                                isDownloading = false
+                            }
+                            DownloadManager.STATUS_PAUSED -> {
+                                if (cursor.getIntOrDefault(
+                                        DownloadManager.COLUMN_REASON,
+                                        0
+                                    ) != DownloadManager.PAUSED_WAITING_TO_RETRY
+                                ) {
+                                    isDownloading = false
+
+                                    runOnUiThread {
+                                        errorDialog?.dismiss()
+                                        errorDialog = null
+                                        errorDialog = showError(
+                                            R.string.qbox_widget_alert_message_error_occurred,
+                                            url
+                                        )
+                                        errorDialog?.show()
+                                    }
+                                }
+                            }
+                            DownloadManager.STATUS_FAILED -> {
                                 isDownloading = false
 
                                 runOnUiThread {
                                     errorDialog?.dismiss()
                                     errorDialog = null
-                                    errorDialog = showError(url)
+                                    errorDialog = showError(
+                                        R.string.qbox_widget_alert_message_error_occurred,
+                                        url
+                                    )
                                     errorDialog?.show()
                                 }
                             }
-                        }
-                        DownloadManager.STATUS_FAILED -> {
-                            isDownloading = false
-
-                            runOnUiThread {
-                                errorDialog?.dismiss()
-                                errorDialog = null
-                                errorDialog = showError(url)
-                                errorDialog?.show()
-                            }
-                        }
-                        else -> {
-                            val bytesDownloaded = cursor.getIntOrDefault(
-                                DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR,
-                                0
-                            )
-                            val bytesTotal = cursor.getIntOrDefault(
-                                DownloadManager.COLUMN_TOTAL_SIZE_BYTES,
-                                0
-                            )
-                            val progress = if (bytesTotal > 0) {
-                                (bytesDownloaded * 100.0 / bytesTotal)
-                            } else {
-                                0.0
-                            }
-
-                            runOnUiThread {
-                                errorDialog?.dismiss()
-                                errorDialog = null
-
-                                if (progressDialog == null) {
-                                    progressDialog = DownloadProgressDialog(
-                                        context = this,
-                                        cancelable = true,
-                                        cancelListener = null,
-                                        params = DownloadProgressDialog.Params(filename)
-                                    )
-                                    progressDialog?.show()
+                            else -> {
+                                val bytesDownloaded = cursor.getIntOrDefault(
+                                    DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR,
+                                    0
+                                )
+                                val bytesTotal = cursor.getIntOrDefault(
+                                    DownloadManager.COLUMN_TOTAL_SIZE_BYTES,
+                                    0
+                                )
+                                val progress = if (bytesTotal > 0) {
+                                    (bytesDownloaded * 100.0 / bytesTotal)
+                                } else {
+                                    0.0
                                 }
-                                progressDialog?.progress = progress
+
+                                runOnUiThread {
+                                    errorDialog?.dismiss()
+                                    errorDialog = null
+
+                                    if (progressDialog == null) {
+                                        progressDialog = DownloadProgressDialog(
+                                            context = this@WebViewActivity,
+                                            cancelable = true,
+                                            cancelListener = null,
+                                            params = DownloadProgressDialog.Params(filename)
+                                        )
+                                        progressDialog?.show()
+                                    }
+                                    progressDialog?.progress = progress
+                                }
                             }
                         }
                     }
+                    cursor.close()
                 }
-                cursor.close()
             }
-        }.start()
+        }
+
+        thread?.start()
 
         Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
             .show()
@@ -853,7 +873,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         }
     }
 
-    private fun openFile(file: File, mimeType: String): Boolean {
+    private fun openFile(file: File, mimeType: String, url: String): Boolean {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
 
@@ -865,8 +885,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             )
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT)
-                .show()
+
+            errorDialog?.dismiss()
+            errorDialog = null
+            errorDialog = showError(R.string.qbox_widget_error_files_open_unable, url)
+            errorDialog?.show()
             return false
         }
 
@@ -879,8 +902,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             true
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()
-            Toast.makeText(this, R.string.qbox_widget_error_files_open_unable, Toast.LENGTH_SHORT)
-                .show()
+            errorDialog?.dismiss()
+            errorDialog = null
+            errorDialog = showError(R.string.qbox_widget_error_files_open_unable, url)
+            errorDialog?.show()
             false
         }
     }
