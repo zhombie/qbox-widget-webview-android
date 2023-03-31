@@ -20,7 +20,7 @@
     <string name="qbox_widget_error_basic">Произошла ошибка</string>
     <string name="qbox_widget_error_files_exceeds_limit">Извините, но вы превысили лимит (%d) при выборе файла</string>
     <string name="qbox_widget_error_files_download_in_progress">Извините, но загрузка файла еще не завершена</string>
-    <string name="qbox_widget_error_files_open_unable">Не удалось открыть файл</string>
+    <string name="qbox_widget_error_files_open_unable">Не удалось открыть файл, хотите ли вы скопировать ссылку файла?</string>
 
     <string name="qbox_widget_alert_title_exit">Выход из виджета</string>
     <string name="qbox_widget_alert_title_reload">Обновление виджета</string>

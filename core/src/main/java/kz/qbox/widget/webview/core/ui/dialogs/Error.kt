@@ -11,7 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.utils.clipboardManager
 
-fun AppCompatActivity.showError(url: String): AlertDialog {
+fun AppCompatActivity.showError(
+    url: String,
+    message: String
+): AlertDialog {
     val linkMessage = TextView(this).apply {
         setPadding(65, 0, 65, 0)
         setTextColor(Color.BLACK)
@@ -27,7 +30,7 @@ fun AppCompatActivity.showError(url: String): AlertDialog {
 
     return AlertDialog.Builder(this)
         .setTitle(getString(R.string.qbox_widget_attention))
-        .setMessage(getString(R.string.qbox_widget_alert_message_error_occurred))
+        .setMessage(message)
         .setView(linkMessage)
         .setPositiveButton(getString(R.string.qbox_widget_copy)) { dialog, _ ->
             clipboardManager?.setPrimaryClip(ClipData.newPlainText("url", url))

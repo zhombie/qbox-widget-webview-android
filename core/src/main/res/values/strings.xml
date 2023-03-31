@@ -20,7 +20,7 @@
     <string name="qbox_widget_error_basic">Error occurred</string>
     <string name="qbox_widget_error_files_exceeds_limit">Sorry, but you exceeded the limit (%d) when selecting a file</string>
     <string name="qbox_widget_error_files_download_in_progress">Sorry, but the file download has not completed yet</string>
-    <string name="qbox_widget_error_files_open_unable">Failed to open file</string>
+    <string name="qbox_widget_error_files_open_unable">Failed to open file, do you want to copy the link?</string>
 
     <string name="qbox_widget_alert_title_exit">Exit Widget</string>
     <string name="qbox_widget_alert_title_reload">Reload Widget</string>

@@ -20,7 +20,7 @@
     <string name="qbox_widget_error_basic">Қателік орын алды</string>
     <string name="qbox_widget_error_files_exceeds_limit">Кешіріңіз, бірақ файлды таңдау кезінде шектен (%d) асып кеттіңіз</string>
     <string name="qbox_widget_error_files_download_in_progress">Кешіріңіз, бірақ файлды жүктеп алу әлі аяқталған жоқ</string>
-    <string name="qbox_widget_error_files_open_unable">Файлды ашу мүмкін емес</string>
+    <string name="qbox_widget_error_files_open_unable">Файлды ашу мүмкін емес, файл сілтемесін көшіргіңіз келе ме?</string>
 
     <string name="qbox_widget_alert_title_exit">Виджеттен шығу</string>
     <string name="qbox_widget_alert_title_reload">Виджетті қайта жүктеу</string>
