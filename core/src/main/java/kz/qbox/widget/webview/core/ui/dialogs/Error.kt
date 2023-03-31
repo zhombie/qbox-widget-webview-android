@@ -6,14 +6,20 @@ import android.os.Build
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.utils.clipboardManager
 
-fun AppCompatActivity.showError(
+internal fun AppCompatActivity.showError(
+    @StringRes messageResId: Int,
     url: String,
-    message: String
+): AlertDialog = showError(getString(messageResId), url)
+
+internal fun AppCompatActivity.showError(
+    message: String,
+    url: String,
 ): AlertDialog {
     val linkMessage = TextView(this).apply {
         setPadding(65, 0, 65, 0)

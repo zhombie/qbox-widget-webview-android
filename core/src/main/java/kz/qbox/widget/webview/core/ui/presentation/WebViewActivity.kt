@@ -101,7 +101,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private var downloadStateReceiver: DownloadStateReceiver? = null
 
-    private var asynchronousTask: Thread? = null
+    private var thread: Thread? = null
 
     private val requestedPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -203,6 +203,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     private var callState: CallState? = null
 
+    private var isDownloading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -270,8 +271,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                 }
             }
         }
-        webView?.loadUrl(uri.toString())
 
+        webView?.loadUrl(uri.toString())
     }
 
     @Deprecated("Deprecated in Java")
@@ -376,7 +377,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         downloadedFiles?.clear()
         downloadedFiles = null
 
-        asynchronousTask = null
+        isDownloading = false
+
+//        thread?.interrupt()
+        thread = null
 
         super.onDestroy()
 
@@ -764,11 +768,15 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             pendingDownloads?.set(found, id to url)
         }
 
-        asynchronousTask = object : Thread() {
-            override fun run() {
-                var isDownloading = true
+        isDownloading = true
 
+        thread = object : Thread() {
+            override fun run() {
                 while (isDownloading) {
+                    if (lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        break
+                    }
+
                     val q = DownloadManager.Query()
                     q.setFilterById(id)
                     val cursor = downloadManager.query(q)
@@ -847,7 +855,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             }
         }
 
-        asynchronousTask?.start()
+        thread?.start()
 
         Toast.makeText(this, R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
             .show()
@@ -880,8 +888,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
             errorDialog?.dismiss()
             errorDialog = null
-            errorDialog =
-                showError(url = url, getString(R.string.qbox_widget_error_files_open_unable))
+            errorDialog = showError(R.string.qbox_widget_error_files_open_unable, url)
             errorDialog?.show()
             return false
         }
@@ -897,8 +904,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
             e.printStackTrace()
             errorDialog?.dismiss()
             errorDialog = null
-            errorDialog =
-                showError(url = url, getString(R.string.qbox_widget_error_files_open_unable))
+            errorDialog = showError(R.string.qbox_widget_error_files_open_unable, url)
             errorDialog?.show()
             false
         }
