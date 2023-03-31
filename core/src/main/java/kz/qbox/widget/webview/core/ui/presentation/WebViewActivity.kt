@@ -797,8 +797,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                                         errorDialog?.dismiss()
                                         errorDialog = null
                                         errorDialog = showError(
-                                            url,
-                                            getString(R.string.qbox_widget_alert_message_error_occurred)
+                                            R.string.qbox_widget_alert_message_error_occurred,
+                                            url
                                         )
                                         errorDialog?.show()
                                     }
@@ -811,8 +811,8 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
                                     errorDialog?.dismiss()
                                     errorDialog = null
                                     errorDialog = showError(
-                                        url,
-                                        getString(R.string.qbox_widget_alert_message_error_occurred)
+                                        R.string.qbox_widget_alert_message_error_occurred,
+                                        url
                                     )
                                     errorDialog?.show()
                                 }
