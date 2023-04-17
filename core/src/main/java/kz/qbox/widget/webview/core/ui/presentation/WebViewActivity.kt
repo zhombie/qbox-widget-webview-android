@@ -84,6 +84,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
     private var exitButton: ImageButton? = null
+    private var menuButton: ImageButton? = null
 
     private var progressDialog: DownloadProgressDialog? = null
 
@@ -215,6 +216,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
         exitButton = findViewById(R.id.exitButton)
+        menuButton = findViewById(R.id.menuButton)
 
         var uri = uri
 
@@ -248,6 +250,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
         setupActionBar()
         setupWebView()
+        setupButtons()
 
         interactor = StorageAccessFrameworkInteractor(this) { result ->
             when (result) {
@@ -432,16 +435,57 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
 
-    private fun setupActionBar() {
+    private fun setupActionBar(title: String? = null, subtitle: String? = null) {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.white)
 
-        setupActionBar(toolbar, isBackButtonEnabled = false) {
+        setupActionBar(
+            toolbar = toolbar,
+            title = title,
+            subtitle = subtitle,
+            isBackButtonEnabled = false
+        ) {
+            onBackPressed()
+        }
+    }
+
+    private fun setupButtons() {
+        exitButton?.setOnClickListener {
             onBackPressed()
         }
 
-        exitButton?.setOnClickListener {
-            onBackPressed()
+        menuButton?.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.qbox_widget_alert_title_action_selection)
+                .setItems(
+                    arrayOf(
+                        getString(R.string.qbox_widget_action_clear_cash),
+                        getString(R.string.qbox_widget_action_reload),
+                    )
+                ) { _, which ->
+                    when (which) {
+                        0 -> {
+                            // TODO REALIZE CLEAR CASH
+                        }
+                        1 -> {
+                            AlertDialog.Builder(this)
+                                .setTitle(R.string.qbox_widget_alert_title_reload)
+                                .setMessage(R.string.qbox_widget_alert_message_reload)
+                                .setNegativeButton(R.string.qbox_widget_cancel) { dialog, _ ->
+                                    dialog.dismiss()
+                                }
+                                .setPositiveButton(R.string.qbox_widget_reload) { dialog, _ ->
+                                    dialog.dismiss()
+                                    webView?.loadUrl("javascript:window.location.reload(true)")
+                                }
+                                .show()
+                        }
+                    }
+                }
+                .setOnCancelListener {
+                    webView?.setFileSelectionPromptResult(uri = null)
+                }
+                .show()
         }
     }
 
@@ -928,6 +972,10 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
 
     override fun onLanguageSet(language: String): Boolean {
         return false
+    }
+
+    override fun onAttachToolbar(uiModel: UIModel) {
+        setupActionBar(uiModel.title, uiModel.subtitle)
     }
 
     override fun onCallState(state: CallState) {

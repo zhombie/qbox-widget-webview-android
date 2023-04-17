@@ -13,6 +13,9 @@
     <string name="qbox_widget_content_audio">Audio</string>
     <string name="qbox_widget_content_document">Document</string>
 
+    <string name="qbox_widget_action_clear_cash">Clear cash</string>
+    <string name="qbox_widget_action_reload">Reload</string>
+
     <string name="qbox_widget_go_to_settings">To settings</string>
 
     <string name="qbox_widget_attention">Attention!</string>
@@ -28,6 +31,7 @@
     <string name="qbox_widget_alert_title_permissions_require">Access to permissions</string>
     <string name="qbox_widget_alert_title_permissions_require_geolocation">Location access</string>
     <string name="qbox_widget_alert_title_media_selection">Select media</string>
+    <string name="qbox_widget_alert_title_action_selection">Select an action</string>
     <string name="qbox_widget_alert_message_call_finished">Call finished</string>
     <string name="qbox_widget_alert_message_exit">Are you sure you want to exit the widget?</string>
     <string name="qbox_widget_alert_message_reload">Are you sure you want to reload the widget?</string>

@@ -13,6 +13,9 @@
     <string name="qbox_widget_content_audio">Аудио</string>
     <string name="qbox_widget_content_document">Құжат</string>
 
+    <string name="qbox_widget_action_clear_cash">Кэш тазалау</string>
+    <string name="qbox_widget_action_reload">Қайта жүктеу</string>
+
     <string name="qbox_widget_go_to_settings">Баптауларға өту</string>
 
     <string name="qbox_widget_attention">Назар аударыңыз!</string>
@@ -28,6 +31,7 @@
     <string name="qbox_widget_alert_title_permissions_require">Рұқсат сұрау</string>
     <string name="qbox_widget_alert_title_permissions_require_geolocation">Геолокация рұқсатын сұрау</string>
     <string name="qbox_widget_alert_title_media_selection">Медиа таңдау</string>
+    <string name="qbox_widget_alert_title_action_selection">Әрекетті таңдаңыз</string>
     <string name="qbox_widget_alert_message_call_finished">Қоңырау аяқталды</string>
     <string name="qbox_widget_alert_message_exit">Виджеттен расымен де шыққыңыз келе ме?</string>
     <string name="qbox_widget_alert_message_reload">Виджетті қайта жүктеңіз келе ме?</string>

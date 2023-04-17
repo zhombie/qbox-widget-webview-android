@@ -5,4 +5,19 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
+    <style name="QboxWidget.Toolbar.TitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="QboxWidget.Toolbar.SubTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="QboxWidget.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="titleTextAppearance">@style/QboxWidget.Toolbar.TitleTextAppearance</item>
+        <item name="subtitleTextAppearance">@style/QboxWidget.Toolbar.SubTitleTextAppearance</item>
+    </style>
+
 </resources>

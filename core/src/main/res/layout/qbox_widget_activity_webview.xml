@@ -1,37 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/contentView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:orientation="vertical"
     tools:context=".ui.presentation.WebViewActivity">
-
-    <kz.qbox.widget.webview.core.ui.components.WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <kz.qbox.widget.webview.core.ui.components.ProgressView
-        android:id="@+id/progressView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
-        android:backgroundTint="@android:color/transparent">
+        style="@style/QboxWidget.Toolbar"
+        android:background="@android:color/white">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:layout_gravity="end"
-            android:layout_margin="0dp"
+            android:layout_marginEnd="15dp"
             android:background="@drawable/qbox_widget_rounded_corner"
-            android:orientation="horizontal"
-            android:padding="0dp">
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/menuButton"
@@ -54,4 +42,22 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-</FrameLayout>
+    <FrameLayout
+        android:id="@+id/contentView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent">
+
+        <kz.qbox.widget.webview.core.ui.components.WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <kz.qbox.widget.webview.core.ui.components.ProgressView
+            android:id="@+id/progressView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+</LinearLayout>

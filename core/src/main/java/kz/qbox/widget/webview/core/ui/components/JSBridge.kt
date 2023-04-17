@@ -37,6 +37,11 @@ class JSBridge constructor(
         listener?.onLanguageSet(language) == true
 
     @JavascriptInterface
+    fun onAttachToolbar(title: String?, subtitle: String?) {
+        listener?.onAttachToolbar(UIModel(title, subtitle))
+    }
+
+    @JavascriptInterface
     fun onClose(): Boolean =
         listener?.onClose() == true
 
@@ -47,6 +52,7 @@ class JSBridge constructor(
     interface Listener {
         fun onCallState(state: CallState)
         fun onLanguageSet(language: String): Boolean
+        fun onAttachToolbar(uiModel: UIModel)
         fun onClose(): Boolean
     }
 
