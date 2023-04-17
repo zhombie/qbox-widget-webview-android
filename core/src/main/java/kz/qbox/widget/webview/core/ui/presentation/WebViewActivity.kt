@@ -19,6 +19,7 @@ import android.view.*
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebView.*
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -82,6 +83,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
     private var toolbar: Toolbar? = null
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
+    private var exitButton: ImageButton? = null
 
     private var progressDialog: DownloadProgressDialog? = null
 
@@ -212,6 +214,7 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         toolbar = findViewById(R.id.toolbar)
         webView = findViewById(R.id.webView)
         progressView = findViewById(R.id.progressView)
+        exitButton = findViewById(R.id.exitButton)
 
         var uri = uri
 
@@ -331,31 +334,31 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         super.onStop()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.qbox_widget_webview, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.qbox_widget_webview, menu)
+//        return super.onCreateOptionsMenu(menu)
+//    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.reload -> {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.qbox_widget_alert_title_reload)
-                    .setMessage(R.string.qbox_widget_alert_message_reload)
-                    .setNegativeButton(R.string.qbox_widget_cancel) { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton(R.string.qbox_widget_reload) { dialog, _ ->
-                        dialog.dismiss()
-                        webView?.loadUrl("javascript:window.location.reload(true)")
-                    }
-                    .show()
-                true
-            }
-            else ->
-                super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.reload -> {
+//                AlertDialog.Builder(this)
+//                    .setTitle(R.string.qbox_widget_alert_title_reload)
+//                    .setMessage(R.string.qbox_widget_alert_message_reload)
+//                    .setNegativeButton(R.string.qbox_widget_cancel) { dialog, _ ->
+//                        dialog.dismiss()
+//                    }
+//                    .setPositiveButton(R.string.qbox_widget_reload) { dialog, _ ->
+//                        dialog.dismiss()
+//                        webView?.loadUrl("javascript:window.location.reload(true)")
+//                    }
+//                    .show()
+//                true
+//            }
+//            else ->
+//                super.onOptionsItemSelected(item)
+//        }
+//    }
 
     override fun onDestroy() {
         jsBridge.dispose()
@@ -433,7 +436,11 @@ class WebViewActivity : AppCompatActivity(), WebView.Listener, JSBridge.Listener
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
 
-        setupActionBar(toolbar, isBackButtonEnabled = true) {
+        setupActionBar(toolbar, isBackButtonEnabled = false) {
+            onBackPressed()
+        }
+
+        exitButton?.setOnClickListener {
             onBackPressed()
         }
     }
