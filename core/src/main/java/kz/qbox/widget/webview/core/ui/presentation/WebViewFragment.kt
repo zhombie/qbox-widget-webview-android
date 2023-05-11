@@ -220,7 +220,6 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         webView = view.findViewById(R.id.webView)
         progressView = view.findViewById(R.id.progressView)
 
@@ -913,19 +912,19 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
                     Toast.LENGTH_SHORT
                 ).show()
 
-                startActivity(
-                    WebViewActivity.newIntent(
-                        context = requireContext(),
-                        flavor = flavor,
-                        url = uri.toString(),
-                        language = language,
-                        call = call,
-                        user = user,
-                        dynamicAttrs = dynamicAttrs
-                    ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                )
+//                startActivity(
+//                    WebViewActivity.newIntent(
+//                        context = requireContext(),
+//                        flavor = flavor,
+//                        url = uri.toString(),
+//                        language = language,
+//                        call = call,
+//                        user = user,
+//                        dynamicAttrs = dynamicAttrs
+//                    ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+//                )
 
-//                moveTaskToBack(true)
+                activity.moveTaskToBack(true)
             }
         }
     }
