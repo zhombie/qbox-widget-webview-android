@@ -16,18 +16,14 @@ import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
 import androidx.fragment.app.Fragment
@@ -62,16 +58,15 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
 
     companion object {
         fun newInstance(
-            context: Context,
             flavor: Flavor,
             url: String,
             language: String?,
             call: Call?,
             user: User?,
             dynamicAttrs: DynamicAttrs?
-        ): Fragment {
+        ): WebViewFragment {
             val fragment = WebViewFragment()
-            fragment.arguments?.apply {
+            val bundle = Bundle().apply {
                 putSerializable("flavor", flavor)
                 putString("url", url)
                 putString("language", language)
@@ -79,14 +74,13 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
                 putSerializable("user", user)
                 putSerializable("dynamic_attrs", dynamicAttrs)
             }
+            fragment.arguments = bundle
             return fragment
         }
     }
 
     private var webView: WebView? = null
     private var progressView: ProgressView? = null
-    private var exitButton: ImageButton? = null
-    private var menuButton: ImageButton? = null
 
     private var progressDialog: DownloadProgressDialog? = null
 
@@ -212,7 +206,10 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
 
     private val activity: AppCompatActivity
         get() = requireActivity() as AppCompatActivity
-    
+
+    val callbackInstance: Callback
+        get() = this
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -226,8 +223,6 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
 
         webView = view.findViewById(R.id.webView)
         progressView = view.findViewById(R.id.progressView)
-        exitButton = view.findViewById(R.id.exitButton)
-        menuButton = view.findViewById(R.id.menuButton)
 
         var uri = uri
 
@@ -260,7 +255,6 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
         }
 
         setupWebView()
-        setupButtons()
 
         interactor = StorageAccessFrameworkInteractor(activity) { result ->
             when (result) {
@@ -399,6 +393,11 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
         onLeave.invoke()
     }
 
+    override fun onReload() {
+        Logger.debug(TAG, "onReload()")
+        webView?.loadUrl("javascript:window.location.reload(true)")
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean
@@ -416,46 +415,6 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
             activity.finishAndRemoveTask()
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-    }
-
-    private fun setupButtons() {
-        exitButton?.setOnClickListener {
-            activity.onBackPressed()
-        }
-
-        menuButton?.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle(R.string.qbox_widget_alert_title_action_selection)
-                .setItems(
-                    arrayOf(
-                        getString(R.string.qbox_widget_action_clear_cash),
-                        getString(R.string.qbox_widget_action_reload),
-                    )
-                ) { _, which ->
-                    when (which) {
-                        0 -> {
-                            // TODO REALIZE CLEAR CASH
-                        }
-                        1 -> {
-                            AlertDialog.Builder(requireContext())
-                                .setTitle(R.string.qbox_widget_alert_title_reload)
-                                .setMessage(R.string.qbox_widget_alert_message_reload)
-                                .setNegativeButton(R.string.qbox_widget_cancel) { dialog, _ ->
-                                    dialog.dismiss()
-                                }
-                                .setPositiveButton(R.string.qbox_widget_reload) { dialog, _ ->
-                                    dialog.dismiss()
-                                    webView?.loadUrl("javascript:window.location.reload(true)")
-                                }
-                                .show()
-                        }
-                    }
-                }
-                .setOnCancelListener {
-                    webView?.setFileSelectionPromptResult(uri = null)
-                }
-                .show()
-        }
     }
 
     private fun setupWebView() {
@@ -1062,11 +1021,10 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
         Logger.debug(TAG, "onGeolocationPermissionsHidePrompt()")
     }
 
-    fun getCallbackInstance(): Callback = this
-
 }
 
 interface Callback {
     fun onUserLeaveHint(onLeave: () -> Unit)
     fun onBackPressed(onBack: () -> Unit)
+    fun onReload()
 }

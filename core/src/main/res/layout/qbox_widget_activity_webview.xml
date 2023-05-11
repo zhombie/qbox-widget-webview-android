@@ -14,21 +14,9 @@
         android:background="@android:color/transparent"
         android:backgroundTint="@android:color/transparent" />
 
-    <FrameLayout
-        android:id="@+id/contentView"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <kz.qbox.widget.webview.core.ui.components.WebView
-            android:id="@+id/webView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <kz.qbox.widget.webview.core.ui.components.ProgressView
-            android:id="@+id/progressView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </FrameLayout>
+        android:layout_height="match_parent"/>
 
 </LinearLayout>
