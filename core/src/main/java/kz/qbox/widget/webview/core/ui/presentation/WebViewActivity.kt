@@ -42,8 +42,8 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     private var toolbar: Toolbar? = null
+    private var contentView: LinearLayout? = null
     private var fragmentContainerView: FragmentContainerView? = null
-    private var contentLinearLayout: LinearLayout? = null
 
     /**
      * [DownloadManager] download ids list (which has downloading status)
@@ -81,7 +81,7 @@ class WebViewActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         fragmentContainerView = findViewById(R.id.fragmentContainerView)
-        contentLinearLayout = findViewById(R.id.content_linear_layout)
+        contentView = findViewById(R.id.contentView)
 
         setupFragmentContainer()
         setupActionBar()
@@ -91,7 +91,6 @@ class WebViewActivity : AppCompatActivity() {
     override fun onBackPressed() {
         callback?.onBackPressed { super.onBackPressed() }
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.qbox_widget_webview, menu)
@@ -119,7 +118,6 @@ class WebViewActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onUserLeaveHint() {
         callback?.onUserLeaveHint { super.onUserLeaveHint() }
     }
@@ -130,9 +128,9 @@ class WebViewActivity : AppCompatActivity() {
         newConfig: Configuration
     ) {
         if (isInPictureInPictureMode) {
-            contentLinearLayout?.visibility = View.GONE
+            contentView?.visibility = View.GONE
         } else {
-            contentLinearLayout?.visibility = View.VISIBLE
+            contentView?.visibility = View.VISIBLE
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
