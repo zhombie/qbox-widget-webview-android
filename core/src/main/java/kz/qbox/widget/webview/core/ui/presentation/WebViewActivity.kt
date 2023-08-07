@@ -2,9 +2,13 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.app.DownloadManager
 import android.content.*
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.webkit.WebView.*
+import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -39,6 +43,7 @@ class WebViewActivity : AppCompatActivity() {
 
     private var toolbar: Toolbar? = null
     private var fragmentContainerView: FragmentContainerView? = null
+    private var contentLinearLayout: LinearLayout? = null
 
     /**
      * [DownloadManager] download ids list (which has downloading status)
@@ -76,6 +81,7 @@ class WebViewActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         fragmentContainerView = findViewById(R.id.fragmentContainerView)
+        contentLinearLayout = findViewById(R.id.content_linear_layout)
 
         setupFragmentContainer()
         setupActionBar()
@@ -117,26 +123,19 @@ class WebViewActivity : AppCompatActivity() {
     override fun onUserLeaveHint() {
         callback?.onUserLeaveHint { super.onUserLeaveHint() }
     }
-//
-//    @RequiresApi(Build.VERSION_CODES.O)
-//    override fun onPictureInPictureModeChanged(
-//        isInPictureInPictureMode: Boolean,
-//        newConfig: Configuration
-//    ) {
-//        Logger.debug(TAG, "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
-//        if (isInPictureInPictureMode) {
-//            supportActionBar?.hide()
-//            evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_ENTER.toString()) })
-//        } else {
-//            supportActionBar?.show()
-//            evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_EXIT.toString()) })
-//        }
-//
-//        if (lifecycle.currentState == Lifecycle.State.CREATED) {
-//            finishAndRemoveTask()
-//        }
-//        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-//    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        if (isInPictureInPictureMode) {
+            contentLinearLayout?.visibility = View.GONE
+        } else {
+            contentLinearLayout?.visibility = View.VISIBLE
+        }
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    }
 
     private fun setupActionBar() {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
