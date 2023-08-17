@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QBoxWebViewWidget">
         <activity
-            android:name=".TestActivity"
+            android:name=".SampleActivity"
             android:exported="false"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:screenOrientation="portrait"

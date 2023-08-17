@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 .setUrl(params.url)
                 .setLanguage(Language.KAZAKH)
                 .setUser(exampleCustomer)
-//                .setCustomActivity(TestActivity())
+                .setCustomActivity(SampleActivity())
                 .launch()
         } else {
             Widget.Builder.VideoCall(this)
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 .setLanguage(Language.KAZAKH)
                 .setCall(call = params.call)
                 .setUser(exampleCustomer)
-//                .setCustomActivity(TestActivity())
+                .setCustomActivity(SampleActivity())
                 .launch()
         }
     }

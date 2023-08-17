@@ -19,7 +19,7 @@ import kz.qbox.widget.webview.core.ui.presentation.WebViewFragment
 import kz.qbox.widget.webview.sample.utils.IntentCompat
 import java.util.Locale
 
-class TestActivity : AppCompatActivity() {
+class SampleActivity : AppCompatActivity() {
 
     private var contentView: LinearLayout? = null
     private var fragmentContainerView: FragmentContainerView? = null
@@ -57,7 +57,7 @@ class TestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_test)
+        setContentView(R.layout.activity_sample)
 
         fragmentContainerView = findViewById(R.id.fragmentContainerView)
         contentView = findViewById(R.id.contentView)
