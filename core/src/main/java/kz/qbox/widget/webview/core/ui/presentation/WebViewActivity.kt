@@ -42,7 +42,6 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     private var toolbar: Toolbar? = null
-    private var contentView: LinearLayout? = null
     private var fragmentContainerView: FragmentContainerView? = null
 
     /**
@@ -81,7 +80,6 @@ class WebViewActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         fragmentContainerView = findViewById(R.id.fragmentContainerView)
-        contentView = findViewById(R.id.contentView)
 
         setupFragmentContainer()
         setupActionBar()
@@ -120,19 +118,6 @@ class WebViewActivity : AppCompatActivity() {
 
     override fun onUserLeaveHint() {
         callback?.onUserLeaveHint { super.onUserLeaveHint() }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onPictureInPictureModeChanged(
-        isInPictureInPictureMode: Boolean,
-        newConfig: Configuration
-    ) {
-        if (isInPictureInPictureMode) {
-            contentView?.visibility = View.GONE
-        } else {
-            contentView?.visibility = View.VISIBLE
-        }
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
 
     private fun setupActionBar() {
