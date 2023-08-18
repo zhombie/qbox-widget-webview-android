@@ -2,6 +2,7 @@ package kz.qbox.widget.webview.core
 
 import android.content.Context
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
@@ -23,6 +24,7 @@ object Widget {
         private var call: Call? = null
         private var user: User? = null
         private var dynamicAttrs: DynamicAttrs? = null
+        private var customActivity: AppCompatActivity? = null
 
         fun getLoggingEnabled(): Boolean = isLoggingEnabled ?: false
 
@@ -66,12 +68,19 @@ object Widget {
             return this
         }
 
+        fun getCustomActivity(): AppCompatActivity? = customActivity
+
+        fun setCustomActivity(customActivity: AppCompatActivity): Builder {
+            this.customActivity = customActivity
+            return this
+        }
+
         fun build(): Intent {
             isLoggingEnabled?.let {
                 Widget.isLoggingEnabled = it
             }
 
-            return WebViewActivity.newIntent(
+            return if (customActivity == null) WebViewActivity.newIntent(
                 context = context,
                 flavor = when (this) {
                     is FullSuite -> Flavor.FULL_SUITE
@@ -83,7 +92,22 @@ object Widget {
                 call = call,
                 user = user,
                 dynamicAttrs = dynamicAttrs
-            )
+            ) else {
+                Intent(context, customActivity!!::class.java)
+                    .putExtra(
+                        "flavor",
+                        when (this) {
+                            is FullSuite -> Flavor.FULL_SUITE
+                            is VideoCall -> Flavor.VIDEO_CALL
+                            else -> throw IllegalStateException()
+                        }
+                    )
+                    .putExtra("url", url)
+                    .putExtra("language", language)
+                    .putExtra("call", call)
+                    .putExtra("user", user)
+                    .putExtra("dynamic_attrs", dynamicAttrs)
+            }
         }
 
         fun launch(): Intent {
