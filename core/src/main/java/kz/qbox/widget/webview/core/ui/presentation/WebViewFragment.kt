@@ -51,10 +51,12 @@ import org.json.JSONObject
 import java.io.File
 import java.util.*
 
-
 private val TAG = WebViewFragment::class.java.simpleName
 
-class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callback {
+class WebViewFragment internal constructor() : Fragment(),
+    WebView.Listener,
+    JSBridge.Listener,
+    Callback {
 
     companion object {
         fun newInstance(
@@ -248,9 +250,6 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
                     }
                     .build()
             }
-            else -> {
-                throw IllegalStateException()
-            }
         }
 
         setupWebView()
@@ -261,7 +260,11 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
                     webView?.setFileSelectionPromptResult(result.uri)
                 }
                 is GetContentDelegate.Result.Error.NullableUri -> {
-                    Toast.makeText(requireContext(), R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.qbox_widget_error_basic,
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
@@ -274,7 +277,11 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
                 else -> {
-                    Toast.makeText(requireContext(), R.string.qbox_widget_error_basic, Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.qbox_widget_error_basic,
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
@@ -835,7 +842,11 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
 
         thread?.start()
 
-        Toast.makeText(requireContext(), R.string.qbox_widget_info_files_download_started, Toast.LENGTH_LONG)
+        Toast.makeText(
+            requireContext(),
+            R.string.qbox_widget_info_files_download_started,
+            Toast.LENGTH_LONG
+        )
             .show()
     }
 
@@ -871,7 +882,11 @@ class WebViewFragment : Fragment(), WebView.Listener, JSBridge.Listener, Callbac
             return false
         }
 
-        activity.grantUriPermission(activity.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        activity.grantUriPermission(
+            activity.packageName,
+            contentUri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
 
         intent.setDataAndType(contentUri, mimeType)
 

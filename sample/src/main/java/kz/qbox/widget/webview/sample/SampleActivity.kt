@@ -3,12 +3,13 @@ package kz.qbox.widget.webview.sample
 import android.app.DownloadManager
 import android.content.res.Configuration
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentContainerView
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.DynamicAttrs
@@ -23,7 +24,7 @@ class SampleActivity : AppCompatActivity() {
 
     private var contentView: LinearLayout? = null
     private var fragmentContainerView: FragmentContainerView? = null
-    private var reloadButton: Button? = null
+    private var sampleButton: Button? = null
 
     /**
      * [DownloadManager] download ids list (which has downloading status)
@@ -61,7 +62,7 @@ class SampleActivity : AppCompatActivity() {
 
         fragmentContainerView = findViewById(R.id.fragmentContainerView)
         contentView = findViewById(R.id.contentView)
-        reloadButton = findViewById(R.id.reload_button)
+        sampleButton = findViewById(R.id.sampleButton)
 
         setupFragmentContainer()
         setupReloadButton()
@@ -99,9 +100,9 @@ class SampleActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupReloadButton(){
-        reloadButton?.setOnClickListener{
-            callback?.onReload()
+    private fun setupReloadButton() {
+        sampleButton?.setOnClickListener {
+            Toast.makeText(this, "Hello, World!", Toast.LENGTH_SHORT).show()
         }
     }
 }
