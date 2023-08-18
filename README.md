@@ -19,7 +19,7 @@ dependencyResolutionManagement {
 2)	Добавление зависимостей
 ```
 implementation 'com.github.zhombie.garage:image-coil:1.3.5'
-implementation 'com.github.zhombie:qbox-widget-webview-android:1.2.3'
+implementation 'com.github.zhombie:qbox-widget-webview-android:1.2.5'
 ```
 3)	Определение загрузчика рисунков (можно указать свой вариант, например библиотека Glide от Google. В таком случае требуется реализация интерфейса ImageLoader и переопределения его методов)
 ```
