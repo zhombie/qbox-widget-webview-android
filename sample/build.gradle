@@ -62,5 +62,8 @@ dependencies {
     // Firebase BoM
 //    implementation platform('com.google.firebase:firebase-bom:31.2.2')
 
+    //Leak Canary
+    implementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+
     implementation project(':core')
 }
