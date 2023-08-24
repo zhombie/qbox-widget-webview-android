@@ -69,6 +69,7 @@ dependencies {
 
     //Leak Canary
     implementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
 
     implementation project(':core')
 }
