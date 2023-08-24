@@ -2,13 +2,9 @@ package kz.qbox.widget.webview.core.ui.presentation
 
 import android.app.DownloadManager
 import android.content.*
-import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.webkit.WebView.*
-import android.widget.LinearLayout
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar

@@ -3,7 +3,11 @@ package kz.qbox.widget.webview.core
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import kz.qbox.widget.webview.core.models.*
+import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.DynamicAttrs
+import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
 object Widget {
@@ -80,34 +84,35 @@ object Widget {
                 Widget.isLoggingEnabled = it
             }
 
-            return if (customActivity == null) WebViewActivity.newIntent(
-                context = context,
-                flavor = when (this) {
-                    is FullSuite -> Flavor.FULL_SUITE
-                    is VideoCall -> Flavor.VIDEO_CALL
-                    else -> throw IllegalStateException()
-                },
-                url = requireNotNull(url) { "Declare url, without it widget won't work!" },
-                language = (language ?: Language.KAZAKH).code,
-                call = call,
-                user = user,
-                dynamicAttrs = dynamicAttrs
-            ) else {
-                Intent(context, customActivity!!::class.java)
-                    .putExtra(
-                        "flavor",
-                        when (this) {
-                            is FullSuite -> Flavor.FULL_SUITE
-                            is VideoCall -> Flavor.VIDEO_CALL
-                            else -> throw IllegalStateException()
-                        }
-                    )
+            val url = requireNotNull(url) { "Declare url, without it widget won't work!" }
+
+            val flavor = when (this) {
+                is FullSuite -> Flavor.FULL_SUITE
+                is VideoCall -> Flavor.VIDEO_CALL
+                else -> throw IllegalStateException()
+            }
+
+            val language = (language ?: Language.KAZAKH).code
+
+            customActivity?.let {
+                return Intent(context, it::class.java)
+                    .putExtra("flavor", flavor)
                     .putExtra("url", url)
                     .putExtra("language", language)
                     .putExtra("call", call)
                     .putExtra("user", user)
                     .putExtra("dynamic_attrs", dynamicAttrs)
             }
+
+            return WebViewActivity.newIntent(
+                context = context,
+                flavor = flavor,
+                url = url,
+                language = language,
+                call = call,
+                user = user,
+                dynamicAttrs = dynamicAttrs
+            )
         }
 
         fun launch(): Intent {
