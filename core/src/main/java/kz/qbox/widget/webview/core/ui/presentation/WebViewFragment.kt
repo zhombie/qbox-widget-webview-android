@@ -183,17 +183,18 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     private val jsBridge by lazy {
+        val provider = provider
         if (provider == null) null else JSBridge(
             device = Device(
-                os = provider!!.os,
-                osVersion = provider!!.osVersion,
-                appVersion = provider!!.versionName,
-                name = provider!!.name,
-                mobileOperator = provider!!.operator,
+                os = provider.os,
+                osVersion = provider.osVersion,
+                appVersion = provider.versionName,
+                name = provider.name,
+                mobileOperator = provider.operator,
                 battery = Device.Battery(
-                    percentage = provider!!.batteryPercent,
-                    isCharging = provider!!.isPhoneCharging,
-                    temperature = provider!!.batteryTemperature
+                    percentage = provider.batteryPercent,
+                    isCharging = provider.isPhoneCharging,
+                    temperature = provider.batteryTemperature
                 )
             ),
             call = call,
