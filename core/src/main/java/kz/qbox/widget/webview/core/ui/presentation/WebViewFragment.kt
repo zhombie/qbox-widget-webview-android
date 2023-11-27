@@ -34,6 +34,7 @@ import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.garage.image.preview.showImagePreview
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
+import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.device.Provider
 import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
@@ -56,7 +57,7 @@ private val TAG = WebViewFragment::class.java.simpleName
 class WebViewFragment internal constructor() : Fragment(),
     WebView.Listener,
     JSBridge.Listener,
-    Callback {
+    Listener {
 
     companion object {
         fun newInstance(
@@ -209,9 +210,6 @@ class WebViewFragment internal constructor() : Fragment(),
     private val activity: AppCompatActivity
         get() = requireActivity() as AppCompatActivity
 
-    val callbackInstance: Callback
-        get() = this
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -237,6 +235,7 @@ class WebViewFragment internal constructor() : Fragment(),
                     }
                     .build()
             }
+
             Flavor.VIDEO_CALL -> {
                 val call = call ?: throw NullPointerException("Call information is not provided!")
 
@@ -259,6 +258,7 @@ class WebViewFragment internal constructor() : Fragment(),
                 is GetContentDelegate.Result.Success -> {
                     webView?.setFileSelectionPromptResult(result.uri)
                 }
+
                 is GetContentDelegate.Result.Error.NullableUri -> {
                     Toast.makeText(
                         requireContext(),
@@ -268,6 +268,7 @@ class WebViewFragment internal constructor() : Fragment(),
                         .show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
+
                 is GetContentDelegate.Result.Error.SizeLimitExceeds -> {
                     Toast.makeText(
                         requireContext(),
@@ -276,6 +277,7 @@ class WebViewFragment internal constructor() : Fragment(),
                     ).show()
                     webView?.setFileSelectionPromptResult(uri = null)
                 }
+
                 else -> {
                     Toast.makeText(
                         requireContext(),
@@ -348,6 +350,8 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onDestroy() {
+        Widget.listener = null
+
         jsBridge?.dispose()
 
         interactor?.dispose()
@@ -376,7 +380,6 @@ class WebViewFragment internal constructor() : Fragment(),
 
         webView?.destroy()
     }
-
 
     override fun onUserLeaveHint(onLeave: () -> Unit) {
         Logger.debug(TAG, "onUserLeaveHint()")
@@ -770,6 +773,7 @@ class WebViewFragment internal constructor() : Fragment(),
                             DownloadManager.STATUS_SUCCESSFUL -> {
                                 isDownloading = false
                             }
+
                             DownloadManager.STATUS_PAUSED -> {
                                 if (cursor.getIntOrDefault(
                                         DownloadManager.COLUMN_REASON,
@@ -789,6 +793,7 @@ class WebViewFragment internal constructor() : Fragment(),
                                     }
                                 }
                             }
+
                             DownloadManager.STATUS_FAILED -> {
                                 isDownloading = false
 
@@ -802,6 +807,7 @@ class WebViewFragment internal constructor() : Fragment(),
                                     errorDialog?.show()
                                 }
                             }
+
                             else -> {
                                 val bytesDownloaded = cursor.getIntOrDefault(
                                     DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR,
@@ -917,29 +923,35 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onCallState(state: CallState) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            callState = state
+        Logger.debug(TAG, "onCallState() -> state: $state")
 
-            if (state == CallState.FINISH && activity.isInPictureInPictureMode) {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.qbox_widget_alert_message_call_finished,
-                    Toast.LENGTH_SHORT
-                ).show()
+        Widget.listener?.onCallState(state)
 
-//                startActivity(
-//                    WebViewActivity.newIntent(
-//                        context = requireContext(),
-//                        flavor = flavor,
-//                        url = uri.toString(),
-//                        language = language,
-//                        call = call,
-//                        user = user,
-//                        dynamicAttrs = dynamicAttrs
-//                    ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-//                )
+        callState = state
 
-                activity.moveTaskToBack(true)
+        if (state == CallState.FINISH) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                if (activity.isInPictureInPictureMode) {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.qbox_widget_alert_message_call_finished,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+//                    startActivity(
+//                        WebViewActivity.newIntent(
+//                            context = requireContext(),
+//                            flavor = flavor,
+//                            url = uri.toString(),
+//                            language = language,
+//                            call = call,
+//                            user = user,
+//                            dynamicAttrs = dynamicAttrs
+//                        ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+//                    )
+
+                    activity.moveTaskToBack(true)
+                }
             }
         }
     }
@@ -977,12 +989,15 @@ class WebViewFragment internal constructor() : Fragment(),
                         0 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.IMAGE))
                         }
+
                         1 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.VIDEO))
                         }
+
                         2 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.AUDIO))
                         }
+
                         3 -> {
                             interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
                         }
@@ -1037,7 +1052,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
 }
 
-interface Callback {
+interface Listener {
     fun onUserLeaveHint(onLeave: () -> Unit)
     fun onBackPressed(onBack: () -> Unit)
     fun onReload()

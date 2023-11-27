@@ -15,8 +15,6 @@ import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.core.utils.*
 import java.util.*
 
-private val TAG = WebViewActivity::class.java.simpleName
-
 class WebViewActivity : AppCompatActivity() {
 
     companion object {
@@ -68,8 +66,6 @@ class WebViewActivity : AppCompatActivity() {
         IntentCompat.getSerializable<DynamicAttrs>(intent, "dynamic_attrs")
     }
 
-    private var callback: Callback? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.qbox_widget_activity_webview)
@@ -83,7 +79,7 @@ class WebViewActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        callback?.onBackPressed { super.onBackPressed() }
+        getFragment()?.onBackPressed { super.onBackPressed() }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -102,18 +98,20 @@ class WebViewActivity : AppCompatActivity() {
                     }
                     .setPositiveButton(R.string.qbox_widget_reload) { dialog, _ ->
                         dialog.dismiss()
-                        callback?.onReload()
+
+                        getFragment()?.onReload()
                     }
                     .show()
                 true
             }
+
             else ->
                 super.onOptionsItemSelected(item)
         }
     }
 
     override fun onUserLeaveHint() {
-        callback?.onUserLeaveHint { super.onUserLeaveHint() }
+        getFragment()?.onUserLeaveHint { super.onUserLeaveHint() }
     }
 
     private fun setupActionBar() {
@@ -126,14 +124,27 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     private fun setupFragmentContainer() {
-        val fragment = WebViewFragment.newInstance(flavor, url, language, call, user, dynamicAttrs)
-        callback = fragment.callbackInstance
-
+        val fragment = WebViewFragment.newInstance(
+            flavor = flavor,
+            url = url,
+            language = language,
+            call = call,
+            user = user,
+            dynamicAttrs = dynamicAttrs
+        )
         supportFragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             add(R.id.fragmentContainerView, fragment)
             commit()
         }
+    }
+
+    private fun getFragment(): Listener? {
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView)
+        if (fragment is Listener) {
+            return fragment
+        }
+        return null
     }
 
 }

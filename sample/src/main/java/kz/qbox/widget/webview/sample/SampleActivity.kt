@@ -15,7 +15,7 @@ import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.User
-import kz.qbox.widget.webview.core.ui.presentation.Callback
+import kz.qbox.widget.webview.core.ui.presentation.Listener
 import kz.qbox.widget.webview.core.ui.presentation.WebViewFragment
 import kz.qbox.widget.webview.sample.utils.IntentCompat
 import java.util.Locale
@@ -54,8 +54,6 @@ class SampleActivity : AppCompatActivity() {
         IntentCompat.getSerializable<DynamicAttrs>(intent, "dynamic_attrs")
     }
 
-    private var callback: Callback? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sample)
@@ -70,11 +68,11 @@ class SampleActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        callback?.onBackPressed { super.onBackPressed() }
+        getFragment()?.onBackPressed { super.onBackPressed() }
     }
 
     override fun onUserLeaveHint() {
-        callback?.onUserLeaveHint { super.onUserLeaveHint() }
+        getFragment()?.onUserLeaveHint { super.onUserLeaveHint() }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -90,14 +88,28 @@ class SampleActivity : AppCompatActivity() {
     }
 
     private fun setupFragmentContainer() {
-        val fragment = WebViewFragment.newInstance(flavor, url, language, call, user, dynamicAttrs)
-        callback = fragment.callbackInstance
-
+        val fragment = WebViewFragment.newInstance(
+            flavor = flavor,
+            url = url,
+            language = language,
+            call = call,
+            user = user,
+            dynamicAttrs = dynamicAttrs
+        )
         supportFragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             add(R.id.fragmentContainerView, fragment)
             commit()
         }
+    }
+
+
+    private fun getFragment(): Listener? {
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView)
+        if (fragment is Listener) {
+            return fragment
+        }
+        return null
     }
 
     private fun setupReloadButton() {
