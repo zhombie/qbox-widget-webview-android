@@ -226,6 +226,12 @@ class WebViewFragment internal constructor() : Fragment(),
 
         var uri = uri
 
+//        uri = uri.buildUpon()
+//            .apply {
+//                appendQueryParameter("can_skip_request_call_feedback", "1")
+//            }
+//            .build()
+
         when (flavor) {
             Flavor.FULL_SUITE -> {
                 uri = uri.buildUpon()
