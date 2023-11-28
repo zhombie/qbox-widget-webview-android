@@ -3,6 +3,7 @@ package kz.qbox.widget.webview.sample
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +13,7 @@ import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.sample.model.Params
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), Widget.Listener {
 
     companion object {
         private const val DEFAULT_DOMAIN = "test.kz"
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                 .setLanguage(Language.KAZAKH)
                 .setUser(exampleCustomer)
                 .setCustomActivity(SampleActivity())
+                .setListener(this)
                 .launch()
         } else {
             Widget.Builder.VideoCall(this)
@@ -67,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 .setCall(call = params.call)
                 .setUser(exampleCustomer)
                 .setCustomActivity(SampleActivity())
+                .setListener(this)
                 .launch()
         }
     }
@@ -97,23 +100,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun parseParams(): Map<String, Params> {
         val paramsMap = mutableMapOf<String, Params>()
-        BuildConfig.CALL_ROUTES.split(",").forEachIndexed { index, pair ->
+        BuildConfig.CALL_ROUTES.split(",").forEach { pair ->
             val (title, url) = pair.split("*")
             paramsMap[title] = Params(
                 title = title,
                 url = url,
-                call = if (index <= 3) {
-                    null
-                } else {
-                    Call(
-                        domain = DEFAULT_DOMAIN,
-                        type = Call.Type.VIDEO,
-                        topic = BuildConfig.CALL_TOPIC
-                    )
-                }
+                call = Call(
+                    domain = DEFAULT_DOMAIN,
+                    type = Call.Type.VIDEO,
+                    topic = BuildConfig.CALL_TOPIC,
+//                    location = Location(
+//                        latitude = 51.14721,
+//                        longitude = 71.39069,
+//                    ),
+                )
             )
         }
         return paramsMap
+    }
+
+    /**
+     * [Widget.Listener] implementation
+     */
+    override fun onCallState(state: CallState) {
+        Log.d(MainActivity::class.java.simpleName, "onCallState() -> state: $state")
     }
 
 }

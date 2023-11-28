@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.Language
@@ -15,6 +16,12 @@ object Widget {
     var isLoggingEnabled: Boolean = false
         @Synchronized get
         @Synchronized set
+
+    var listener: Listener? = null
+
+    interface Listener {
+        fun onCallState(state: CallState)
+    }
 
     abstract class Builder internal constructor(private val context: Context) {
 
@@ -76,6 +83,11 @@ object Widget {
 
         fun setCustomActivity(customActivity: AppCompatActivity): Builder {
             this.customActivity = customActivity
+            return this
+        }
+
+        fun setListener(listener: Listener): Builder {
+            Widget.listener = listener
             return this
         }
 

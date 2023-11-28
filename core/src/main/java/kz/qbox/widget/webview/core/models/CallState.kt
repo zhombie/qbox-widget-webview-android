@@ -2,5 +2,7 @@ package kz.qbox.widget.webview.core.models
 
 enum class CallState {
     START,
-    FINISH
+    FINISH,
+    FEEDBACK_RATE,
+    FEEDBACK_SKIP
 }
