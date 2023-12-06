@@ -32,8 +32,8 @@ ext.projectArtifactId = { Project project ->
 
 allprojects {
     group = 'kz.qbox.widget.webview'
-    project.ext.version_code = 16
-    version = '1.2.6'
+    project.ext.version_code = 17
+    version = '1.2.7'
     project.ext.artifactId = rootProject.ext.projectArtifactId(project)
 
     if (project.group != null) {
