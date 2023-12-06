@@ -1,7 +1,6 @@
 package kz.qbox.widget.webview.core.ui.presentation
 
 import android.app.DownloadManager
-import android.app.PictureInPictureParams
 import android.content.*
 import android.graphics.Color
 import android.net.Uri
@@ -10,9 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.text.Html
 import android.text.method.LinkMovementMethod
-import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,10 +23,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.webkit.WebSettingsCompat
-import androidx.webkit.WebViewFeature
 import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.garage.image.preview.showImagePreview
 import kz.qbox.widget.webview.core.Logger
@@ -42,6 +38,8 @@ import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
 import kz.qbox.widget.webview.core.multimedia.selection.MimeType
 import kz.qbox.widget.webview.core.multimedia.selection.StorageAccessFrameworkInteractor
+import kz.qbox.widget.webview.core.sdk.ActivityCompat
+import kz.qbox.widget.webview.core.sdk.BundleCompat
 import kz.qbox.widget.webview.core.ui.components.JSBridge
 import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
@@ -211,6 +209,10 @@ class WebViewFragment internal constructor() : Fragment(),
     private val activity: AppCompatActivity
         get() = requireActivity() as AppCompatActivity
 
+    fun setListener(listener: Widget.Listener) {
+        Widget.listener = listener
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -293,7 +295,6 @@ class WebViewFragment internal constructor() : Fragment(),
 
         webView?.loadUrl(uri.toString())
     }
-
 
     override fun onBackPressed(onBack: () -> Unit) {
         val fragments = childFragmentManager.fragments
@@ -384,22 +385,13 @@ class WebViewFragment internal constructor() : Fragment(),
 
     override fun onUserLeaveHint(onLeave: () -> Unit) {
         Logger.debug(TAG, "onUserLeaveHint()")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (callState == CallState.START) {
-                if (!activity.isInPictureInPictureMode) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        activity.enterPictureInPictureMode(
-                            PictureInPictureParams.Builder()
-                                .setAspectRatio(Rational(2, 3))
-//                                .setAutoEnterEnabled(true)
-                                .build()
-                        )
-                    } else {
-                        activity.enterPictureInPictureMode()
-                    }
-                }
+
+        if (callState == CallState.START) {
+            if (!ActivityCompat.isInPictureInPictureMode(activity)) {
+                ActivityCompat.enterPictureInPictureMode(activity)
             }
         }
+
         onLeave.invoke()
     }
 
@@ -428,14 +420,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     private fun setupWebView() {
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-            webView?.settings?.let {
-                WebSettingsCompat.setForceDark(
-                    it,
-                    WebSettingsCompat.FORCE_DARK_OFF
-                )
-            }
-        }
+        ActivityCompat.setDarkModeOff(webView)
 
         webView?.init()
         webView?.setupCookieManager()
@@ -538,11 +523,10 @@ class WebViewFragment internal constructor() : Fragment(),
                     textSize = 15f
                     isClickable = true
                     movementMethod = LinkMovementMethod.getInstance()
-                    text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        Html.fromHtml("<a href='$url'>$url</a>", Html.FROM_HTML_MODE_LEGACY)
-                    } else {
-                        Html.fromHtml("<a href='$url'>$url</a>")
-                    }
+                    text = HtmlCompat.fromHtml(
+                        "<a href='$url'>$url</a>",
+                        HtmlCompat.FROM_HTML_MODE_LEGACY
+                    )
                 }
 
                 AlertDialog.Builder(requireContext())

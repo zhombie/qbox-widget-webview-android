@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 .setUrl(params.url)
                 .setLanguage(Language.KAZAKH)
                 .setUser(exampleCustomer)
-                .setCustomActivity(SampleActivity())
+                .setCustomActivity(SampleActivity::class.java)
                 .setListener(this)
                 .launch()
         } else {
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 .setLanguage(Language.KAZAKH)
                 .setCall(call = params.call)
                 .setUser(exampleCustomer)
-                .setCustomActivity(SampleActivity())
+                .setCustomActivity(SampleActivity::class.java)
                 .setListener(this)
                 .launch()
         }

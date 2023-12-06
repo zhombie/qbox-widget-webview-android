@@ -1,19 +1,25 @@
 package kz.qbox.widget.webview.core.ui.presentation
 
 import android.app.DownloadManager
-import android.content.*
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.*
-import android.webkit.WebView.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentContainerView
 import kz.qbox.widget.webview.core.R
-import kz.qbox.widget.webview.core.models.*
-import kz.qbox.widget.webview.core.utils.*
-import java.util.*
+import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.DynamicAttrs
+import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.User
+import kz.qbox.widget.webview.core.sdk.IntentCompat
+import kz.qbox.widget.webview.core.utils.setupActionBar
+import java.util.Locale
 
 class WebViewActivity : AppCompatActivity() {
 
@@ -72,6 +78,12 @@ class WebViewActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         fragmentContainerView = findViewById(R.id.fragmentContainerView)
+
+//        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+//            override fun handleOnBackPressed() {
+//                getFragment()?.onBackPressed { onBackPressedDispatcher.onBackPressed() }
+//            }
+//        })
 
         setupFragmentContainer()
         setupActionBar()

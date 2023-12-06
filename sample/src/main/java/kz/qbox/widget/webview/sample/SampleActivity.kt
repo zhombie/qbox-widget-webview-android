@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
@@ -11,7 +12,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentContainerView
+import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.User
@@ -20,7 +23,7 @@ import kz.qbox.widget.webview.core.ui.presentation.WebViewFragment
 import kz.qbox.widget.webview.sample.utils.IntentCompat
 import java.util.Locale
 
-class SampleActivity : AppCompatActivity() {
+class SampleActivity : AppCompatActivity(), Widget.Listener {
 
     private var contentView: LinearLayout? = null
     private var fragmentContainerView: FragmentContainerView? = null
@@ -62,6 +65,14 @@ class SampleActivity : AppCompatActivity() {
         contentView = findViewById(R.id.contentView)
         sampleButton = findViewById(R.id.sampleButton)
 
+//        getFragment()?.onBackPressed {
+//            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+//                override fun handleOnBackPressed() {
+//                    getFragment()?.onBackPressed { onBackPressedDispatcher.onBackPressed() }
+//                }
+//            })
+//        }
+
         setupFragmentContainer()
         setupReloadButton()
     }
@@ -96,13 +107,13 @@ class SampleActivity : AppCompatActivity() {
             user = user,
             dynamicAttrs = dynamicAttrs
         )
+        fragment.setListener(this)
         supportFragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             add(R.id.fragmentContainerView, fragment)
             commit()
         }
     }
-
 
     private fun getFragment(): Listener? {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView)
@@ -116,5 +127,12 @@ class SampleActivity : AppCompatActivity() {
         sampleButton?.setOnClickListener {
             Toast.makeText(this, "Hello, World!", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /**
+     * [Widget.Listener] implementation
+     */
+    override fun onCallState(state: CallState) {
+        Log.d(SampleActivity::class.java.simpleName, "onCallState() -> state: $state")
     }
 }

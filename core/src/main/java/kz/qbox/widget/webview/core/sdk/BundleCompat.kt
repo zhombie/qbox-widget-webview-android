@@ -1,31 +1,31 @@
-package kz.qbox.widget.webview.core.utils
+package kz.qbox.widget.webview.core.sdk
 
-import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 
-internal object IntentCompat {
+internal object BundleCompat {
 
     inline fun <reified T : Enum<T>> getEnum(
-        intent: Intent,
+        arguments: Bundle?,
         name: String
     ): T? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra(name, T::class.java)
+            arguments?.getSerializable(name, T::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getSerializableExtra(name) as? T
+            arguments?.getSerializable(name) as? T
         }
     }
 
     inline fun <reified T : java.io.Serializable> getSerializable(
-        intent: Intent,
+        arguments: Bundle?,
         name: String
     ): T? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra(name, T::class.java)
+            arguments?.getSerializable(name, T::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getSerializableExtra(name) as? T
+            arguments?.getSerializable(name) as? T
         }
     }
 

@@ -35,7 +35,7 @@ object Widget {
         private var call: Call? = null
         private var user: User? = null
         private var dynamicAttrs: DynamicAttrs? = null
-        private var customActivity: AppCompatActivity? = null
+        private var customActivity: Class<*>? = null
 
         fun getLoggingEnabled(): Boolean = isLoggingEnabled ?: false
 
@@ -79,9 +79,9 @@ object Widget {
             return this
         }
 
-        fun getCustomActivity(): AppCompatActivity? = customActivity
+        fun getCustomActivity(): Class<*>? = customActivity
 
-        fun setCustomActivity(customActivity: AppCompatActivity): Builder {
+        fun setCustomActivity(customActivity: Class<*>): Builder {
             this.customActivity = customActivity
             return this
         }
@@ -107,7 +107,7 @@ object Widget {
             val language = (language ?: Language.KAZAKH).code
 
             customActivity?.let {
-                return Intent(context, it::class.java)
+                return Intent(context, it)
                     .putExtra("flavor", flavor)
                     .putExtra("url", url)
                     .putExtra("language", language)
