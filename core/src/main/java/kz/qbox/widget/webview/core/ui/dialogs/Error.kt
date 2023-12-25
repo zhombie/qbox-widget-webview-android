@@ -2,13 +2,12 @@ package kz.qbox.widget.webview.core.ui.dialogs
 
 import android.content.ClipData
 import android.graphics.Color
-import android.os.Build
-import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.utils.clipboardManager
 
@@ -27,11 +26,10 @@ internal fun AppCompatActivity.showError(
         textSize = 15f
         isClickable = true
         movementMethod = LinkMovementMethod.getInstance()
-        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml("<a href='$url'>$url</a>", Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            Html.fromHtml("<a href='$url'>$url</a>")
-        }
+        text = HtmlCompat.fromHtml(
+            "<a href='$url'>$url</a>",
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
     }
 
     return AlertDialog.Builder(this)

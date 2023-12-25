@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.2.0'
 
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
 
@@ -60,12 +60,11 @@ subprojects { Project project ->
     apply plugin: 'maven-publish'
 
     android {
-        compileSdkVersion 33
-        buildToolsVersion '30.0.3'
+        compileSdk 34
 
         defaultConfig {
-            minSdkVersion 21
-            targetSdkVersion 33
+            minSdk 21
+            targetSdk 34
 
             versionCode project.ext.version_code
             versionName project.version
@@ -83,6 +82,12 @@ subprojects { Project project ->
             buildConfig false
         }
 
+        publishing {
+            multipleVariants {
+                allVariants()
+            }
+        }
+
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_11
             targetCompatibility JavaVersion.VERSION_11
@@ -92,7 +97,7 @@ subprojects { Project project ->
             jvmTarget = JavaVersion.VERSION_11.toString()
         }
 
-        configurations.all {
+        configurations.configureEach {
             resolutionStrategy.eachDependency { DependencyResolveDetails details ->
                 if (details.requested.group == 'org.jetbrains.kotlin') {
                     details.useVersion kotlin_version
@@ -104,7 +109,9 @@ subprojects { Project project ->
     afterEvaluate {
         publishing {
             publications {
-                aar(MavenPublication) {
+                allVariants(MavenPublication) {
+                    from components.default
+
                     groupId project.group
                     artifactId project.ext.artifactId
                     version project.version
@@ -130,7 +137,6 @@ subprojects { Project project ->
                         }
                     }
 
-//                    from components.release
                     artifact "$buildDir/outputs/aar/$project.name-release.aar"
                 }
             }
@@ -162,6 +168,6 @@ static def getParentFolderModuleName(Project project) {
 }
 
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
