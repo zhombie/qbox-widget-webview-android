@@ -18,8 +18,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.ref.WeakReference
 
-private val TAG = StorageAccessFrameworkInteractor::class.java.simpleName
-
 internal class StorageAccessFrameworkInteractor private constructor(
     private val reference: WeakReference<AppCompatActivity>,
     private val getContentDelegate: GetContentDelegate
@@ -85,7 +83,7 @@ internal class StorageAccessFrameworkInteractor private constructor(
 
         val mimeType = contentResolver?.getType(uri)
 
-        Logger.debug(TAG, "parse() -> mimeType: $mimeType")
+        Logger.debug("QBox", "parse() -> mimeType: $mimeType")
 
         return when {
             mimeType?.startsWith("image") == true -> {

@@ -10,14 +10,12 @@ import androidx.core.database.getStringOrNull
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.utils.downloadManager
 
-private val TAG = DownloadStateReceiver::class.java.simpleName
-
 internal class DownloadStateReceiver constructor(
     private val listener: Listener
 ) : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Logger.debug(TAG, "onReceive() -> context: $context, intent: $intent")
+        Logger.debug("QBox", "onReceive() -> context: $context, intent: $intent")
 
         if (context == null) return
         val action = intent?.action
@@ -32,14 +30,14 @@ internal class DownloadStateReceiver constructor(
                     .setFilterById(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1))
             )
 
-            Logger.debug(TAG, "onReceive() -> cursor: $cursor")
+            Logger.debug("QBox", "onReceive() -> cursor: $cursor")
 
             if (cursor.moveToFirst()) {
                 if (cursor.count > 0) {
                     val status =
                         cursor.getIntOrNull(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
 
-                    Logger.debug(TAG, "onReceive() -> status: $status")
+                    Logger.debug("QBox", "onReceive() -> status: $status")
 
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         val localUri =
@@ -47,7 +45,7 @@ internal class DownloadStateReceiver constructor(
                         val mimeType =
                             downloadManager.getMimeTypeForDownloadedFile(downloadId)
                         Logger.debug(
-                            TAG, "onReceive() -> " +
+                            "QBox", "onReceive() -> " +
                                     "downloadId: $downloadId, localUri: $localUri"
                         )
                         listener.onFileUriReady(downloadId, Uri.parse(localUri), mimeType)

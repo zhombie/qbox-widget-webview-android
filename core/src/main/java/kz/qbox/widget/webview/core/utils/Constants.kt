@@ -1,6 +1,5 @@
 package kz.qbox.widget.webview.core.utils
 
-import android.Manifest
 import android.webkit.WebView
 
 internal object Constants {
@@ -28,30 +27,23 @@ internal object Constants {
 
     val FILE_EXTENSIONS = arrayOf(
         ".dot",
-        ".pptx",
         ".rtf",
-        ".xlsx",
-        ".xls",
         ".bmp",
-        ".csv",
         ".html",
+        ".csv",
         ".xml",
         ".txt",
         ".pdf",
+
         ".doc",
-        ".zip",
-        ".rar",
         ".docx",
-    )
+        ".ppt",
+        ".pptx",
+        ".xls",
+        ".xlsx",
 
-    val LOCATION_PERMISSIONS = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
-
-    val STORAGE_PERMISSIONS = arrayOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ".rar",
+        ".zip",
     )
 
 }

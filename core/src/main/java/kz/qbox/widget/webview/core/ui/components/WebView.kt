@@ -9,11 +9,22 @@ import android.net.http.SslError
 import android.os.Message
 import android.util.AttributeSet
 import android.view.View
-import android.webkit.*
+import android.webkit.ConsoleMessage
+import android.webkit.CookieManager
+import android.webkit.GeolocationPermissions
+import android.webkit.JsPromptResult
+import android.webkit.JsResult
+import android.webkit.PermissionRequest
+import android.webkit.SslErrorHandler
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
+import android.webkit.WebViewClient
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.Widget
-
-private val TAG = WebView::class.java.simpleName
 
 class WebView @JvmOverloads constructor(
     context: Context,
@@ -100,7 +111,7 @@ class WebView @JvmOverloads constructor(
 
     fun setupCookieManager() {
         with(CookieManager.getInstance()) {
-            Logger.debug(TAG, "CookieManager#hasCookies(): ${hasCookies()}")
+            Logger.debug("QBox", "CookieManager#hasCookies(): ${hasCookies()}")
 
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(this@WebView, true)
@@ -118,14 +129,14 @@ class WebView @JvmOverloads constructor(
 
     fun setPermissionRequestResult(permissions: List<String>) {
         Logger.debug(
-            TAG, "setPermissionRequestResult() -> " +
+            "QBox", "setPermissionRequestResult() -> " +
                     "permissions: ${permissions.joinToString(", ")}"
         )
         if (permissions.isEmpty()) {
             permissionRequest?.deny()
         } else {
             Logger.debug(
-                TAG, "setPermissionRequestResult() -> " +
+                "QBox", "setPermissionRequestResult() -> " +
                         "$permissionRequest grant permissions: ${permissions.joinToString(", ")}"
             )
             permissionRequest?.grant(permissions.toTypedArray())
@@ -135,7 +146,7 @@ class WebView @JvmOverloads constructor(
 
     fun setGeolocationPermissionsShowPromptResult(success: Boolean) {
         Logger.debug(
-            TAG, "setGeolocationPermissionsShowPromptResult() -> " +
+            "QBox", "setGeolocationPermissionsShowPromptResult() -> " +
                     "$success, $geolocationPermissionsShowPrompt"
         )
         if (success) {
@@ -164,7 +175,7 @@ class WebView @JvmOverloads constructor(
 
     fun setFileSelectionPromptResult(uris: Array<Uri>?) {
         Logger.debug(
-            TAG,
+            "QBox",
             "setFileSelectionPromptResult() -> $uris, $fileSelectionPrompt"
         )
 
@@ -190,7 +201,7 @@ class WebView @JvmOverloads constructor(
 
         override fun onPermissionRequest(request: PermissionRequest?) {
             Logger.debug(
-                TAG,
+                "QBox",
                 "onPermissionRequest() -> " +
                         "origin: ${request?.origin}, " +
                         "resources: ${request?.resources?.contentToString()}"
@@ -206,7 +217,7 @@ class WebView @JvmOverloads constructor(
         override fun onPermissionRequestCanceled(request: PermissionRequest?) {
             super.onPermissionRequestCanceled(request)
 
-            Logger.debug(TAG, "onPermissionRequestCanceled() -> request: $request")
+            Logger.debug("QBox", "onPermissionRequestCanceled() -> request: $request")
 
             permissionRequest = null
 
@@ -222,7 +233,7 @@ class WebView @JvmOverloads constructor(
             super.onGeolocationPermissionsShowPrompt(origin, callback)
 
 //            Logger.debug(
-//                TAG,
+//                "QBox",
 //                "onGeolocationPermissionsShowPrompt() -> origin: $origin, callback: $callback"
 //            )
 //
@@ -237,7 +248,7 @@ class WebView @JvmOverloads constructor(
         override fun onGeolocationPermissionsHidePrompt() {
             super.onGeolocationPermissionsHidePrompt()
 
-            Logger.debug(TAG, "onGeolocationPermissionsHidePrompt()")
+            Logger.debug("QBox", "onGeolocationPermissionsHidePrompt()")
 
             geolocationPermissionsShowPrompt = null
 
@@ -251,7 +262,7 @@ class WebView @JvmOverloads constructor(
             result: JsResult?
         ): Boolean {
             Logger.debug(
-                TAG,
+                "QBox",
                 "onJsAlert() -> " +
                         "url: $url, " +
                         "message: $message, " +
@@ -267,7 +278,7 @@ class WebView @JvmOverloads constructor(
             result: JsResult?
         ): Boolean {
             Logger.debug(
-                TAG,
+                "QBox",
                 "onJsConfirm() -> " +
                         "url: $url, " +
                         "message: $message, " +
@@ -284,7 +295,7 @@ class WebView @JvmOverloads constructor(
             result: JsPromptResult?
         ): Boolean {
             Logger.debug(
-                TAG,
+                "QBox",
                 "onJsPrompt() -> " +
                         "url: $url, " +
                         "message: $message, " +
@@ -309,7 +320,7 @@ class WebView @JvmOverloads constructor(
             fileChooserParams: FileChooserParams?
         ): Boolean {
             Logger.debug(
-                TAG,
+                "QBox",
                 "onShowFileChooser() -> params: " +
                         "${fileChooserParams?.acceptTypes?.contentToString()}, " +
                         "${fileChooserParams?.filenameHint}, " +
@@ -329,7 +340,7 @@ class WebView @JvmOverloads constructor(
 
         override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
             super.onShowCustomView(view, callback)
-            Logger.debug(TAG, "onShowCustomView()")
+            Logger.debug("QBox", "onShowCustomView()")
         }
 
         override fun onProgressChanged(view: android.webkit.WebView?, newProgress: Int) {
@@ -339,7 +350,7 @@ class WebView @JvmOverloads constructor(
 
         override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
             return if (Widget.isLoggingEnabled) {
-                Logger.debug(TAG, consoleMessage?.message() ?: "Client received console message")
+                Logger.debug("QBox", consoleMessage?.message() ?: "Client received console message")
                 super.onConsoleMessage(consoleMessage)
             } else {
                 false
@@ -350,17 +361,17 @@ class WebView @JvmOverloads constructor(
     private inner class MyWebViewClient : WebViewClient() {
         override fun onLoadResource(view: android.webkit.WebView?, url: String?) {
             super.onLoadResource(view, url)
-            Logger.debug(TAG, "onLoadResource() -> url: $url")
+            Logger.debug("QBox", "onLoadResource() -> url: $url")
         }
 
         override fun onPageStarted(view: android.webkit.WebView?, url: String?, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
-            Logger.debug(TAG, "onPageStarted() -> url: $url")
+            Logger.debug("QBox", "onPageStarted() -> url: $url")
         }
 
         override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
             super.onPageFinished(view, url)
-            Logger.debug(TAG, "onPageFinished() -> url: $url")
+            Logger.debug("QBox", "onPageFinished() -> url: $url")
             listener?.onPageFinished(view, url)
         }
 
@@ -369,7 +380,7 @@ class WebView @JvmOverloads constructor(
             request: WebResourceRequest?
         ): Boolean {
             Logger.debug(
-                TAG,
+                "QBox",
                 "shouldOverrideUrlLoading() -> ${request?.requestHeaders}, ${request?.url}"
             )
 
@@ -389,7 +400,7 @@ class WebView @JvmOverloads constructor(
             view: android.webkit.WebView?,
             url: String?
         ): Boolean {
-            Logger.debug(TAG, "shouldOverrideUrlLoading() -> url: $url")
+            Logger.debug("QBox", "shouldOverrideUrlLoading() -> url: $url")
             return super.shouldOverrideUrlLoading(view, url)
         }
 
@@ -399,7 +410,7 @@ class WebView @JvmOverloads constructor(
             error: WebResourceError?
         ) {
             super.onReceivedError(view, request, error)
-            Logger.debug(TAG, "onReceivedError() -> $request, $error")
+            Logger.debug("QBox", "onReceivedError() -> $request, $error")
         }
 
         override fun onReceivedHttpError(
@@ -408,7 +419,7 @@ class WebView @JvmOverloads constructor(
             errorResponse: WebResourceResponse?
         ) {
             super.onReceivedHttpError(view, request, errorResponse)
-            Logger.debug(TAG, "onReceivedHttpError() -> $request, $errorResponse")
+            Logger.debug("QBox", "onReceivedHttpError() -> $request, $errorResponse")
         }
 
         override fun onReceivedSslError(
@@ -416,7 +427,7 @@ class WebView @JvmOverloads constructor(
             handler: SslErrorHandler?,
             error: SslError?
         ) {
-            Logger.debug(TAG, "onReceivedSslError() -> $handler, $error")
+            Logger.debug("QBox", "onReceivedSslError() -> $handler, $error")
             listener?.onReceivedSSLError(handler, error)
         }
     }
