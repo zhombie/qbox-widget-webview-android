@@ -9,7 +9,9 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!-- Devices running Android 12L (API level 32) or lower  -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <!-- Devices running Android 13 (API level 33) or higher -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -29,7 +31,9 @@
     <application>
         <activity
             android:name="kz.qbox.widget.webview.core.ui.presentation.WebViewActivity"
+            android:autoRemoveFromRecents="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:supportsPictureInPicture="true"
             android:theme="@style/Theme.WebViewWidget"

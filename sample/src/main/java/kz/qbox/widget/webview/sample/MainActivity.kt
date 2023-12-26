@@ -1,13 +1,14 @@
 package kz.qbox.widget.webview.sample
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textview.MaterialTextView
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.*
 import kz.qbox.widget.webview.sample.model.Params
@@ -19,8 +20,16 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         private const val DEFAULT_DOMAIN = "test.kz"
     }
 
-    private val button by lazy(LazyThreadSafetyMode.NONE) {
-        findViewById<MaterialButton>(R.id.button)
+    private val textView by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialTextView>(R.id.textView)
+    }
+
+    private val switchButton by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialButton>(R.id.switchButton)
+    }
+
+    private val launchButton by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialButton>(R.id.launchButton)
     }
 
     private val paramsMap = parseParams()
@@ -32,13 +41,35 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        with(button) {
-            text = "Launch: " + selected.first
+        setText(selected.first)
 
-            setOnClickListener {
-                launchWidget(selected.second)
-            }
+        switchButton.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setItems(paramsMap.keys.toTypedArray()) { dialog: DialogInterface, position: Int ->
+                    dialog.dismiss()
+
+                    val item = paramsMap.entries.elementAt(position).toPair()
+
+                    setText(item.first)
+
+                    val key = item.first
+                    val value = paramsMap[key]
+                    selected = if (value == null) {
+                        paramsMap.entries.first().toPair()
+                    } else {
+                        key to value
+                    }
+                }
+                .show()
         }
+
+        launchButton.setOnClickListener {
+            launchWidget(selected.second)
+        }
+    }
+
+    private fun setText(value: String) {
+        textView.text = value
     }
 
     private fun launchWidget(params: Params) {
@@ -72,30 +103,6 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 .setListener(this)
                 .launch()
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        paramsMap.keys.forEach { menu?.add(it) }
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        button?.text = "Launch: " + item.title
-
-        val key = item.title
-        selected = if (key == null) {
-            paramsMap.entries.first().toPair()
-        } else {
-            val value = paramsMap[key]
-            if (value == null) {
-                paramsMap.entries.first().toPair()
-            } else {
-                key.toString() to value
-            }
-        }
-
-        return super.onOptionsItemSelected(item)
     }
 
     private fun parseParams(): Map<String, Params> {
