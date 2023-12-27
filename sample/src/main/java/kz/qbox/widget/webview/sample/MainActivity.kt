@@ -1,6 +1,5 @@
 package kz.qbox.widget.webview.sample
 
-import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.SystemClock
@@ -8,11 +7,16 @@ import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import kz.qbox.widget.webview.core.Widget
-import kz.qbox.widget.webview.core.models.*
+import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.CallState
+import kz.qbox.widget.webview.core.models.DynamicAttrs
+import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.sample.model.Params
-import java.util.*
+import java.util.Date
 
 class MainActivity : AppCompatActivity(), Widget.Listener {
 
@@ -20,59 +24,97 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         private const val DEFAULT_DOMAIN = "test.kz"
     }
 
-    private val textView by lazy(LazyThreadSafetyMode.NONE) {
-        findViewById<MaterialTextView>(R.id.textView)
+    private val projectTextView by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialTextView>(R.id.projectTextView)
     }
 
-    private val switchButton by lazy(LazyThreadSafetyMode.NONE) {
-        findViewById<MaterialButton>(R.id.switchButton)
+    private val projectSwitchButton by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialButton>(R.id.projectSwitchButton)
+    }
+
+    private val topicTextView by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialTextView>(R.id.topicTextView)
+    }
+
+    private val topicEditButton by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialButton>(R.id.topicEditButton)
     }
 
     private val launchButton by lazy(LazyThreadSafetyMode.NONE) {
         findViewById<MaterialButton>(R.id.launchButton)
     }
 
-    private val paramsMap = parseParams()
+    private var selectedTopic: String = BuildConfig.CALL_TOPIC
+        set(value) {
+            Log.d("QBox", "Set selectedTopic -> value: $value")
+            field = value
+            topicTextView.text = value
+        }
 
-    private var selected: Pair<String, Params> = paramsMap.entries.first().toPair()
+    private val projects = parseProjects()
 
-    @SuppressLint("SetTextI18n")
+    private var selectedProject: Pair<String, Params> = projects.entries.first().toPair()
+        set(value) {
+            Log.d("QBox", "Set selectedProject -> value: $value")
+            field = value
+            projectTextView.text = value.first
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setText(selected.first)
+        selectedProject = projects.entries.first().toPair()
+        selectedTopic = BuildConfig.CALL_TOPIC
 
-        switchButton.setOnClickListener {
+        setupProjectSwitchButton()
+        setupTopicEditButton()
+
+        launchButton.setOnClickListener {
+            launchWidget()
+        }
+    }
+
+    private fun setupProjectSwitchButton() {
+        projectSwitchButton.setOnClickListener {
             AlertDialog.Builder(this)
-                .setItems(paramsMap.keys.toTypedArray()) { dialog: DialogInterface, position: Int ->
+                .setItems(projects.keys.toTypedArray()) { dialog: DialogInterface, position: Int ->
                     dialog.dismiss()
 
-                    val item = paramsMap.entries.elementAt(position).toPair()
-
-                    setText(item.first)
+                    val item = projects.entries.elementAt(position).toPair()
 
                     val key = item.first
-                    val value = paramsMap[key]
-                    selected = if (value == null) {
-                        paramsMap.entries.first().toPair()
+                    val value = projects[key]
+
+                    selectedProject = if (value == null) {
+                        projects.entries.first().toPair()
                     } else {
                         key to value
                     }
                 }
                 .show()
         }
+    }
 
-        launchButton.setOnClickListener {
-            launchWidget(selected.second)
+    private fun setupTopicEditButton() {
+        topicEditButton.setOnClickListener {
+            val editText = TextInputEditText(this)
+            AlertDialog.Builder(this)
+                .setTitle("Topic")
+                .setView(editText)
+                .setPositiveButton(android.R.string.ok) { dialog: DialogInterface, _ ->
+                    dialog.dismiss()
+                    selectedTopic = editText.text.toString()
+                }
+                .show()
         }
     }
 
-    private fun setText(value: String) {
-        textView.text = value
-    }
+    private fun launchWidget() {
+        val params = selectedProject.second
 
-    private fun launchWidget(params: Params) {
+        var (url, call) = params.url to params.call
+
         val exampleCustomer = User(
             firstName = "Shaken",
             lastName = "Aimanov",
@@ -83,21 +125,23 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             dynamicAttrs = DynamicAttrs("foo" to "bar")
         )
 
-        if (params.call == null) {
+        if (call == null) {
             Widget.Builder.FullSuite(this)
                 .setLoggingEnabled(true)
-                .setUrl(params.url)
+                .setUrl(url)
                 .setLanguage(Language.KAZAKH)
                 .setUser(exampleCustomer)
                 .setCustomActivity(SampleActivity::class.java)
                 .setListener(this)
                 .launch()
         } else {
+            call = call.copy(topic = selectedTopic)
+
             Widget.Builder.VideoCall(this)
                 .setLoggingEnabled(true)
-                .setUrl(params.url)
+                .setUrl(url)
                 .setLanguage(Language.KAZAKH)
-                .setCall(call = params.call)
+                .setCall(call = call)
                 .setUser(exampleCustomer)
                 .setCustomActivity(SampleActivity::class.java)
                 .setListener(this)
@@ -105,7 +149,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         }
     }
 
-    private fun parseParams(): Map<String, Params> {
+    private fun parseProjects(): Map<String, Params> {
         val paramsMap = mutableMapOf<String, Params>()
         BuildConfig.CALL_ROUTES.split(",").forEach { pair ->
             val (title, url) = pair.split("*")
@@ -115,7 +159,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 call = Call(
                     domain = DEFAULT_DOMAIN,
                     type = Call.Type.VIDEO,
-                    topic = BuildConfig.CALL_TOPIC,
+                    topic = selectedTopic,
 //                    location = Location(
 //                        latitude = 51.14721,
 //                        longitude = 71.39069,

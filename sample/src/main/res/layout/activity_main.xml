@@ -5,31 +5,101 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
     tools:context=".MainActivity">
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:gravity="center"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        tools:text="Text" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="20dp" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/switchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Switch"
+        android:layout_gravity="start"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="start"
+        android:text="Project"
+        android:textColor="@color/black"
+        android:textSize="16sp"
         tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/projectTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif"
+            android:gravity="start"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            tools:text="Project" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/projectSwitchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Switch"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="20dp" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="start"
+        android:text="Topic"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/topicTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif"
+            android:gravity="start"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            tools:text="Topic" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/topicEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Edit"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="30dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/launchButton"
