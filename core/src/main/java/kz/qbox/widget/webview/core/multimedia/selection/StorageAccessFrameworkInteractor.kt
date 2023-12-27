@@ -62,6 +62,7 @@ internal class StorageAccessFrameworkInteractor private constructor(
     }
 
     fun dispose() {
+        reference.clear()
         launcher?.unregister()
     }
 

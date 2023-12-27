@@ -26,11 +26,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
+import androidx.core.os.HandlerCompat
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import kz.garage.image.preview.ImagePreviewDialogFragment
-import kz.garage.image.preview.showImagePreview
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.Widget
@@ -82,11 +82,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     private val handler: Handler by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            Handler.createAsync(Looper.getMainLooper())
-        } else {
-            Handler()
-        }
+        HandlerCompat.createAsync(Looper.getMainLooper())
     }
 
     private var webView: WebView? = null
@@ -223,9 +219,7 @@ class WebViewFragment internal constructor() : Fragment(),
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.qbox_widget_fragment_web_view, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.qbox_widget_fragment_web_view, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -380,6 +374,12 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onDestroy() {
+        try {
+            handler.removeCallbacksAndMessages(null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         Widget.listener = null
 
         jsBridge?.dispose()
@@ -389,7 +389,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
         if (downloadStateReceiver != null) {
             try {
-                activity.unregisterReceiver(downloadStateReceiver)
+                getActivity()?.unregisterReceiver(downloadStateReceiver)
             } catch (_: IllegalArgumentException) {
             }
             downloadStateReceiver = null
@@ -442,7 +442,7 @@ class WebViewFragment internal constructor() : Fragment(),
         }
 
         if (lifecycle.currentState == Lifecycle.State.CREATED) {
-            activity.finishAndRemoveTask()
+            getActivity()?.finishAndRemoveTask()
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
     }
@@ -460,7 +460,7 @@ class WebViewFragment internal constructor() : Fragment(),
             )
 
             return@setUrlListener if (uri.toString().contains("image")) {
-                activity.showImagePreview(uri)
+                getActivity()?.showImagePreview(uri)
                 true
             }
 //            else if (uri.toString().contains("video")) {
@@ -489,7 +489,7 @@ class WebViewFragment internal constructor() : Fragment(),
                         url.endsWith("jpg") ||
                         url.endsWith("jpeg"))
             ) {
-                activity.showImagePreview(Uri.parse(url))
+                getActivity()?.showImagePreview(Uri.parse(url))
                 return@setDownloadListener
             }
 //            else if (mimetype?.startsWith("video") == true &&
@@ -562,7 +562,7 @@ class WebViewFragment internal constructor() : Fragment(),
                     .setMessage(getString(R.string.qbox_widget_alert_message_not_enough_space))
                     .setView(linkMessage)
                     .setPositiveButton(getString(R.string.qbox_widget_copy)) { dialog, _ ->
-                        activity.clipboardManager?.setPrimaryClip(ClipData.newPlainText("url", url))
+                        context?.clipboardManager?.setPrimaryClip(ClipData.newPlainText("url", url))
 
                         Toast.makeText(
                             requireContext(),
@@ -603,7 +603,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
             if (downloadStateReceiver != null) {
                 try {
-                    activity.unregisterReceiver(downloadStateReceiver)
+                    getActivity()?.unregisterReceiver(downloadStateReceiver)
                 } catch (_: IllegalArgumentException) {
                 }
                 downloadStateReceiver = null
@@ -733,7 +733,7 @@ class WebViewFragment internal constructor() : Fragment(),
                 startActivity(
                     Intent().apply {
                         action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                        data = Uri.fromParts("package", activity.packageName, null)
+                        data = Uri.fromParts("package", context?.packageName, null)
                     }
                 )
             }
@@ -759,7 +759,7 @@ class WebViewFragment internal constructor() : Fragment(),
         filename: String
     ) {
         // TODO: Handle DownloadManager absence issue (impossible case, but who knows)
-        val downloadManager = activity.downloadManager ?: return
+        val downloadManager = context?.downloadManager ?: return
 
         val id = downloadManager.enqueue(downloadRequest)
 
@@ -800,10 +800,10 @@ class WebViewFragment internal constructor() : Fragment(),
                                 ) {
                                     isDownloading = false
 
-                                    activity.runOnUiThread {
+                                    handler.post {
                                         errorDialog?.dismiss()
                                         errorDialog = null
-                                        errorDialog = activity.showError(
+                                        errorDialog = context?.showError(
                                             R.string.qbox_widget_alert_message_error_occurred,
                                             url
                                         )
@@ -815,10 +815,10 @@ class WebViewFragment internal constructor() : Fragment(),
                             DownloadManager.STATUS_FAILED -> {
                                 isDownloading = false
 
-                                activity.runOnUiThread {
+                                handler.post {
                                     errorDialog?.dismiss()
                                     errorDialog = null
-                                    errorDialog = activity.showError(
+                                    errorDialog = context?.showError(
                                         R.string.qbox_widget_alert_message_error_occurred,
                                         url
                                     )
@@ -841,7 +841,7 @@ class WebViewFragment internal constructor() : Fragment(),
                                     0.0
                                 }
 
-                                activity.runOnUiThread {
+                                handler.post {
                                     errorDialog?.dismiss()
                                     errorDialog = null
 
@@ -893,7 +893,7 @@ class WebViewFragment internal constructor() : Fragment(),
         val contentUri = try {
             FileProvider.getUriForFile(
                 requireContext(),
-                "${activity.packageName}.provider",
+                "${context?.packageName}.provider",
                 file
             )
         } catch (e: IllegalArgumentException) {
@@ -901,13 +901,13 @@ class WebViewFragment internal constructor() : Fragment(),
 
             errorDialog?.dismiss()
             errorDialog = null
-            errorDialog = activity.showError(R.string.qbox_widget_error_files_open_unable, url)
+            errorDialog = context?.showError(R.string.qbox_widget_error_files_open_unable, url)
             errorDialog?.show()
             return false
         }
 
-        activity.grantUriPermission(
-            activity.packageName,
+        context?.grantUriPermission(
+            context?.packageName,
             contentUri,
             Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
@@ -921,7 +921,7 @@ class WebViewFragment internal constructor() : Fragment(),
             e.printStackTrace()
             errorDialog?.dismiss()
             errorDialog = null
-            errorDialog = activity.showError(R.string.qbox_widget_error_files_open_unable, url)
+            errorDialog = context?.showError(R.string.qbox_widget_error_files_open_unable, url)
             errorDialog?.show()
             false
         }
@@ -932,7 +932,7 @@ class WebViewFragment internal constructor() : Fragment(),
      */
 
     override fun onClose(): Boolean {
-        activity.onBackPressed()
+        getActivity()?.onBackPressed()
         return true
     }
 
@@ -949,7 +949,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
         if (state == CallState.FINISH) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                if (activity.isInPictureInPictureMode) {
+                if (getActivity()?.isInPictureInPictureMode == true) {
                     Toast.makeText(
                         requireContext(),
                         R.string.qbox_widget_alert_message_call_finished,
@@ -968,7 +968,7 @@ class WebViewFragment internal constructor() : Fragment(),
 //                        ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
 //                    )
 
-                    activity.moveTaskToBack(true)
+                    getActivity()?.moveTaskToBack(true)
                 }
             }
         }
@@ -1044,7 +1044,10 @@ class WebViewFragment internal constructor() : Fragment(),
     override fun onPermissionRequest(resources: Array<String>) {
         val permissions = PermissionRequestMapper.fromWebClientToAndroid(resources).toTypedArray()
         Logger.debug("QBox", "onPermissionRequest() -> resources: ${resources.contentToString()}")
-        Logger.debug("QBox", "onPermissionRequest() -> permissions: ${permissions.contentToString()}")
+        Logger.debug(
+            "QBox",
+            "onPermissionRequest() -> permissions: ${permissions.contentToString()}"
+        )
         requestedPermissionsLauncher.launch(permissions)
     }
 
@@ -1058,7 +1061,7 @@ class WebViewFragment internal constructor() : Fragment(),
     override fun onGeolocationPermissionsShowPrompt() {
         Logger.debug("QBox", "onGeolocationPermissionsShowPrompt()")
         if (LOCATION_PERMISSIONS.all { requireContext().isPermissionGranted(it) }) {
-            val locationManager = activity.locationManager
+            val locationManager = context?.locationManager
             if (locationManager == null) {
                 showGPSDisabledErrorAlertDialog()
             } else {

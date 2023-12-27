@@ -31,13 +31,16 @@
     <application>
         <activity
             android:name="kz.qbox.widget.webview.core.ui.presentation.WebViewActivity"
+            android:allowTaskReparenting="true"
             android:autoRemoveFromRecents="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:supportsPictureInPicture="true"
             android:theme="@style/Theme.WebViewWidget"
             android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity"
             tools:targetApi="n" />
     </application>
 

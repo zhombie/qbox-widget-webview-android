@@ -2,7 +2,6 @@ package kz.qbox.widget.webview.core
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
@@ -113,7 +112,9 @@ object Widget {
                     .putExtra("language", language)
                     .putExtra("call", call)
                     .putExtra("user", user)
-                    .putExtra("dynamic_attrs", dynamicAttrs)
+                    .putExtra("dynamic_attrs", dynamicAttrs).also {
+                        customActivity = null
+                    }
             }
 
             return WebViewActivity.newIntent(

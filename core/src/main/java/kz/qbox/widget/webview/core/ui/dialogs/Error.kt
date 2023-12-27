@@ -1,22 +1,22 @@
 package kz.qbox.widget.webview.core.ui.dialogs
 
 import android.content.ClipData
+import android.content.Context
 import android.graphics.Color
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.utils.clipboardManager
 
-internal fun AppCompatActivity.showError(
+internal fun Context.showError(
     @StringRes messageResId: Int,
     url: String,
 ): AlertDialog = showError(getString(messageResId), url)
 
-internal fun AppCompatActivity.showError(
+internal fun Context.showError(
     message: String,
     url: String,
 ): AlertDialog {
