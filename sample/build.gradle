@@ -72,7 +72,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     // Leak Canary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.13'
 
     implementation project(':core')
 }
