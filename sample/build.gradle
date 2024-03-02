@@ -11,6 +11,8 @@ def properties = new Properties()
 properties.load(new FileInputStream(rootProject.file('local.properties')))
 
 def callTopic = properties.getProperty('call.topic') ?: '"general"'
+def callPhoneNumber = properties.getProperty('call.phone_number') ?: '"87771234567"'
+def callDestination = properties.getProperty('call.destination') ?: '"777"'
 def callRoutes = properties.getProperty('call.routes') ?: '"localhost*http://127.0.0.1"'
 
 android {
@@ -31,6 +33,8 @@ android {
     buildTypes {
         debug {
             buildConfigField 'String', 'CALL_TOPIC', callTopic
+            buildConfigField 'String', 'CALL_PHONE_NUMBER', callPhoneNumber
+            buildConfigField 'String', 'CALL_DESTINATION', callDestination
             buildConfigField 'String', 'CALL_ROUTES', callRoutes
 
             minifyEnabled false

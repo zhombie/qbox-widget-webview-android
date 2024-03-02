@@ -40,6 +40,22 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         findViewById<MaterialButton>(R.id.topicEditButton)
     }
 
+    private val destinationTextView by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialTextView>(R.id.destinationTextView)
+    }
+
+    private val destinationEditButton by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialButton>(R.id.destinationEditButton)
+    }
+
+    private val phoneNumberTextView by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialTextView>(R.id.phoneNumberTextView)
+    }
+
+    private val phoneNumberEditButton by lazy(LazyThreadSafetyMode.NONE) {
+        findViewById<MaterialButton>(R.id.phoneNumberEditButton)
+    }
+
     private val launchButton by lazy(LazyThreadSafetyMode.NONE) {
         findViewById<MaterialButton>(R.id.launchButton)
     }
@@ -51,9 +67,23 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             topicTextView.text = value
         }
 
+    private var inputPhoneNumber: String = BuildConfig.CALL_PHONE_NUMBER
+        set(value) {
+            Log.d("QBox", "Set inputPhoneNumber -> value: $value")
+            field = value
+            phoneNumberTextView.text = value
+        }
+
+    private var destination: String = BuildConfig.CALL_DESTINATION
+        set(value) {
+            Log.d("QBox", "Set destination -> value: $value")
+            field = value
+            destinationTextView.text = value
+        }
+
     private val projects = parseProjects()
 
-    private var selectedProject: Pair<String, Params> = projects.entries.first().toPair()
+    private var selectedProject: Pair<String, Params> = projects.entries.last().toPair()
         set(value) {
             Log.d("QBox", "Set selectedProject -> value: $value")
             field = value
@@ -64,11 +94,15 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        selectedProject = projects.entries.first().toPair()
+        selectedProject = projects.entries.last().toPair()
         selectedTopic = BuildConfig.CALL_TOPIC
+        inputPhoneNumber = BuildConfig.CALL_PHONE_NUMBER
+        destination = BuildConfig.CALL_DESTINATION
 
         setupProjectSwitchButton()
         setupTopicEditButton()
+        setupPhoneNumberEditButton()
+        setupDestinationEditButton()
 
         launchButton.setOnClickListener {
             launchWidget()
@@ -110,10 +144,43 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         }
     }
 
+    private fun setupPhoneNumberEditButton() {
+        phoneNumberEditButton.setOnClickListener {
+            val editText = TextInputEditText(this)
+            AlertDialog.Builder(this)
+                .setTitle("Phone number")
+                .setView(editText)
+                .setPositiveButton(android.R.string.ok) { dialog: DialogInterface, _ ->
+                    dialog.dismiss()
+                    inputPhoneNumber = editText.text.toString()
+                }
+                .show()
+        }
+    }
+
+    private fun setupDestinationEditButton() {
+        destinationEditButton.setOnClickListener {
+            val editText = TextInputEditText(this)
+            AlertDialog.Builder(this)
+                .setTitle("Destination")
+                .setView(editText)
+                .setPositiveButton(android.R.string.ok) { dialog: DialogInterface, _ ->
+                    dialog.dismiss()
+                    destination = editText.text.toString()
+                }
+                .show()
+        }
+    }
+
     private fun launchWidget() {
+        val key = selectedProject.first
         val params = selectedProject.second
 
-        var (url, call) = params.url to params.call
+        val (url, call) = params.url to params.call
+
+        Log.d(MainActivity::class.java.simpleName, "launchWidget() -> key: $key, params: $params")
+
+        val flavor = key.split(":")[1]
 
         val exampleCustomer = User(
             firstName = "Shaken",
@@ -125,41 +192,73 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             dynamicAttrs = DynamicAttrs("foo" to "bar")
         )
 
-        if (call == null) {
-            Widget.Builder.FullSuite(this)
-                .setLoggingEnabled(true)
-                .setUrl(url)
-                .setLanguage(Language.KAZAKH)
-                .setUser(exampleCustomer)
-                .setCustomActivity(SampleActivity::class.java)
-                .setListener(this)
-                .launch()
-        } else {
-            call = call.copy(topic = selectedTopic)
+        Widget.isLoggingEnabled = true
 
-            Widget.Builder.VideoCall(this)
-                .setLoggingEnabled(true)
-                .setUrl(url)
-                .setLanguage(Language.KAZAKH)
-                .setCall(call = call)
-                .setUser(exampleCustomer)
-                .setCustomActivity(SampleActivity::class.java)
-                .setListener(this)
-                .launch()
+        when (flavor) {
+            "full-suite" -> {
+                Widget.Builder.FullSuite(this)
+                    .setLoggingEnabled(true)
+                    .setUrl(url)
+                    .setLanguage(Language.KAZAKH)
+                    .setUser(exampleCustomer)
+//                    .setCustomActivity(SampleActivity::class.java)
+                    .setListener(this)
+                    .launch()
+            }
+            "audio-call" -> {
+                Widget.Builder.AudioCall(this)
+                    .setLoggingEnabled(true)
+                    .setUrl(url)
+                    .setLanguage(Language.KAZAKH)
+                    .apply {
+                        if (call != null) {
+                            val copy = call.copy(
+                                phoneNumber = inputPhoneNumber,
+                                destination = destination
+                            )
+                            setCall(call = copy)
+                        }
+                    }
+                    .setUser(exampleCustomer)
+//                    .setCustomActivity(SampleActivity::class.java)
+                    .setListener(this)
+                    .launch()
+            }
+            "video-call" -> {
+                Widget.Builder.VideoCall(this)
+                    .setLoggingEnabled(true)
+                    .setUrl(url)
+                    .setLanguage(Language.KAZAKH)
+                    .apply {
+                        if (call != null) {
+                            val copy = call.copy(
+                                topic = selectedTopic
+                            )
+                            setCall(call = copy)
+                        }
+                    }
+                    .setUser(exampleCustomer)
+//                    .setCustomActivity(SampleActivity::class.java)
+                    .setListener(this)
+                    .launch()
+            }
         }
     }
 
     private fun parseProjects(): Map<String, Params> {
         val paramsMap = mutableMapOf<String, Params>()
         BuildConfig.CALL_ROUTES.split(",").forEach { pair ->
-            val (title, url) = pair.split("*")
-            paramsMap[title] = Params(
+            val (baseUrl, flavor, title, url) = pair.split("*")
+            paramsMap["$baseUrl:$flavor:$title"] = Params(
                 title = title,
                 url = url,
                 call = Call(
                     domain = DEFAULT_DOMAIN,
                     type = Call.Type.VIDEO,
                     topic = selectedTopic,
+                    phoneNumber = inputPhoneNumber,
+                    destination = destination,
+                    dynamicAttrs = DynamicAttrs("request_id" to "123456")
 //                    location = Location(
 //                        latitude = 51.14721,
 //                        longitude = 71.39069,

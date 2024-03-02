@@ -246,6 +246,25 @@ class WebViewFragment internal constructor() : Fragment(),
                     .build()
             }
 
+            Flavor.AUDIO_CALL -> {
+                val call = call ?: throw NullPointerException("Call information is not provided!")
+
+                uri = uri.buildUpon()
+                    .apply {
+                        if (!language.isNullOrBlank()) {
+                            appendQueryParameter("lang", language)
+                        }
+
+                        appendQueryParameter("caller", call.phoneNumber)
+                        appendQueryParameter("dest", call.destination)
+
+                        if (Widget.isLoggingEnabled) {
+                            appendQueryParameter("debug", "1")
+                        }
+                    }
+                    .build()
+            }
+
             Flavor.VIDEO_CALL -> {
                 val call = call ?: throw NullPointerException("Call information is not provided!")
 
@@ -673,8 +692,9 @@ class WebViewFragment internal constructor() : Fragment(),
 
     private fun resolveUri(uri: Uri): Boolean {
         Logger.debug("QBox", "resolveUri() -> ${this.uri}, $uri")
+
         if (this.uri == uri) return false
-        if (this.uri.toString() in uri.toString()) return false
+        if (this.uri.host == uri.host) return false
 
         Constants.URL_SCHEMES.forEach {
             if (uri.scheme?.let { uriScheme -> it.startsWith(uriScheme) } == true) {

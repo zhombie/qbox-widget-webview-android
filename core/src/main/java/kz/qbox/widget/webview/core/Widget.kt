@@ -26,6 +26,8 @@ object Widget {
 
         class FullSuite constructor(context: Context) : Builder(context)
 
+        class AudioCall constructor(context: Context) : Builder(context)
+
         class VideoCall constructor(context: Context) : Builder(context)
 
         private var isLoggingEnabled: Boolean? = null
@@ -99,6 +101,7 @@ object Widget {
 
             val flavor = when (this) {
                 is FullSuite -> Flavor.FULL_SUITE
+                is AudioCall -> Flavor.AUDIO_CALL
                 is VideoCall -> Flavor.VIDEO_CALL
                 else -> throw IllegalStateException()
             }
