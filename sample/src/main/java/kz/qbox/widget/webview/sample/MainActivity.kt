@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
+import com.twilio.audioswitch.AudioSwitch
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
@@ -90,6 +91,8 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             projectTextView.text = value.first
         }
 
+    private val audioSwitch by lazy { AudioSwitch(applicationContext) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -104,9 +107,19 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         setupPhoneNumberEditButton()
         setupDestinationEditButton()
 
+        audioSwitch.start { audioDevices, selectedDevice ->
+            Log.d("QBox", "audioSwitch.start() -> $audioDevices, $selectedDevice")
+        }
+
         launchButton.setOnClickListener {
             launchWidget()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        audioSwitch.stop()
     }
 
     private fun setupProjectSwitchButton() {
@@ -178,7 +191,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
 
         val (url, call) = params.url to params.call
 
-        Log.d(MainActivity::class.java.simpleName, "launchWidget() -> key: $key, params: $params")
+        Log.d("QBox", "launchWidget() -> key: $key, params: $params")
 
         val flavor = key.split(":")[1]
 
@@ -273,7 +286,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
      * [Widget.Listener] implementation
      */
     override fun onCallState(state: CallState) {
-        Log.d(MainActivity::class.java.simpleName, "onCallState() -> state: $state")
+        Log.d("QBox", "onCallState() -> state: $state")
     }
 
 }
