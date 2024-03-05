@@ -9,8 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
-import com.twilio.audioswitch.AudioDevice
-import com.twilio.audioswitch.AudioSwitch
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
@@ -58,14 +56,6 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         findViewById<MaterialButton>(R.id.phoneNumberEditButton)
     }
 
-    private val audioOutputTextView by lazy(LazyThreadSafetyMode.NONE) {
-        findViewById<MaterialTextView>(R.id.audioOutputTextView)
-    }
-
-    private val audioOutputSwitchButton by lazy(LazyThreadSafetyMode.NONE) {
-        findViewById<MaterialButton>(R.id.audioOutputSwitchButton)
-    }
-
     private val launchButton by lazy(LazyThreadSafetyMode.NONE) {
         findViewById<MaterialButton>(R.id.launchButton)
     }
@@ -91,16 +81,6 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             destinationTextView.text = value
         }
 
-    private var audioOutput: String? = null
-        set(value) {
-            Log.d("QBox", "Set audioOutput -> value: $value")
-            field = value
-            audioOutputTextView.text = value
-        }
-
-    private val audioSwitch by lazy { AudioSwitch(applicationContext, loggingEnabled = true) }
-    private val availableAudioDevices = mutableListOf<AudioDevice>()
-
     private val projects = parseProjects()
 
     private var selectedProject: Pair<String, Params> = projects.entries.last().toPair()
@@ -123,26 +103,10 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         setupTopicEditButton()
         setupPhoneNumberEditButton()
         setupDestinationEditButton()
-        setupAudioOutputSwitchButton()
-
-        audioSwitch.start { audioDevices: List<AudioDevice>, selectedDevice: AudioDevice? ->
-            Log.d("QBox", "audioSwitch.start() -> audioDevices: $audioDevices")
-            Log.d("QBox", "audioSwitch.start() -> selectedDevice: $selectedDevice")
-
-            availableAudioDevices.addAll(audioDevices)
-
-            audioOutput = selectedDevice.toString()
-        }
 
         launchButton.setOnClickListener {
             launchWidget()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        audioSwitch.stop()
     }
 
     private fun setupProjectSwitchButton() {
@@ -209,19 +173,6 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         }
     }
 
-    private fun setupAudioOutputSwitchButton() {
-        audioOutputSwitchButton.setOnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle("Audio output")
-                .setItems(availableAudioDevices.map { it.name }.toTypedArray()) { dialog: DialogInterface, position: Int ->
-                    dialog.dismiss()
-
-                    audioSwitch.selectDevice(availableAudioDevices[position])
-                }
-                .show()
-        }
-    }
-
     private fun launchWidget() {
         val key = selectedProject.first
         val params = selectedProject.second
@@ -255,6 +206,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                     .setListener(this)
                     .launch()
             }
+
             "audio-call" -> {
                 Widget.Builder.AudioCall(this)
                     .setLoggingEnabled(true)
@@ -274,6 +226,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                     .setListener(this)
                     .launch()
             }
+
             "video-call" -> {
                 Widget.Builder.VideoCall(this)
                     .setLoggingEnabled(true)

@@ -78,7 +78,5 @@ dependencies {
     // Leak Canary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.13'
 
-    implementation 'com.twilio:audioswitch:1.1.8'
-
     implementation project(':core')
 }

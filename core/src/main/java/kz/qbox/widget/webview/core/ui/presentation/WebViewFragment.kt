@@ -1,8 +1,12 @@
 package kz.qbox.widget.webview.core.ui.presentation
 
 import android.app.DownloadManager
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
+import android.media.AudioManager
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
@@ -12,6 +16,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,12 +35,21 @@ import androidx.core.os.HandlerCompat
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import com.twilio.audioswitch.AudioDevice
+import com.twilio.audioswitch.AudioSwitch
 import kz.garage.image.preview.ImagePreviewDialogFragment
 import kz.qbox.widget.webview.core.Logger
 import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.device.Provider
-import kz.qbox.widget.webview.core.models.*
+import kz.qbox.widget.webview.core.models.AppEvent
+import kz.qbox.widget.webview.core.models.AppState
+import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.CallState
+import kz.qbox.widget.webview.core.models.Device
+import kz.qbox.widget.webview.core.models.DynamicAttrs
+import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentResultContract
@@ -48,10 +62,21 @@ import kz.qbox.widget.webview.core.ui.components.ProgressView
 import kz.qbox.widget.webview.core.ui.components.WebView
 import kz.qbox.widget.webview.core.ui.dialogs.DownloadProgressDialog
 import kz.qbox.widget.webview.core.ui.dialogs.showError
-import kz.qbox.widget.webview.core.utils.*
+import kz.qbox.widget.webview.core.utils.Constants
+import kz.qbox.widget.webview.core.utils.LOCATION_PERMISSIONS
+import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
+import kz.qbox.widget.webview.core.utils.STORAGE_PERMISSIONS
+import kz.qbox.widget.webview.core.utils.audioManager
+import kz.qbox.widget.webview.core.utils.clipboardManager
+import kz.qbox.widget.webview.core.utils.downloadManager
+import kz.qbox.widget.webview.core.utils.getIntOrDefault
+import kz.qbox.widget.webview.core.utils.isPermissionGranted
+import kz.qbox.widget.webview.core.utils.isStoragePermissionsGranted
+import kz.qbox.widget.webview.core.utils.locationManager
+import kz.qbox.widget.webview.core.utils.showImagePreview
 import org.json.JSONObject
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 class WebViewFragment internal constructor() : Fragment(),
     WebView.Listener,
@@ -212,8 +237,35 @@ class WebViewFragment internal constructor() : Fragment(),
     private val activity: AppCompatActivity
         get() = requireActivity() as AppCompatActivity
 
+    private val audioSwitch by lazy {
+        AudioSwitch(
+            context = activity.applicationContext,
+            loggingEnabled = true,
+            audioFocusChangeListener = {
+                Logger.debug("Qwerty", "audioFocusChangeListener() -> $it")
+            },
+            preferredDeviceList = listOf(
+                AudioDevice.BluetoothHeadset::class.java,
+                AudioDevice.WiredHeadset::class.java,
+                AudioDevice.Earpiece::class.java,
+                AudioDevice.Speakerphone::class.java
+            )
+        )
+    }
+
+    private val audioManager by lazy { context?.audioManager }
+
     fun setListener(listener: Widget.Listener) {
         Widget.listener = listener
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        audioSwitch.start { audioDevices: List<AudioDevice>, selectedDevice: AudioDevice? ->
+            Log.d("Qwerty", "audioSwitch.start() -> audioDevices: $audioDevices")
+            Log.d("Qwerty", "audioSwitch.start() -> selectedDevice: $selectedDevice")
+        }
     }
 
     override fun onCreateView(
@@ -393,6 +445,8 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onDestroy() {
+        audioSwitch.stop()
+
         try {
             handler.removeCallbacksAndMessages(null)
         } catch (e: Exception) {
@@ -992,6 +1046,31 @@ class WebViewFragment internal constructor() : Fragment(),
                 }
             }
         }
+    }
+
+    override fun getAvailableAudioOutputDevices(): List<String> {
+        return audioSwitch.availableAudioDevices.map { it.name }
+    }
+
+    override fun getSelectedAudioOutputDevice(): String? {
+        return audioSwitch.selectedAudioDevice?.name
+    }
+
+    override fun onSelectAudioOutputDevice(name: String): Boolean {
+        Log.d("Qwerty", "onSelectAudioOutputDevice -> name: $name")
+
+        audioSwitch.availableAudioDevices.find { it.name == name }?.let {
+            if (it is AudioDevice.Earpiece) {
+                audioManager?.isBluetoothScoOn = false
+                audioManager?.isSpeakerphoneOn = false
+                audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+                activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
+            }
+
+            audioSwitch.selectDevice(it)
+        }
+
+        return true
     }
 
     /**

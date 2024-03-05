@@ -20,11 +20,13 @@ dependencies {
 //    implementation 'androidx.core:core-ktx:1.9.0'
 
     // WebView Kit
-    api 'androidx.webkit:webkit:1.9.0'
+    api 'androidx.webkit:webkit:1.10.0'
 
     // Garage SDK
     api 'com.github.zhombie.garage:image-load:1.4.0'
     api 'com.github.zhombie.garage:image-preview:1.4.0'
+
+    implementation 'com.twilio:audioswitch:1.1.8'
 
     // ExoPlayer
 //    api "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"

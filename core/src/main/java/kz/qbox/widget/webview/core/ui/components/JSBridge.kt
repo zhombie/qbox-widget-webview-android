@@ -3,7 +3,11 @@ package kz.qbox.widget.webview.core.ui.components
 import android.webkit.JavascriptInterface
 import findEnumByName
 import kz.qbox.widget.webview.core.Logger
-import kz.qbox.widget.webview.core.models.*
+import kz.qbox.widget.webview.core.models.Call
+import kz.qbox.widget.webview.core.models.CallState
+import kz.qbox.widget.webview.core.models.Device
+import kz.qbox.widget.webview.core.models.DynamicAttrs
+import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.utils.encode
 
 class JSBridge constructor(
@@ -39,6 +43,18 @@ class JSBridge constructor(
         listener?.onLanguageSet(language) == true
 
     @JavascriptInterface
+    fun getAvailableAudioOutputDevices(): List<String> =
+        listener?.getAvailableAudioOutputDevices() ?: emptyList()
+
+    @JavascriptInterface
+    fun getSelectedAudioOutputDevice(): String? =
+        listener?.getSelectedAudioOutputDevice()
+
+    @JavascriptInterface
+    fun onSelectAudioOutputDevice(name: String) =
+        listener?.onSelectAudioOutputDevice(name) == true
+
+    @JavascriptInterface
     fun onClose(): Boolean =
         listener?.onClose() == true
 
@@ -50,6 +66,9 @@ class JSBridge constructor(
         fun onCallState(state: CallState)
         fun onLanguageSet(language: String): Boolean
         fun onClose(): Boolean
+        fun getAvailableAudioOutputDevices(): List<String>
+        fun getSelectedAudioOutputDevice(): String?
+        fun onSelectAudioOutputDevice(name: String): Boolean
     }
 
 }
