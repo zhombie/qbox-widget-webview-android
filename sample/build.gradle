@@ -12,7 +12,7 @@ plugins {
 def properties = new Properties()
 properties.load(new FileInputStream(rootProject.file('local.properties')))
 
-def apiBaseUrl = properties.getProperty('api.base_url')
+def apiBaseUrl = properties.getProperty('api.base_url') ?: "test.kz"
 def callTopic = properties.getProperty('call.topic') ?: '"general"'
 def callPhoneNumber = properties.getProperty('call.phone_number') ?: '"87771234567"'
 def callDestination = properties.getProperty('call.destination') ?: '"777"'
