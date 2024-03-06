@@ -320,6 +320,8 @@ class WebViewFragment internal constructor() : Fragment(),
                             appendQueryParameter("token", token)
                         }
 
+                        Logger.debug("QBox-WebViewFragment", "Widget.isLoggingEnabled: ${Widget.isLoggingEnabled}")
+
                         if (Widget.isLoggingEnabled) {
                             appendQueryParameter("debug", "1")
                         }

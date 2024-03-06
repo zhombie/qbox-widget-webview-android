@@ -14,7 +14,10 @@ object Widget {
 
     var isLoggingEnabled: Boolean = false
         @Synchronized get
-        @Synchronized set
+        @Synchronized set(value) {
+            field = value
+            Logger.debug("QBox-Widget", "isLoggingEnabled: $isLoggingEnabled")
+        }
 
     var listener: Listener? = null
 

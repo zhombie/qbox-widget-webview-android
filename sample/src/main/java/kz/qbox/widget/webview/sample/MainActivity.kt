@@ -211,8 +211,6 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             dynamicAttrs = DynamicAttrs("foo" to "bar")
         )
 
-        Widget.isLoggingEnabled = true
-
         when (flavor) {
             "full-suite" -> {
                 Widget.Builder.FullSuite(this)
@@ -233,7 +231,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 }
 
                 Widget.Builder.AudioCall(this)
-                    .setLoggingEnabled(true)
+                    .setLoggingEnabled(false)
                     .setUrl(url)
                     .setToken(token)
                     .setLanguage(Language.KAZAKH)
