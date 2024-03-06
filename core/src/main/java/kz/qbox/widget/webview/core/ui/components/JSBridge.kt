@@ -43,12 +43,12 @@ class JSBridge constructor(
         listener?.onLanguageSet(language) == true
 
     @JavascriptInterface
-    fun getAvailableAudioOutputDevices(): List<String> =
-        listener?.getAvailableAudioOutputDevices() ?: emptyList()
+    fun getAvailableAudioOutputDevices(): String =
+        listener?.getAvailableAudioOutputDevices()?.joinToString(separator = ":") ?: ""
 
     @JavascriptInterface
-    fun getSelectedAudioOutputDevice(): String? =
-        listener?.getSelectedAudioOutputDevice()
+    fun getSelectedAudioOutputDevice(): String =
+        listener?.getSelectedAudioOutputDevice() ?: ""
 
     @JavascriptInterface
     fun onSelectAudioOutputDevice(name: String) =

@@ -87,6 +87,7 @@ class WebViewFragment internal constructor() : Fragment(),
         fun newInstance(
             flavor: Flavor,
             url: String,
+            token: String?,
             language: String?,
             call: Call?,
             user: User?,
@@ -96,6 +97,7 @@ class WebViewFragment internal constructor() : Fragment(),
             val bundle = Bundle().apply {
                 putSerializable("flavor", flavor)
                 putString("url", url)
+                putString("token", token)
                 putString("language", language)
                 putSerializable("call", call)
                 putSerializable("user", user)
@@ -135,7 +137,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
     private val requestedPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Logger.debug("QBox", "requestedPermissionsLauncher() -> permissions: $permissions")
+            Logger.debug("QBox-WebViewFragment", "requestedPermissionsLauncher() -> permissions: $permissions")
 
             webView?.setPermissionRequestResult(
                 PermissionRequestMapper.fromAndroidToWebClient(permissions)
@@ -148,7 +150,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
     private val locationPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Logger.debug("QBox", "locationPermissionsLauncher() -> permissions: $permissions")
+            Logger.debug("QBox-WebViewFragment", "locationPermissionsLauncher() -> permissions: $permissions")
 
             val isAllPermissionsGranted = permissions.all { it.value }
 
@@ -161,14 +163,14 @@ class WebViewFragment internal constructor() : Fragment(),
 
     private val locationSettingsLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            Logger.debug("QBox", "locationSettingsLauncher() -> resultCode: ${result.resultCode}")
+            Logger.debug("QBox-WebViewFragment", "locationSettingsLauncher() -> resultCode: ${result.resultCode}")
 
             onGeolocationPermissionsShowPrompt()
         }
 
     private val storagePermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Logger.debug("QBox", "storagePermissionsLauncher() -> permissions: $permissions")
+            Logger.debug("QBox-WebViewFragment", "storagePermissionsLauncher() -> permissions: $permissions")
 
             if (requireContext().isStoragePermissionsGranted()) {
                 onSelectFileRequest()
@@ -179,6 +181,10 @@ class WebViewFragment internal constructor() : Fragment(),
 
     private val provider: Provider? by lazy { Provider(requireContext()) }
 
+    private val flavor by lazy(LazyThreadSafetyMode.NONE) {
+        BundleCompat.getEnum<Flavor>(arguments, "flavor") ?: throw IllegalStateException()
+    }
+
     private val uri by lazy(LazyThreadSafetyMode.NONE) {
         try {
             Uri.parse(arguments?.getString("url"))
@@ -188,12 +194,12 @@ class WebViewFragment internal constructor() : Fragment(),
         }
     }
 
-    private val language by lazy(LazyThreadSafetyMode.NONE) {
-        arguments?.getString("language") ?: Locale.getDefault().language
+    private val token by lazy(LazyThreadSafetyMode.NONE) {
+        arguments?.getString("token")
     }
 
-    private val flavor by lazy(LazyThreadSafetyMode.NONE) {
-        BundleCompat.getEnum<Flavor>(arguments, "flavor") ?: throw IllegalStateException()
+    private val language by lazy(LazyThreadSafetyMode.NONE) {
+        arguments?.getString("language") ?: Locale.getDefault().language
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
@@ -242,7 +248,7 @@ class WebViewFragment internal constructor() : Fragment(),
             context = activity.applicationContext,
             loggingEnabled = true,
             audioFocusChangeListener = {
-                Logger.debug("Qwerty", "audioFocusChangeListener() -> $it")
+                Logger.debug("QBox-WebViewFragment", "audioFocusChangeListener() -> $it")
             },
             preferredDeviceList = listOf(
                 AudioDevice.BluetoothHeadset::class.java,
@@ -263,8 +269,8 @@ class WebViewFragment internal constructor() : Fragment(),
         super.onCreate(savedInstanceState)
 
         audioSwitch.start { audioDevices: List<AudioDevice>, selectedDevice: AudioDevice? ->
-            Log.d("Qwerty", "audioSwitch.start() -> audioDevices: $audioDevices")
-            Log.d("Qwerty", "audioSwitch.start() -> selectedDevice: $selectedDevice")
+            Log.d("QBox-WebViewFragment", "audioSwitch.start() -> audioDevices: $audioDevices")
+            Log.d("QBox-WebViewFragment", "audioSwitch.start() -> selectedDevice: $selectedDevice")
         }
     }
 
@@ -299,16 +305,20 @@ class WebViewFragment internal constructor() : Fragment(),
             }
 
             Flavor.AUDIO_CALL -> {
-                val call = call ?: throw NullPointerException("Call information is not provided!")
-
                 uri = uri.buildUpon()
                     .apply {
                         if (!language.isNullOrBlank()) {
                             appendQueryParameter("lang", language)
                         }
 
-                        appendQueryParameter("caller", call.phoneNumber)
-                        appendQueryParameter("dest", call.destination)
+                        if (!token.isNullOrBlank()) {
+                            appendQueryParameter("token", token)
+                        }
+
+                        call?.let {
+                            appendQueryParameter("caller", it.phoneNumber)
+                            appendQueryParameter("dest", it.destination)
+                        }
 
                         if (Widget.isLoggingEnabled) {
                             appendQueryParameter("debug", "1")
@@ -371,17 +381,19 @@ class WebViewFragment internal constructor() : Fragment(),
             }
         }
 
+        Logger.debug("QBox-WebViewFragment", "uri: $uri")
+        
         webView?.loadUrl(uri.toString())
     }
 
     override fun onResume() {
         super.onResume()
 
-        Logger.debug("QBox", "onResume()")
+        Logger.debug("QBox-WebViewFragment", "onResume()")
 
         try {
             handler.postDelayed({
-                Logger.debug("QBox", "handler.postDelayed()")
+                Logger.debug("QBox-WebViewFragment", "handler.postDelayed()")
                 webView?.setFileSelectionPromptResult(uri = null)
             }, 1000)
         } catch (e: Exception) {
@@ -485,7 +497,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onUserLeaveHint(onLeave: () -> Unit) {
-        Logger.debug("QBox", "onUserLeaveHint()")
+        Logger.debug("QBox-WebViewFragment", "onUserLeaveHint()")
 
         if (callState == CallState.START) {
             if (!ActivityCompat.isInPictureInPictureMode(activity)) {
@@ -497,7 +509,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onReload() {
-        Logger.debug("QBox", "onReload()")
+        Logger.debug("QBox-WebViewFragment", "onReload()")
         webView?.loadUrl("javascript:window.location.reload(true)")
     }
 
@@ -505,7 +517,7 @@ class WebViewFragment internal constructor() : Fragment(),
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean
     ) {
-        Logger.debug("QBox", "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
+        Logger.debug("QBox-WebViewFragment", "onPictureInPictureModeChanged() -> $isInPictureInPictureMode")
         if (isInPictureInPictureMode) {
             activity.supportActionBar?.hide()
             evaluateJS(JSONObject().apply { put("app_event", AppEvent.PIP_ENTER.toString()) })
@@ -528,7 +540,7 @@ class WebViewFragment internal constructor() : Fragment(),
         webView?.setMixedContentAllowed(true)
         webView?.setUrlListener { headers, uri ->
             Logger.debug(
-                "QBox",
+                "QBox-WebViewFragment",
                 "setUrlListener() -> $headers, $uri, ${uri.scheme}, ${uri.path}, ${uri.encodedPath}, ${uri.authority}"
             )
 
@@ -549,7 +561,7 @@ class WebViewFragment internal constructor() : Fragment(),
 
         webView?.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
             Logger.debug(
-                "QBox", "onDownloadStart() -> " +
+                "QBox-WebViewFragment", "onDownloadStart() -> " +
                         "url: $url, " +
                         "userAgent: $userAgent, " +
                         "contentDisposition: $contentDisposition, " +
@@ -595,7 +607,7 @@ class WebViewFragment internal constructor() : Fragment(),
             val found = downloadedFiles?.find { it.first == url }
             if (found != null && !found.second.path.isNullOrBlank()) {
                 val file = File(requireNotNull(found.second.path))
-                Logger.debug("QBox", "file: $file")
+                Logger.debug("QBox-WebViewFragment", "file: $file")
                 isLocalFileFoundAndOpened = openFile(file, mimetype, url)
             }
 
@@ -683,7 +695,7 @@ class WebViewFragment internal constructor() : Fragment(),
             }
             downloadStateReceiver = DownloadStateReceiver { downloadId, uri, mimeType ->
                 Logger.debug(
-                    "QBox",
+                    "QBox-WebViewFragment",
                     "onFileUriReady() -> " +
                             "downloadId: $downloadId, " +
                             "uri: $uri," +
@@ -745,7 +757,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     private fun resolveUri(uri: Uri): Boolean {
-        Logger.debug("QBox", "resolveUri() -> ${this.uri}, $uri")
+        Logger.debug("QBox-WebViewFragment", "resolveUri() -> ${this.uri}, $uri")
 
         if (this.uri == uri) return false
         if (this.uri.host == uri.host) return false
@@ -760,7 +772,7 @@ class WebViewFragment internal constructor() : Fragment(),
                     startActivity(intent)
                     return true
                 } catch (e: ActivityNotFoundException) {
-                    Logger.error("QBox", "resolveUri() -> $uri, $e")
+                    Logger.error("QBox-WebViewFragment", "resolveUri() -> $uri, $e")
                 }
             }
         }
@@ -775,7 +787,7 @@ class WebViewFragment internal constructor() : Fragment(),
 //                    startActivity(intent)
 //                    return true
 //                } catch (e: ActivityNotFoundException) {
-//                    Logger.debug("QBox", "resolveUri() -> $uri, $e")
+//                    Logger.debug("QBox-WebViewFragment", "resolveUri() -> $uri, $e")
 //                }
 //            }
 //        }
@@ -791,7 +803,7 @@ class WebViewFragment internal constructor() : Fragment(),
             startActivity(intent)
             true
         } catch (e: ActivityNotFoundException) {
-            Logger.error("QBox", "resolveUri() -> $uri, $e")
+            Logger.error("QBox-WebViewFragment", "resolveUri() -> $uri, $e")
             false
         }
     }
@@ -1015,7 +1027,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onCallState(state: CallState) {
-        Logger.debug("QBox", "onCallState() -> state: $state")
+        Logger.debug("QBox-WebViewFragment", "onCallState() -> state: $state")
 
         Widget.listener?.onCallState(state)
 
@@ -1049,7 +1061,9 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun getAvailableAudioOutputDevices(): List<String> {
-        return audioSwitch.availableAudioDevices.map { it.name }
+        val devices = audioSwitch.availableAudioDevices.map { it.name }
+        Log.d("QBox-WebViewFragment", "getAvailableAudioOutputDevices() -> $devices")
+        return devices
     }
 
     override fun getSelectedAudioOutputDevice(): String? {
@@ -1057,13 +1071,37 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onSelectAudioOutputDevice(name: String): Boolean {
-        Log.d("Qwerty", "onSelectAudioOutputDevice -> name: $name")
+        Log.d("QBox-WebViewFragment", "onSelectAudioOutputDevice -> name: $name")
 
         audioSwitch.availableAudioDevices.find { it.name == name }?.let {
-            if (it is AudioDevice.Earpiece) {
-                audioManager?.isBluetoothScoOn = false
-                audioManager?.isSpeakerphoneOn = false
+            Logger.debug("QBox-WebViewFragment", "onSelectAudioOutputDevice() -> $it")
+
+            when (it) {
+                is AudioDevice.Earpiece -> {
+                    Logger.debug("QBox-WebViewFragment", "onSelectAudioOutputDevice() -> $it")
+                    audioManager?.isBluetoothScoOn = false
+                    audioManager?.isSpeakerphoneOn = false
+                }
+
+                is AudioDevice.Speakerphone -> {
+                    Logger.debug("QBox-WebViewFragment", "onSelectAudioOutputDevice() -> $it")
+                    audioManager?.isBluetoothScoOn = false
+                    audioManager?.isSpeakerphoneOn = true
+                }
+
+                else -> {
+                }
+            }
+
+            if (audioManager?.mode == AudioManager.MODE_IN_COMMUNICATION) {
+                Logger.warn("QBox-WebViewFragment", "audioManager?.mode == AudioManager.MODE_IN_COMMUNICATION")
+            } else {
                 audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+            }
+
+            if (activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL) {
+                Logger.warn("QBox-WebViewFragment", "activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL")
+            } else {
                 activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
             }
 
@@ -1091,11 +1129,11 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onSelectFileRequest(): Boolean {
-        Logger.debug("QBox", "onSelectFileRequest()")
+        Logger.debug("QBox-WebViewFragment", "onSelectFileRequest()")
 
         if (requireContext().isStoragePermissionsGranted()) {
             Logger.debug(
-                "QBox",
+                "QBox-WebViewFragment",
                 "Constants.STORAGE_PERMISSIONS.all { activity.isPermissionGranted(it) }"
             )
 
@@ -1132,7 +1170,7 @@ class WebViewFragment internal constructor() : Fragment(),
                 }
                 .show()
         } else {
-            Logger.debug("QBox", "storagePermissionsLauncher.launch(Constants.STORAGE_PERMISSIONS)")
+            Logger.debug("QBox-WebViewFragment", "storagePermissionsLauncher.launch(Constants.STORAGE_PERMISSIONS)")
 
             storagePermissionsLauncher.launch(STORAGE_PERMISSIONS)
         }
@@ -1142,9 +1180,9 @@ class WebViewFragment internal constructor() : Fragment(),
 
     override fun onPermissionRequest(resources: Array<String>) {
         val permissions = PermissionRequestMapper.fromWebClientToAndroid(resources).toTypedArray()
-        Logger.debug("QBox", "onPermissionRequest() -> resources: ${resources.contentToString()}")
+        Logger.debug("QBox-WebViewFragment", "onPermissionRequest() -> resources: ${resources.contentToString()}")
         Logger.debug(
-            "QBox",
+            "QBox-WebViewFragment",
             "onPermissionRequest() -> permissions: ${permissions.contentToString()}"
         )
         requestedPermissionsLauncher.launch(permissions)
@@ -1152,13 +1190,13 @@ class WebViewFragment internal constructor() : Fragment(),
 
     override fun onPermissionRequestCanceled(resources: Array<String>) {
         Logger.debug(
-            "QBox",
+            "QBox-WebViewFragment",
             "onPermissionRequestCanceled() -> resources: ${resources.contentToString()}"
         )
     }
 
     override fun onGeolocationPermissionsShowPrompt() {
-        Logger.debug("QBox", "onGeolocationPermissionsShowPrompt()")
+        Logger.debug("QBox-WebViewFragment", "onGeolocationPermissionsShowPrompt()")
         if (LOCATION_PERMISSIONS.all { requireContext().isPermissionGranted(it) }) {
             val locationManager = context?.locationManager
             if (locationManager == null) {
@@ -1176,7 +1214,7 @@ class WebViewFragment internal constructor() : Fragment(),
     }
 
     override fun onGeolocationPermissionsHidePrompt() {
-        Logger.debug("QBox", "onGeolocationPermissionsHidePrompt()")
+        Logger.debug("QBox-WebViewFragment", "onGeolocationPermissionsHidePrompt()")
     }
 
 }

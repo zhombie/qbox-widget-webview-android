@@ -32,6 +32,7 @@ object Widget {
 
         private var isLoggingEnabled: Boolean? = null
         private var url: String? = null
+        private var token: String? = null
         private var language: Language? = null
         private var call: Call? = null
         private var user: User? = null
@@ -49,6 +50,13 @@ object Widget {
 
         fun setUrl(url: String): Builder {
             this.url = url
+            return this
+        }
+
+        fun getToken(): String? = token
+
+        fun setToken(token: String): Builder {
+            this.token = token
             return this
         }
 
@@ -124,6 +132,7 @@ object Widget {
                 context = context,
                 flavor = flavor,
                 url = url,
+                token = token,
                 language = language,
                 call = call,
                 user = user,

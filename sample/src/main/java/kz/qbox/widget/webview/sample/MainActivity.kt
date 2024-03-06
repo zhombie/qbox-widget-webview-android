@@ -4,11 +4,15 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kz.qbox.widget.webview.core.Widget
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
@@ -62,30 +66,32 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
 
     private var selectedTopic: String = BuildConfig.CALL_TOPIC
         set(value) {
-            Log.d("QBox", "Set selectedTopic -> value: $value")
+            Log.d("QBox-MainActivity", "Set selectedTopic -> value: $value")
             field = value
             topicTextView.text = value
         }
 
     private var inputPhoneNumber: String = BuildConfig.CALL_PHONE_NUMBER
         set(value) {
-            Log.d("QBox", "Set inputPhoneNumber -> value: $value")
+            Log.d("QBox-MainActivity", "Set inputPhoneNumber -> value: $value")
             field = value
             phoneNumberTextView.text = value
         }
 
     private var destination: String = BuildConfig.CALL_DESTINATION
         set(value) {
-            Log.d("QBox", "Set destination -> value: $value")
+            Log.d("QBox-MainActivity", "Set destination -> value: $value")
             field = value
             destinationTextView.text = value
         }
+
+    private var token: String? = null
 
     private val projects = parseProjects()
 
     private var selectedProject: Pair<String, Params> = projects.entries.last().toPair()
         set(value) {
-            Log.d("QBox", "Set selectedProject -> value: $value")
+            Log.d("QBox-MainActivity", "Set selectedProject -> value: $value")
             field = value
             projectTextView.text = value.first
         }
@@ -104,9 +110,21 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         setupPhoneNumberEditButton()
         setupDestinationEditButton()
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = HTTPClient.generateToken(HTTPClient.GenerateTokenParams(inputPhoneNumber, destination))
+            Log.d("QBox-MainActivity", "HTTPClient.generateToken() -> response: $response")
+            token = response?.token
+        }
+
         launchButton.setOnClickListener {
             launchWidget()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        HTTPClient.close()
     }
 
     private fun setupProjectSwitchButton() {
@@ -179,7 +197,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
 
         val (url, call) = params.url to params.call
 
-        Log.d("QBox", "launchWidget() -> key: $key, params: $params")
+        Log.d("QBox-MainActivity", "launchWidget() -> key: $key, params: $params")
 
         val flavor = key.split(":")[1]
 
@@ -208,9 +226,16 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             }
 
             "audio-call" -> {
+                val token = token
+
+                if (token.isNullOrBlank()) {
+                    return Toast.makeText(this, "token is null or blank!", Toast.LENGTH_SHORT).show()
+                }
+
                 Widget.Builder.AudioCall(this)
                     .setLoggingEnabled(true)
                     .setUrl(url)
+//                    .setToken(token)
                     .setLanguage(Language.KAZAKH)
                     .apply {
                         if (call != null) {
@@ -276,7 +301,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
      * [Widget.Listener] implementation
      */
     override fun onCallState(state: CallState) {
-        Log.d("QBox", "onCallState() -> state: $state")
+        Log.d("QBox-MainActivity", "onCallState() -> state: $state")
     }
 
 }

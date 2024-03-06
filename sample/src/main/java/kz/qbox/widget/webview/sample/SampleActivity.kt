@@ -45,6 +45,10 @@ class SampleActivity : AppCompatActivity(), Widget.Listener {
         intent.getStringExtra("url") ?: throw IllegalStateException()
     }
 
+    private val token by lazy(LazyThreadSafetyMode.NONE) {
+        intent.getStringExtra("token")
+    }
+
     private val call by lazy(LazyThreadSafetyMode.NONE) {
         IntentCompat.getSerializable<Call>(intent, "call")
     }
@@ -102,6 +106,7 @@ class SampleActivity : AppCompatActivity(), Widget.Listener {
         val fragment = WebViewFragment.newInstance(
             flavor = flavor,
             url = url,
+            token = token,
             language = language,
             call = call,
             user = user,

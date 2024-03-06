@@ -28,6 +28,7 @@ class WebViewActivity : AppCompatActivity() {
             context: Context,
             flavor: Flavor,
             url: String,
+            token: String?,
             language: String?,
             call: Call?,
             user: User?,
@@ -35,6 +36,7 @@ class WebViewActivity : AppCompatActivity() {
         ): Intent = Intent(context, WebViewActivity::class.java)
             .putExtra("flavor", flavor)
             .putExtra("url", url)
+            .putExtra("token", token)
             .putExtra("language", language)
             .putExtra("call", call)
             .putExtra("user", user)
@@ -58,6 +60,10 @@ class WebViewActivity : AppCompatActivity() {
 
     private val url by lazy(LazyThreadSafetyMode.NONE) {
         intent.getStringExtra("url") ?: throw IllegalStateException()
+    }
+
+    private val token by lazy(LazyThreadSafetyMode.NONE) {
+        intent.getStringExtra("token")
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
@@ -139,6 +145,7 @@ class WebViewActivity : AppCompatActivity() {
         val fragment = WebViewFragment.newInstance(
             flavor = flavor,
             url = url,
+            token = token,
             language = language,
             call = call,
             user = user,
