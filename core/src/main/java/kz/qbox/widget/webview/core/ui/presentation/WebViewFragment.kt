@@ -311,13 +311,13 @@ class WebViewFragment internal constructor() : Fragment(),
                             appendQueryParameter("lang", language)
                         }
 
-                        if (!token.isNullOrBlank()) {
+                        if (token.isNullOrBlank()) {
+                            call?.let {
+                                appendQueryParameter("caller", it.phoneNumber)
+                                appendQueryParameter("dest", it.destination)
+                            }
+                        } else {
                             appendQueryParameter("token", token)
-                        }
-
-                        call?.let {
-                            appendQueryParameter("caller", it.phoneNumber)
-                            appendQueryParameter("dest", it.destination)
                         }
 
                         if (Widget.isLoggingEnabled) {
@@ -382,7 +382,7 @@ class WebViewFragment internal constructor() : Fragment(),
         }
 
         Logger.debug("QBox-WebViewFragment", "uri: $uri")
-        
+
         webView?.loadUrl(uri.toString())
     }
 
@@ -458,6 +458,9 @@ class WebViewFragment internal constructor() : Fragment(),
 
     override fun onDestroy() {
         audioSwitch.stop()
+
+//        audioManager?.mode = AudioManager.MODE_NORMAL
+//        activity.volumeControlStream = AudioManager.STREAM_SYSTEM
 
         try {
             handler.removeCallbacksAndMessages(null)
@@ -1081,31 +1084,24 @@ class WebViewFragment internal constructor() : Fragment(),
                     Logger.debug("QBox-WebViewFragment", "onSelectAudioOutputDevice() -> $it")
                     audioManager?.isBluetoothScoOn = false
                     audioManager?.isSpeakerphoneOn = false
+                    audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+                    activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
                 }
 
                 is AudioDevice.Speakerphone -> {
                     Logger.debug("QBox-WebViewFragment", "onSelectAudioOutputDevice() -> $it")
                     audioManager?.isBluetoothScoOn = false
                     audioManager?.isSpeakerphoneOn = true
+                    audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+                    activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
                 }
 
                 else -> {
                 }
             }
 
-            if (audioManager?.mode == AudioManager.MODE_IN_COMMUNICATION) {
-                Logger.warn("QBox-WebViewFragment", "audioManager?.mode == AudioManager.MODE_IN_COMMUNICATION")
-            } else {
-                audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-            }
-
-            if (activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL) {
-                Logger.warn("QBox-WebViewFragment", "activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL")
-            } else {
-                activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
-            }
-
             audioSwitch.selectDevice(it)
+            audioSwitch.activate()
         }
 
         return true

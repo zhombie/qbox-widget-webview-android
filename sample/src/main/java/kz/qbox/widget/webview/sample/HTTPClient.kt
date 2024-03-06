@@ -32,7 +32,7 @@ object HTTPClient {
     @Serializable
     data class GenerateTokenParams(
         val caller: String,
-        val destination: String
+        val dest: String
     )
 
     @Serializable

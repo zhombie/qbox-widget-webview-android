@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 Widget.Builder.AudioCall(this)
                     .setLoggingEnabled(true)
                     .setUrl(url)
-//                    .setToken(token)
+                    .setToken(token)
                     .setLanguage(Language.KAZAKH)
                     .apply {
                         if (call != null) {
