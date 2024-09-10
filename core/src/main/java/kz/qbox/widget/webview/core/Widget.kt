@@ -7,6 +7,7 @@ import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
@@ -40,6 +41,7 @@ object Widget {
         private var call: Call? = null
         private var user: User? = null
         private var dynamicAttrs: DynamicAttrs? = null
+        private var ui: UI? = null
         private var customActivity: Class<*>? = null
 
         fun getLoggingEnabled(): Boolean = isLoggingEnabled ?: false
@@ -77,6 +79,13 @@ object Widget {
             return this
         }
 
+        fun getUser(): User? = user
+
+        fun setUser(user: User): Builder {
+            this.user = user
+            return this
+        }
+
         fun getDynamicAttrs(): DynamicAttrs? = dynamicAttrs
 
         fun setDynamicAttrs(dynamicAttrs: DynamicAttrs): Builder {
@@ -84,10 +93,10 @@ object Widget {
             return this
         }
 
-        fun getUser(): User? = user
+        fun getUI(): UI? = ui
 
-        fun setUser(user: User): Builder {
-            this.user = user
+        fun setUI(ui: UI): Builder {
+            this.ui = ui
             return this
         }
 
@@ -129,6 +138,7 @@ object Widget {
                     .putExtra("dynamic_attrs", dynamicAttrs).also {
                         customActivity = null
                     }
+                    .putExtra("ui", ui)
             }
 
             return WebViewActivity.newIntent(
@@ -139,7 +149,8 @@ object Widget {
                 language = language,
                 call = call,
                 user = user,
-                dynamicAttrs = dynamicAttrs
+                dynamicAttrs = dynamicAttrs,
+                ui = ui
             )
         }
 

@@ -49,6 +49,7 @@ import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.Device
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
 import kz.qbox.widget.webview.core.multimedia.selection.GetContentDelegate
@@ -91,7 +92,8 @@ class WebViewFragment internal constructor() : Fragment(),
             language: String?,
             call: Call?,
             user: User?,
-            dynamicAttrs: DynamicAttrs?
+            dynamicAttrs: DynamicAttrs?,
+            ui: UI?
         ): WebViewFragment {
             val fragment = WebViewFragment()
             val bundle = Bundle().apply {
@@ -102,6 +104,7 @@ class WebViewFragment internal constructor() : Fragment(),
                 putSerializable("call", call)
                 putSerializable("user", user)
                 putSerializable("dynamic_attrs", dynamicAttrs)
+                putSerializable("ui", ui)
             }
             fragment.arguments = bundle
             return fragment
@@ -214,6 +217,10 @@ class WebViewFragment internal constructor() : Fragment(),
         BundleCompat.getSerializable<DynamicAttrs>(arguments, "dynamic_attrs")
     }
 
+    private val ui by lazy(LazyThreadSafetyMode.NONE) {
+        BundleCompat.getSerializable<UI>(arguments, "ui")
+    }
+
     private val jsBridge by lazy {
         val provider = provider
         if (provider == null) null else JSBridge(
@@ -232,6 +239,7 @@ class WebViewFragment internal constructor() : Fragment(),
             call = call,
             user = user,
             dynamicAttrs = dynamicAttrs,
+            ui = ui,
             listener = this
         )
     }

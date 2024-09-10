@@ -18,6 +18,7 @@ import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.sample.model.Params
 import java.util.Date
@@ -264,6 +265,11 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                         }
                     }
                     .setUser(exampleCustomer)
+                    .setUI(
+                        UI(
+                            readinessCheckText = "Hello, World!"
+                        )
+                    )
 //                    .setCustomActivity(SampleActivity::class.java)
                     .setListener(this)
                     .launch()

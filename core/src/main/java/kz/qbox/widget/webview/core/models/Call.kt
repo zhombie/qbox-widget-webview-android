@@ -7,6 +7,7 @@ data class Call constructor(
     val domain: String? = null,
     val type: Type,
     val topic: String = "general",
+    val rtcLib: String? = null,
     val phoneNumber: String? = null,
     val destination: String? = null,
     val location: Location? = null,
@@ -26,6 +27,7 @@ data class Call constructor(
         try {
             jsonObject.put("domain", domain)
             jsonObject.put("type", type.value)
+            jsonObject.put("webrtc_library", rtcLib)
             jsonObject.put("topic", topic)
             jsonObject.put("phone_number", phoneNumber)
             jsonObject.put("destination", destination)

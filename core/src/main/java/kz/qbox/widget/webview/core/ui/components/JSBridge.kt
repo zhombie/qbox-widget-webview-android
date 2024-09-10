@@ -7,6 +7,7 @@ import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.Device
 import kz.qbox.widget.webview.core.models.DynamicAttrs
+import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.utils.encode
 
@@ -15,6 +16,7 @@ class JSBridge constructor(
     private val call: Call?,
     private val user: User?,
     private val dynamicAttrs: DynamicAttrs?,
+    private val ui: UI?,
     private var listener: Listener? = null
 ) {
 
@@ -29,6 +31,9 @@ class JSBridge constructor(
 
     @JavascriptInterface
     fun getExtra(): String? = dynamicAttrs?.encode()
+
+    @JavascriptInterface
+    fun getUI(): String? = ui?.encode()
 
     @JavascriptInterface
     fun onCallState(state: String) {

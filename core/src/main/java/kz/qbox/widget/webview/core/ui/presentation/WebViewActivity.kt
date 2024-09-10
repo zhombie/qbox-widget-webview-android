@@ -16,6 +16,7 @@ import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.sdk.IntentCompat
 import kz.qbox.widget.webview.core.utils.setupActionBar
@@ -33,6 +34,7 @@ class WebViewActivity : AppCompatActivity() {
             call: Call?,
             user: User?,
             dynamicAttrs: DynamicAttrs?,
+            ui: UI?
         ): Intent = Intent(context, WebViewActivity::class.java)
             .putExtra("flavor", flavor)
             .putExtra("url", url)
@@ -41,6 +43,7 @@ class WebViewActivity : AppCompatActivity() {
             .putExtra("call", call)
             .putExtra("user", user)
             .putExtra("dynamic_attrs", dynamicAttrs)
+            .putExtra("ui", ui)
     }
 
     private var toolbar: Toolbar? = null
@@ -76,6 +79,10 @@ class WebViewActivity : AppCompatActivity() {
 
     private val dynamicAttrs by lazy(LazyThreadSafetyMode.NONE) {
         IntentCompat.getSerializable<DynamicAttrs>(intent, "dynamic_attrs")
+    }
+
+    private val ui by lazy(LazyThreadSafetyMode.NONE) {
+        IntentCompat.getSerializable<UI>(intent, "ui")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,7 +156,8 @@ class WebViewActivity : AppCompatActivity() {
             language = language,
             call = call,
             user = user,
-            dynamicAttrs = dynamicAttrs
+            dynamicAttrs = dynamicAttrs,
+            ui = ui
         )
         supportFragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
