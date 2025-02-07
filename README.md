@@ -74,10 +74,10 @@ class Application : Application(), ImageLoaderFactory {
 ```
 Widget.Builder.VideoCall(this)
                 .setLoggingEnabled(true)
-                .setUrl(params.url)
+                .setUrl("<string URL>")
                 .setLanguage(Language.KAZAKH)
-                .setCall(call = params.call)
-                .setUser(exampleCustomer)
+                .setCall("<object Call>")
+                .setUser("<object User>")
                 .launch()
 ```
 
