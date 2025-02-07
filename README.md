@@ -1,5 +1,3 @@
-[![](https://jitpack.io/v/zhombie/qbox-widget-webview-android.svg)](https://jitpack.io/#zhombie/qbox-widget-webview-android)
-
 # Установка Android-версии виджета в мобильное приложение
 
 ## Минимальные требования:
