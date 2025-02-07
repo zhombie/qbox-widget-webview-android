@@ -22,13 +22,17 @@ dependencyResolutionManagement {
 
 2)	Добавление зависимостей
 
-[![](https://jitpack.io/v/zhombie/garage.svg)](https://jitpack.io/#zhombie/garage)
-[![](https://jitpack.io/v/zhombie/qbox-widget-webview-android.svg)](https://jitpack.io/#zhombie/qbox-widget-webview-android)
+    1) image-coil - [![](https://jitpack.io/v/zhombie/garage.svg)](https://jitpack.io/#zhombie/garage)
 
-```
-implementation 'com.github.zhombie.garage:image-coil:X.Y.Z'
-implementation 'com.github.zhombie:qbox-widget-webview-android:X.Y.Z'
-```
+    ```
+    implementation 'com.github.zhombie.garage:image-coil:X.Y.Z'
+    ```
+
+    2) qbox-widget-webview-android - [![](https://jitpack.io/v/zhombie/qbox-widget-webview-android.svg)](https://jitpack.io/#zhombie/qbox-widget-webview-android)
+    
+    ```
+    implementation 'com.github.zhombie:qbox-widget-webview-android:X.Y.Z'
+    ```
 
 3)	Определение загрузчика рисунков (можно указать свой вариант. Например, библиотека Glide от Google. В таком случае требуется реализация интерфейса ImageLoader и переопределения его методов)
 
