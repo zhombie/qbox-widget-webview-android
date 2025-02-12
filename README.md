@@ -1,12 +1,13 @@
-[![](https://jitpack.io/v/zhombie/qbox-widget-webview-android.svg)](https://jitpack.io/#zhombie/qbox-widget-webview-android)
-
 # Установка Android-версии виджета в мобильное приложение
+
 ## Минимальные требования:
-1)	Минимальный SDK = 23
-2)	Актуальная поддержка SDK = 33
+1)	Минимальный SDK = 21
+2)	Актуальная поддержка SDK = 34
 
 ## Установка:
+
 1)	Добавление репозитория для подключения зависимостей
+
 ```
 dependencyResolutionManagement {
     …
@@ -16,12 +17,23 @@ dependencyResolutionManagement {
     }
 }
 ```
+
 2)	Добавление зависимостей
-```
-implementation 'com.github.zhombie.garage:image-coil:1.3.5'
-implementation 'com.github.zhombie:qbox-widget-webview-android:1.2.5'
-```
-3)	Определение загрузчика рисунков (можно указать свой вариант, например библиотека Glide от Google. В таком случае требуется реализация интерфейса ImageLoader и переопределения его методов)
+
+    1) image-coil - [![](https://jitpack.io/v/zhombie/garage.svg)](https://jitpack.io/#zhombie/garage)
+
+    ```
+    implementation 'com.github.zhombie.garage:image-coil:X.Y.Z'
+    ```
+
+    2) qbox-widget-webview-android - [![](https://jitpack.io/v/zhombie/qbox-widget-webview-android.svg)](https://jitpack.io/#zhombie/qbox-widget-webview-android)
+    
+    ```
+    implementation 'com.github.zhombie:qbox-widget-webview-android:X.Y.Z'
+    ```
+
+3)	Определение загрузчика рисунков (можно указать свой вариант. Например, библиотека Glide от Google. В таком случае требуется реализация интерфейса ImageLoader и переопределения его методов)
+
 ```
 class Application : Application(), ImageLoaderFactory {
 
@@ -35,7 +47,9 @@ class Application : Application(), ImageLoaderFactory {
 
 }
 ```
+
 4)	Описание путей для хранения скачанных файлов. При наличии у приложения уже описанной FileProvider, то можно пропустить данный шаг, главное, чтобы совпадали authorities как указано внизу
+
 ```
 <provider
     android:name="androidx.core.content.FileProvider"
@@ -46,23 +60,31 @@ class Application : Application(), ImageLoaderFactory {
         android:name="android.support.FILE_PROVIDER_PATHS"
         android:resource="@xml/file_paths" />
 </provider>
-
 ```
-5)	Запуск виджета. Есть 2 вида запуска виджета: 1 вариант запуск с использованием WebViewActivity, 2 вариант запуск с использованием вашей кастомной активити, давайте рассмотрим каждый.
+
+5)	Запуск виджета. Есть 2 вида запуска виджета:
+
+    1) WebViewActivity
+    2) Кастомное Activity
+
 #### С использованием WebViewActivity:
+
 Для этого понадобится просто вызвать Builder класс и передать нужные параметры и вызвать метод launch(), ниже приведен пример:
 
 ```
 Widget.Builder.VideoCall(this)
                 .setLoggingEnabled(true)
-                .setUrl(params.url)
+                .setUrl("<string URL>")
                 .setLanguage(Language.KAZAKH)
-                .setCall(call = params.call)
-                .setUser(exampleCustomer)
+                .setCall("<object Call>")
+                .setUser("<object User>")
                 .launch()
 ```
-#### С использованием кастомной активити:
-* Для начала в xml файле вашего активити пропишите FragmentContainerView:
+
+#### С использованием кастомного Activity:
+
+* Для начала в xml файле вашего Activity пропишите FragmentContainerView:
+
 ```
 <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
@@ -70,8 +92,10 @@ Widget.Builder.VideoCall(this)
         android:layout_height="0dp"
         android:layout_weight="1" />
 ```
-* Затем вам нужно инициализировать его в вашем активити
-* После этого необходимо также инициализировать такие параметры как flavor, url, language, call, user, dynamicAttrs, для передачи данных а также callback (для отправкий событий в WebViewFragment). Ниже приведен пример
+
+* Вам нужно инициализировать его в вашем Activity
+* Необходимо также инициализировать такие параметры как flavor, url, language, call, user, dynamicAttrs, для передачи данных. А также callback (для отправкий событий в WebViewFragment). Ниже приведен пример:
+
   ```
   private val language by lazy(LazyThreadSafetyMode.NONE) {
         intent.getStringExtra("language") ?: Locale.getDefault().language
@@ -99,7 +123,9 @@ Widget.Builder.VideoCall(this)
 
     private var callback: Callback? = null
   ```
+
 * Далее вам нужно будет переопределить методы onBackPressed и onUserLeaveHint
+
   ```
   @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -110,7 +136,9 @@ Widget.Builder.VideoCall(this)
         callback?.onUserLeaveHint { super.onUserLeaveHint() }
     }
   ```
+
 * Затем надо сделать тоже самое с методом onPictureInPictureModeChanged, в этом методе вы, исходя из того находится ли ваше приложение в режиме "PictureInPicture" или нет скрываете или же на оборот показываете весь остальной контент помимо FragmentContainerView
+
   ```
   override fun onPictureInPictureModeChanged(
           isInPictureInPictureMode: Boolean, newConfig: Configuration
@@ -125,17 +153,23 @@ Widget.Builder.VideoCall(this)
   ```
 
 6)	Для управления глобальными значениями предоставляется Singleton объект Widget
+
 ```
 Widget.isLoggingEnabled = true
 ```
+
 Например, можно при желании включать/отключать логирование
 
-## Важное примечание если вы используете кастомной активити:
-* Callback имеет метод onReload, его вы можете использовать по своему желанию, он перезагружает WebView в WebViewFragment.
-* Для корректной работы PictureInPicture в вашем активити, в AndroidManifest необходимо прописать такие параметры как:
+## Важное примечание (если вы используете кастомное Activity):
+
+* Callback имеет метод onReload, его вы можете использовать по своему желанию, он перезагружает WebView в WebViewFragment
+* Для корректной работы PictureInPicture в вашем Activity, в AndroidManifest необходимо прописать такие параметры как:
+
   ```
   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
   android:supportsPictureInPicture="true"
   ```
+
 ## Пример:
+
 В модуле [sample](sample) есть пример работы с библиотекой
