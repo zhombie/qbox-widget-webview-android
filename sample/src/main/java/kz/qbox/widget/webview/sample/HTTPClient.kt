@@ -41,11 +41,16 @@ object HTTPClient {
     )
 
     suspend fun generateToken(params: GenerateTokenParams): GenerateTokenResponse? {
-        val response = client.post(
-            "https://${BuildConfig.API_BASE_URL}/api/generate"
-        ) {
-            contentType(ContentType.Application.Json)
-            setBody(params)
+        val response = try {
+            client.post(
+                "https://${BuildConfig.API_BASE_URL}/api/generate"
+            ) {
+                contentType(ContentType.Application.Json)
+                setBody(params)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
         }
 
         if (response.status == HttpStatusCode.OK) {

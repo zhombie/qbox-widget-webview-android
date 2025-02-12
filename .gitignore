@@ -91,3 +91,5 @@ lint/tmp/
 /app/prod/release/
 
 /sample/google-services.json
+
+.kotlin
