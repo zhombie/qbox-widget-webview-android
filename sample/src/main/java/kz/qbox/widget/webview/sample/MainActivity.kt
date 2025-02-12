@@ -18,6 +18,7 @@ import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.QueryParams
 import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.sample.model.Params
@@ -222,6 +223,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 Widget.Builder.FullSuite(this)
                     .setLoggingEnabled(true)
                     .setUrl(url)
+                    .setQueryParams(params.queryParams)
                     .setLanguage(Language.KAZAKH)
                     .setUser(exampleCustomer)
 //                    .setCustomActivity(SampleActivity::class.java)
@@ -290,6 +292,9 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             paramsMap["$baseUrl:$flavor:$title"] = Params(
                 title = title,
                 url = url,
+                queryParams = QueryParams(
+                    "readiness_check_text" to "Просим подготовить удостоверение личности"
+                ),
                 call = Call(
                     domain = DEFAULT_DOMAIN,
                     type = Call.Type.VIDEO,

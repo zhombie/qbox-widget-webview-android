@@ -16,6 +16,7 @@ import kz.qbox.widget.webview.core.R
 import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.QueryParams
 import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.sdk.IntentCompat
@@ -29,15 +30,17 @@ class WebViewActivity : AppCompatActivity() {
             context: Context,
             flavor: Flavor,
             url: String,
-            token: String?,
-            language: String?,
-            call: Call?,
-            user: User?,
-            dynamicAttrs: DynamicAttrs?,
-            ui: UI?
+            queryParams: QueryParams? = null,
+            token: String? = null,
+            language: String? = null,
+            call: Call? = null,
+            user: User? = null,
+            dynamicAttrs: DynamicAttrs? = null,
+            ui: UI? = null
         ): Intent = Intent(context, WebViewActivity::class.java)
             .putExtra("flavor", flavor)
             .putExtra("url", url)
+            .putExtra("query_params", queryParams)
             .putExtra("token", token)
             .putExtra("language", language)
             .putExtra("call", call)
@@ -63,6 +66,10 @@ class WebViewActivity : AppCompatActivity() {
 
     private val url by lazy(LazyThreadSafetyMode.NONE) {
         intent.getStringExtra("url") ?: throw IllegalStateException()
+    }
+
+    private val queryParams by lazy(LazyThreadSafetyMode.NONE) {
+        IntentCompat.getSerializable<QueryParams>(intent, "query_params")
     }
 
     private val token by lazy(LazyThreadSafetyMode.NONE) {
@@ -152,6 +159,7 @@ class WebViewActivity : AppCompatActivity() {
         val fragment = WebViewFragment.newInstance(
             flavor = flavor,
             url = url,
+            queryParams = queryParams,
             token = token,
             language = language,
             call = call,

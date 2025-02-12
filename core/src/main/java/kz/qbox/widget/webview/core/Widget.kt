@@ -7,6 +7,7 @@ import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.QueryParams
 import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
@@ -36,6 +37,7 @@ object Widget {
 
         private var isLoggingEnabled: Boolean? = null
         private var url: String? = null
+        private var queryParams: QueryParams? = null
         private var token: String? = null
         private var language: Language? = null
         private var call: Call? = null
@@ -55,6 +57,13 @@ object Widget {
 
         fun setUrl(url: String): Builder {
             this.url = url
+            return this
+        }
+
+        fun getQueryParams(): QueryParams? = queryParams
+
+        fun setQueryParams(queryParams: QueryParams?): Builder {
+            this.queryParams = queryParams
             return this
         }
 
@@ -132,6 +141,7 @@ object Widget {
                 return Intent(context, it)
                     .putExtra("flavor", flavor)
                     .putExtra("url", url)
+                    .putExtra("query_params", queryParams)
                     .putExtra("language", language)
                     .putExtra("call", call)
                     .putExtra("user", user)
@@ -145,6 +155,7 @@ object Widget {
                 context = context,
                 flavor = flavor,
                 url = url,
+                queryParams = queryParams,
                 token = token,
                 language = language,
                 call = call,
