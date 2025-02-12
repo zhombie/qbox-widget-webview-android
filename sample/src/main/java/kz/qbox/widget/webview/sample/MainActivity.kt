@@ -112,7 +112,12 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         setupDestinationEditButton()
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val response = HTTPClient.generateToken(HTTPClient.GenerateTokenParams(inputPhoneNumber, destination))
+            val response = HTTPClient.generateToken(
+                HTTPClient.GenerateTokenParams(
+                    inputPhoneNumber,
+                    destination
+                )
+            )
             Log.d("QBox-MainActivity", "HTTPClient.generateToken() -> response: $response")
             token = response?.token
         }
@@ -228,7 +233,8 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 val token = token
 
                 if (token.isNullOrBlank()) {
-                    return Toast.makeText(this, "token is null or blank!", Toast.LENGTH_SHORT).show()
+                    return Toast.makeText(this, "token is null or blank!", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 Widget.Builder.AudioCall(this)
@@ -290,11 +296,10 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                     topic = selectedTopic,
                     phoneNumber = inputPhoneNumber,
                     destination = destination,
-                    dynamicAttrs = DynamicAttrs("request_id" to "123456")
-//                    location = Location(
-//                        latitude = 51.14721,
-//                        longitude = 71.39069,
-//                    ),
+                    dynamicAttrs = DynamicAttrs(
+                        "digit" to 1,
+                        "foo" to "bar",
+                    )
                 )
             )
         }

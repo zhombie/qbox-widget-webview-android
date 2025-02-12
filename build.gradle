@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.9.22'
+    ext.kotlin_version = '2.1.10'
 
     repositories {
         google()
@@ -7,9 +7,9 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.1'
+        classpath 'com.android.tools.build:gradle:8.8.0'
 
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.3'
 
 //        classpath 'com.google.gms:google-services:4.4.0'
 
@@ -62,11 +62,11 @@ subprojects { Project project ->
     apply plugin: 'maven-publish'
 
     android {
-        compileSdk 34
+        compileSdk 35
 
         defaultConfig {
             minSdk 21
-            targetSdk 34
+            targetSdk 35
 
             versionCode project.ext.version_code
             versionName project.version

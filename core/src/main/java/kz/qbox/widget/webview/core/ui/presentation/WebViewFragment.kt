@@ -88,12 +88,12 @@ class WebViewFragment internal constructor() : Fragment(),
         fun newInstance(
             flavor: Flavor,
             url: String,
-            token: String?,
-            language: String?,
-            call: Call?,
-            user: User?,
-            dynamicAttrs: DynamicAttrs?,
-            ui: UI?
+            token: String? = null,
+            language: String? = null,
+            call: Call? = null,
+            user: User? = null,
+            dynamicAttrs: DynamicAttrs? = null,
+            ui: UI? = null
         ): WebViewFragment {
             val fragment = WebViewFragment()
             val bundle = Bundle().apply {
