@@ -109,34 +109,26 @@ subprojects { Project project ->
     }
 
     afterEvaluate {
-        android.libraryVariants.each { variant ->
-            publishing.publications.create(variant.name, MavenPublication) {
-                from components.findByName(variant.name)
+        publishing {
+            publications {
+                release(MavenPublication) {
+                    from components.release
 
-                groupId project.group
-                artifactId project.ext.artifactId
-                version project.version
+                    groupId project.group
+                    artifactId project.ext.artifactId
+                    version project.version
 
-                pom {
-                    name = project.name
-                    url = 'https://github.com/zhombie/qbox-webview-widget-android'
+                    pom {
+                        name = project.name
+                        url = 'https://github.com/zhombie/qbox-webview-widget-android'
 
-                    developers {
-                        developer {
-                            name = 'zhombie'
+                        developers {
+                            developer {
+                                name = 'zhombie'
+                            }
                         }
                     }
                 }
-
-//                pom.withXml {
-//                    def dependenciesNode = asNode().appendNode('dependencies')
-//                    project.configurations.api.allDependencies.each { dependency ->
-//                        def dependencyNode = dependenciesNode.appendNode('dependency')
-//                        dependencyNode.appendNode('groupId', dependency.group)
-//                        dependencyNode.appendNode('artifactId', dependency.name)
-//                        dependencyNode.appendNode('version', dependency.version)
-//                    }
-//                }
             }
         }
     }

@@ -45,6 +45,18 @@ android {
 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
+        release {
+            buildConfigField 'String', 'API_BASE_URL', apiBaseUrl
+            buildConfigField 'String', 'CALL_TOPIC', callTopic
+            buildConfigField 'String', 'CALL_PHONE_NUMBER', callPhoneNumber
+            buildConfigField 'String', 'CALL_DESTINATION', callDestination
+            buildConfigField 'String', 'CALL_ROUTES', callRoutes
+
+            minifyEnabled false
+
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
 
     buildFeatures {
