@@ -18,7 +18,7 @@ def apiBaseUrl = properties.getProperty('api.base_url') ?: '"test.kz"'
 def callTopic = properties.getProperty('call.topic') ?: '"general"'
 def callPhoneNumber = properties.getProperty('call.phone_number') ?: '"87771234567"'
 def callDestination = properties.getProperty('call.destination') ?: '"777"'
-def callRoutes = properties.getProperty('call.routes') ?: '"localhost*http://127.0.0.1"'
+def callRoutes = properties.getProperty('call.routes') ?: '"[localhost]*localhost*localhost*http://127.0.0.1"'
 
 android {
     namespace = 'kz.qbox.widget.webview.sample'

@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
 
     private val projects = parseProjects()
 
-    private var selectedProject: Pair<String, Params> = projects.entries.last().toPair()
+    private var selectedProject: Pair<String, Params> = projects.entries.first().toPair()
         set(value) {
             Log.d("QBox-MainActivity", "Set selectedProject -> value: $value")
             field = value
@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        selectedProject = projects.entries.last().toPair()
+        selectedProject = projects.entries.first().toPair()
         selectedTopic = BuildConfig.CALL_TOPIC
         inputPhoneNumber = BuildConfig.CALL_PHONE_NUMBER
         destination = BuildConfig.CALL_DESTINATION
@@ -284,7 +284,12 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
     private fun parseProjects(): Map<String, Params> {
         val paramsMap = mutableMapOf<String, Params>()
         BuildConfig.CALL_ROUTES.split(",").forEach { pair ->
-            val (baseUrl, flavor, title, url) = pair.split("*")
+            val (baseUrl, flavor, title, url) = try {
+                pair.split("*")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@forEach
+            }
             paramsMap["$baseUrl:$flavor:$title"] = Params(
                 title = title,
                 url = url,
