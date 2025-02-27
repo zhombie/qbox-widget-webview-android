@@ -12,6 +12,7 @@ import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
+@Suppress("unused")
 object Widget {
 
     var isLoggingEnabled: Boolean = false
@@ -43,6 +44,7 @@ object Widget {
         private var call: Call? = null
         private var user: User? = null
         private var dynamicAttrs: DynamicAttrs? = null
+        @Deprecated("Outdated", replaceWith = ReplaceWith("queryParams"))
         private var ui: UI? = null
         private var customActivity: Class<*>? = null
 
@@ -102,8 +104,10 @@ object Widget {
             return this
         }
 
+        @Deprecated("Outdated", replaceWith = ReplaceWith("getQueryParams()"))
         fun getUI(): UI? = ui
 
+        @Deprecated("Outdated", replaceWith = ReplaceWith("setQueryParams()"))
         fun setUI(ui: UI): Builder {
             this.ui = ui
             return this

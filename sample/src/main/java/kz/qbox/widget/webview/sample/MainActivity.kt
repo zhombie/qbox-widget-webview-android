@@ -19,7 +19,6 @@ import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Language
 import kz.qbox.widget.webview.core.models.QueryParams
-import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.sample.model.Params
 import java.util.Date
@@ -253,6 +252,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                             setCall(call = copy)
                         }
                     }
+                    .setQueryParams(params.queryParams)
                     .setUser(exampleCustomer)
 //                    .setCustomActivity(SampleActivity::class.java)
                     .setListener(this)
@@ -272,12 +272,8 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                             setCall(call = copy)
                         }
                     }
+                    .setQueryParams(params.queryParams)
                     .setUser(exampleCustomer)
-                    .setUI(
-                        UI(
-                            readinessCheckText = "Hello, World!"
-                        )
-                    )
 //                    .setCustomActivity(SampleActivity::class.java)
                     .setListener(this)
                     .launch()
@@ -293,7 +289,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 title = title,
                 url = url,
                 queryParams = QueryParams(
-                    "readiness_check_text" to "Просим подготовить удостоверение личности"
+                    QueryParams.READINESS_CHECK_TEXT to "Просим подготовить удостоверение личности"
                 ),
                 call = Call(
                     domain = DEFAULT_DOMAIN,
