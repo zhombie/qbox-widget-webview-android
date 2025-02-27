@@ -7,10 +7,12 @@ import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
 import kz.qbox.widget.webview.core.models.Language
+import kz.qbox.widget.webview.core.models.QueryParams
 import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.ui.presentation.WebViewActivity
 
+@Suppress("unused")
 object Widget {
 
     var isLoggingEnabled: Boolean = false
@@ -36,11 +38,13 @@ object Widget {
 
         private var isLoggingEnabled: Boolean? = null
         private var url: String? = null
+        private var queryParams: QueryParams? = null
         private var token: String? = null
         private var language: Language? = null
         private var call: Call? = null
         private var user: User? = null
         private var dynamicAttrs: DynamicAttrs? = null
+        @Deprecated("Outdated", replaceWith = ReplaceWith("queryParams"))
         private var ui: UI? = null
         private var customActivity: Class<*>? = null
 
@@ -55,6 +59,13 @@ object Widget {
 
         fun setUrl(url: String): Builder {
             this.url = url
+            return this
+        }
+
+        fun getQueryParams(): QueryParams? = queryParams
+
+        fun setQueryParams(queryParams: QueryParams?): Builder {
+            this.queryParams = queryParams
             return this
         }
 
@@ -93,8 +104,10 @@ object Widget {
             return this
         }
 
+        @Deprecated("Outdated", replaceWith = ReplaceWith("getQueryParams()"))
         fun getUI(): UI? = ui
 
+        @Deprecated("Outdated", replaceWith = ReplaceWith("setQueryParams()"))
         fun setUI(ui: UI): Builder {
             this.ui = ui
             return this
@@ -132,6 +145,7 @@ object Widget {
                 return Intent(context, it)
                     .putExtra("flavor", flavor)
                     .putExtra("url", url)
+                    .putExtra("query_params", queryParams)
                     .putExtra("language", language)
                     .putExtra("call", call)
                     .putExtra("user", user)
@@ -145,6 +159,7 @@ object Widget {
                 context = context,
                 flavor = flavor,
                 url = url,
+                queryParams = queryParams,
                 token = token,
                 language = language,
                 call = call,

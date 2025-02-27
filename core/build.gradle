@@ -23,8 +23,8 @@ dependencies {
     api 'androidx.webkit:webkit:1.12.1'
 
     // Garage SDK
-    api 'com.github.zhombie.garage:image-load:1.5.0'
-    api 'com.github.zhombie.garage:image-preview:1.5.0'
+    api 'com.github.zhombie.garage:image-load:1.5.1'
+    api 'com.github.zhombie.garage:image-preview:1.5.1'
 
     implementation 'com.twilio:audioswitch:1.2.0'
 

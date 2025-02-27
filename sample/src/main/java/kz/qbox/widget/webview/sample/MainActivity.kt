@@ -18,7 +18,7 @@ import kz.qbox.widget.webview.core.models.Call
 import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Language
-import kz.qbox.widget.webview.core.models.UI
+import kz.qbox.widget.webview.core.models.QueryParams
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.sample.model.Params
 import java.util.Date
@@ -222,6 +222,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                 Widget.Builder.FullSuite(this)
                     .setLoggingEnabled(true)
                     .setUrl(url)
+                    .setQueryParams(params.queryParams)
                     .setLanguage(Language.KAZAKH)
                     .setUser(exampleCustomer)
 //                    .setCustomActivity(SampleActivity::class.java)
@@ -251,6 +252,7 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                             setCall(call = copy)
                         }
                     }
+                    .setQueryParams(params.queryParams)
                     .setUser(exampleCustomer)
 //                    .setCustomActivity(SampleActivity::class.java)
                     .setListener(this)
@@ -270,12 +272,8 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
                             setCall(call = copy)
                         }
                     }
+                    .setQueryParams(params.queryParams)
                     .setUser(exampleCustomer)
-                    .setUI(
-                        UI(
-                            readinessCheckText = "Hello, World!"
-                        )
-                    )
 //                    .setCustomActivity(SampleActivity::class.java)
                     .setListener(this)
                     .launch()
@@ -290,6 +288,9 @@ class MainActivity : AppCompatActivity(), Widget.Listener {
             paramsMap["$baseUrl:$flavor:$title"] = Params(
                 title = title,
                 url = url,
+                queryParams = QueryParams(
+                    QueryParams.READINESS_CHECK_TEXT to "Просим подготовить удостоверение личности"
+                ),
                 call = Call(
                     domain = DEFAULT_DOMAIN,
                     type = Call.Type.VIDEO,

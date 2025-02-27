@@ -49,6 +49,7 @@ import kz.qbox.widget.webview.core.models.CallState
 import kz.qbox.widget.webview.core.models.Device
 import kz.qbox.widget.webview.core.models.DynamicAttrs
 import kz.qbox.widget.webview.core.models.Flavor
+import kz.qbox.widget.webview.core.models.QueryParams
 import kz.qbox.widget.webview.core.models.UI
 import kz.qbox.widget.webview.core.models.User
 import kz.qbox.widget.webview.core.multimedia.receiver.DownloadStateReceiver
@@ -88,6 +89,7 @@ class WebViewFragment internal constructor() : Fragment(),
         fun newInstance(
             flavor: Flavor,
             url: String,
+            queryParams: QueryParams? = null,
             token: String? = null,
             language: String? = null,
             call: Call? = null,
@@ -99,6 +101,7 @@ class WebViewFragment internal constructor() : Fragment(),
             val bundle = Bundle().apply {
                 putSerializable("flavor", flavor)
                 putString("url", url)
+                putSerializable("query_params", queryParams)
                 putString("token", token)
                 putString("language", language)
                 putSerializable("call", call)
@@ -203,6 +206,10 @@ class WebViewFragment internal constructor() : Fragment(),
 
     private val language by lazy(LazyThreadSafetyMode.NONE) {
         arguments?.getString("language") ?: Locale.getDefault().language
+    }
+
+    private val queryParams by lazy(LazyThreadSafetyMode.NONE) {
+        BundleCompat.getSerializable<QueryParams>(arguments, "query_params")
     }
 
     private val call by lazy(LazyThreadSafetyMode.NONE) {
@@ -350,6 +357,14 @@ class WebViewFragment internal constructor() : Fragment(),
                     }
                     .build()
             }
+        }
+
+        queryParams?.value?.entries?.forEach { entry ->
+            uri = uri.buildUpon()
+                .apply {
+                    appendQueryParameter(entry.key, entry.value)
+                }
+                .build()
         }
 
         setupWebView()
