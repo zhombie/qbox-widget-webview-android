@@ -67,13 +67,11 @@ import kz.qbox.widget.webview.core.ui.dialogs.showError
 import kz.qbox.widget.webview.core.utils.Constants
 import kz.qbox.widget.webview.core.utils.LOCATION_PERMISSIONS
 import kz.qbox.widget.webview.core.utils.PermissionRequestMapper
-import kz.qbox.widget.webview.core.utils.STORAGE_PERMISSIONS
 import kz.qbox.widget.webview.core.utils.audioManager
 import kz.qbox.widget.webview.core.utils.clipboardManager
 import kz.qbox.widget.webview.core.utils.downloadManager
 import kz.qbox.widget.webview.core.utils.getIntOrDefault
 import kz.qbox.widget.webview.core.utils.isPermissionGranted
-import kz.qbox.widget.webview.core.utils.isStoragePermissionsGranted
 import kz.qbox.widget.webview.core.utils.locationManager
 import kz.qbox.widget.webview.core.utils.showImagePreview
 import org.json.JSONObject
@@ -174,16 +172,16 @@ class WebViewFragment internal constructor() : Fragment(),
             onGeolocationPermissionsShowPrompt()
         }
 
-    private val storagePermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            Logger.debug("QBox-WebViewFragment", "storagePermissionsLauncher() -> permissions: $permissions")
-
-            if (requireContext().isStoragePermissionsGranted()) {
-                onSelectFileRequest()
-            } else {
-                showRequestPermissionsAlertDialog()
-            }
-        }
+//    private val storagePermissionsLauncher =
+//        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+//            Logger.debug("QBox-WebViewFragment", "storagePermissionsLauncher() -> permissions: $permissions")
+//
+//            if (requireContext().isStoragePermissionsGranted()) {
+//                onSelectFileRequest()
+//            } else {
+//                showRequestPermissionsAlertDialog()
+//            }
+//        }
 
     private val provider: Provider? by lazy { Provider(requireContext()) }
 
@@ -622,14 +620,6 @@ class WebViewFragment internal constructor() : Fragment(),
             if (pendingDownloads == null) {
                 pendingDownloads = mutableListOf()
             }
-            if (url in (pendingDownloads ?: mutableListOf()).map { it.second }) {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.qbox_widget_error_files_download_in_progress,
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setDownloadListener
-            }
 
             var isLocalFileFoundAndOpened = false
             val found = downloadedFiles?.find { it.first == url }
@@ -654,6 +644,13 @@ class WebViewFragment internal constructor() : Fragment(),
             }
 
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
+
+            val existingFile = findDownloadedFile(filename)
+            if (existingFile != null) {
+                if (openFile(existingFile, mimetype, url)) {
+                    return@setDownloadListener
+                }
+            }
 
             val publicDirectory = Environment.DIRECTORY_DOWNLOADS
             val deviceDirectory = Environment.getExternalStorageDirectory()
@@ -778,6 +775,17 @@ class WebViewFragment internal constructor() : Fragment(),
         }
 
         webView?.setListener(this)
+    }
+
+    private fun findDownloadedFile(filename: String): File? {
+        val downloadsDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
+        if (!downloadsDir.exists()) return null
+
+        return downloadsDir
+            .listFiles()
+            ?.firstOrNull { it.name == filename }
     }
 
     private fun evaluateJS(jsonObject: JSONObject) {
@@ -1152,49 +1160,38 @@ class WebViewFragment internal constructor() : Fragment(),
     override fun onSelectFileRequest(): Boolean {
         Logger.debug("QBox-WebViewFragment", "onSelectFileRequest()")
 
-        if (requireContext().isStoragePermissionsGranted()) {
-            Logger.debug(
-                "QBox-WebViewFragment",
-                "Constants.STORAGE_PERMISSIONS.all { activity.isPermissionGranted(it) }"
-            )
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.qbox_widget_alert_title_media_selection)
+            .setItems(
+                arrayOf(
+                    getString(R.string.qbox_widget_content_image),
+                    getString(R.string.qbox_widget_content_video),
+                    getString(R.string.qbox_widget_content_audio),
+                    getString(R.string.qbox_widget_content_document)
+                )
+            ) { _, which ->
+                when (which) {
+                    0 -> {
+                        interactor?.launchSelection(GetContentResultContract.Params(MimeType.IMAGE))
+                    }
 
-            AlertDialog.Builder(requireContext())
-                .setTitle(R.string.qbox_widget_alert_title_media_selection)
-                .setItems(
-                    arrayOf(
-                        getString(R.string.qbox_widget_content_image),
-                        getString(R.string.qbox_widget_content_video),
-                        getString(R.string.qbox_widget_content_audio),
-                        getString(R.string.qbox_widget_content_document)
-                    )
-                ) { _, which ->
-                    when (which) {
-                        0 -> {
-                            interactor?.launchSelection(GetContentResultContract.Params(MimeType.IMAGE))
-                        }
+                    1 -> {
+                        interactor?.launchSelection(GetContentResultContract.Params(MimeType.VIDEO))
+                    }
 
-                        1 -> {
-                            interactor?.launchSelection(GetContentResultContract.Params(MimeType.VIDEO))
-                        }
+                    2 -> {
+                        interactor?.launchSelection(GetContentResultContract.Params(MimeType.AUDIO))
+                    }
 
-                        2 -> {
-                            interactor?.launchSelection(GetContentResultContract.Params(MimeType.AUDIO))
-                        }
-
-                        3 -> {
-                            interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
-                        }
+                    3 -> {
+                        interactor?.launchSelection(GetContentResultContract.Params(MimeType.DOCUMENT))
                     }
                 }
-                .setOnCancelListener {
-                    webView?.setFileSelectionPromptResult(uri = null)
-                }
-                .show()
-        } else {
-            Logger.debug("QBox-WebViewFragment", "storagePermissionsLauncher.launch(Constants.STORAGE_PERMISSIONS)")
-
-            storagePermissionsLauncher.launch(STORAGE_PERMISSIONS)
-        }
+            }
+            .setOnCancelListener {
+                webView?.setFileSelectionPromptResult(uri = null)
+            }
+            .show()
 
         return true
     }
